@@ -32,6 +32,7 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
@@ -46,11 +47,13 @@ class dashboard : public lecui::form {
 	const std::string font_ = "Segoe UI";
 	const lecui::color caption_color_{ 100, 100, 100 };
 	const lecui::color ok_color_{ 0, 150, 0 };
+	const unsigned long refresh_interval_ = 3000;
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
 	lecui::appearance apprnc_{ *this };
 	lecui::dimensions dim_{ *this };
 	lecui::instance_management instance_man_{ *this, "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}" };
+	lecui::timer_management timer_man_{ *this };
 
 	leccore::pc_info pc_info_;
 	leccore::pc_info::pc_details pc_details_;
@@ -60,6 +63,141 @@ class dashboard : public lecui::form {
 	std::vector<leccore::pc_info::drive_info> drives_;
 	leccore::pc_info::power_info power_;
 
+	float title_height;
+	float highlight_height;
+	float detail_height;
+	float caption_height;
+
+	void on_start() override {
+		start_refresh_timer();
+	}
+
+	void start_refresh_timer() {
+		timer_man_.add("refresh", refresh_interval_, [&]() { on_refresh(); });
+	}
+
+	void stop_refresh_timer() {
+		timer_man_.stop("refresh");
+	}
+
+	void on_refresh() {
+		stop_refresh_timer();
+		bool refresh_ui = false;
+
+		try {
+			// to-do: refresh pc details
+		}
+		catch (const std::exception) {}
+
+		try {
+			// refresh power details
+			std::string error;
+			leccore::pc_info::power_info power_old_ = power_;
+			if (!pc_info_.power(power_, error)) {}
+
+			if (power_old_.ac != power_.ac) {
+				auto& power_status = lecui::widgets::label::specs(*this, "home/power_pane/power_status");
+				power_status.text = power_.ac ? "On AC" : "On Battery";
+				power_status.text += ", ";
+				power_status.text += ("<span style = 'font-size: 8.0pt;'>" +
+					pc_info_.to_string(power_.status) + "</span>");
+				refresh_ui = true;
+			}
+
+			if (power_old_.level != power_.level) {
+				auto& level = lecui::widgets::label::specs(*this, "home/power_pane/level");
+				level.text = (power_.level != -1 ?
+					(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) +
+					"<span style = 'font-size: 8.0pt;'>overall power level</span>";
+
+				auto& level_bar = lecui::widgets::progress_bar::specs(*this, "home/power_pane/level_bar");
+				level_bar.percentage = static_cast<float>(power_.level);
+				refresh_ui = true;
+			}
+
+			if (power_old_.lifetime_remaining != power_.lifetime_remaining) {
+				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
+				life_remaining.text = power_.lifetime_remaining.empty() ? std::string() :
+					(power_.lifetime_remaining + " remaining");
+				refresh_ui = true;
+			}
+
+			if (power_old_.batteries.size() != power_.batteries.size()) {
+				// close old tab pane
+				page_man_.close("home/power_pane/battery_tab_pane");
+
+				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
+				auto& power_pane = lecui::containers::pane::get(*this, "home/power_pane");
+
+				// add battery pane
+				add_battery_pane(power_pane, life_remaining.rect.bottom);
+
+				refresh_ui = true;
+			}
+			else {
+				for (size_t battery_number = 0; battery_number < power_.batteries.size(); battery_number++) {
+					auto& battery_old = power_old_.batteries[battery_number];
+					auto& battery = power_.batteries[battery_number];
+
+					if (battery_old != battery) {
+						if (battery_old.current_capacity != battery.current_capacity) {
+							auto& current_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
+							current_capacity.text = std::to_string(battery.current_capacity) + "mWh";
+						}
+
+						if (battery_old.level != battery.level) {
+							auto& charge_level = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
+							charge_level.text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
+						}
+
+						if (battery_old.current_charge_rate != battery.current_charge_rate) {
+							auto& charge_rate = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
+							charge_rate.text = std::to_string(battery.current_charge_rate) + "mW";
+						}
+
+						if (battery_old.current_voltage != battery.current_voltage) {
+							auto& current_voltage = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
+							current_voltage.text = std::to_string(battery.current_voltage) + "mV";
+						}
+
+						if (battery_old.status != battery.status) {
+							auto& status = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
+							status.text = pc_info_.to_string(battery.status);
+						}
+
+						if (battery_old.designed_capacity != battery.designed_capacity) {
+							auto& designed_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
+							designed_capacity.text = std::to_string(battery.designed_capacity) + "mWh";
+						}
+
+						if (battery_old.fully_charged_capacity != battery.fully_charged_capacity) {
+							auto& fully_charged_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
+							fully_charged_capacity.text = std::to_string(battery.fully_charged_capacity) + "mWh";
+						}
+
+						if (battery_old.health != battery.health) {
+							auto& health = lecui::widgets::progress_indicator::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/health");
+							health.percentage = static_cast<float>(battery.health);
+						}
+
+						refresh_ui = true;
+					}
+				}
+			}
+		}
+		catch (const std::exception) {}
+
+		try {
+			// to-do: refresh ram details
+		}
+		catch (const std::exception) {}
+
+		if (refresh_ui)
+			update();
+
+		start_refresh_timer();
+	}
+
 public:
 	dashboard(const std::string& caption) :
 		form(caption) {
@@ -67,6 +205,9 @@ public:
 
 		// read pc details
 		if (!pc_info_.pc(pc_details_, error)) {}
+
+		// read power info
+		if (!pc_info_.power(power_, error)) {}
 
 		// read cpu info
 		if (!pc_info_.cpu(cpus_, error)) {}
@@ -79,9 +220,6 @@ public:
 
 		// read drive info
 		if (!pc_info_.drives(drives_, error)) {}
-
-		// read power info
-		if (!pc_info_.power(power_, error)) {}
 	}
 
 	bool on_layout(std::string& error) override {
@@ -93,10 +231,10 @@ public:
 
 		// compute label heights
 		const lecui::rect page_rect = { 0.f, home.size().width, 0.f, home.size().height };
-		const auto title_height = dim_.measure_label(sample_text_, font_, title_font_size_, true, false, page_rect).height();
-		const auto highlight_height = dim_.measure_label(sample_text_, font_, highlight_font_size_, true, false, page_rect).height();
-		const auto detail_height = dim_.measure_label(sample_text_, font_, detail_font_size_, true, false, page_rect).height();
-		const auto caption_height = dim_.measure_label(sample_text_, font_, caption_font_size_, true, false, page_rect).height();
+		title_height = dim_.measure_label(sample_text_, font_, title_font_size_, true, false, page_rect).height();
+		highlight_height = dim_.measure_label(sample_text_, font_, highlight_font_size_, true, false, page_rect).height();
+		detail_height = dim_.measure_label(sample_text_, font_, detail_font_size_, true, false, page_rect).height();
+		caption_height = dim_.measure_label(sample_text_, font_, caption_font_size_, true, false, page_rect).height();
 
 		//////////////////////////////////////////////////
 		// 1. Add pane for pc details
@@ -247,7 +385,7 @@ public:
 
 		//////////////////////////////////////////////////
 		// 2. Add pane for power details
-		lecui::containers::pane power_pane(home);
+		lecui::containers::pane power_pane(home, "power_pane");
 		power_pane().rect = pc_details_pane().rect;
 		power_pane().rect.width(270.f);
 		power_pane().rect.snap_to(pc_details_pane().rect, snap_type::right_top, margin_);
@@ -268,7 +406,7 @@ public:
 		power_status_caption().font_size = caption_font_size_;
 		power_status_caption().text = "Status";
 
-		lecui::widgets::label power_status(power_pane.get());
+		lecui::widgets::label power_status(power_pane.get(), "power_status");
 		power_status().rect = power_details_title().rect;
 		power_status().rect.height(highlight_height);
 		power_status().rect.snap_to(power_status_caption().rect, snap_type::bottom, 0.f);
@@ -280,7 +418,7 @@ public:
 			pc_info_.to_string(power_.status) + "</span>");
 
 		// add power level
-		lecui::widgets::label level(power_pane.get());
+		lecui::widgets::label level(power_pane.get(), "level");
 		level().rect = power_status_caption().rect;
 		level().rect.height(detail_height);
 		level().rect.snap_to(power_status().rect, snap_type::bottom, margin_);
@@ -289,13 +427,13 @@ public:
 			(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) +
 			"<span style = 'font-size: 8.0pt;'>overall power level</span>";
 
-		lecui::widgets::progress_bar level_bar(power_pane.get());
+		lecui::widgets::progress_bar level_bar(power_pane.get(), "level_bar");
 		level_bar().rect.width(power_status().rect.width());
 		level_bar().rect.snap_to(level().rect, snap_type::bottom, margin_ / 2.f);
 		level_bar().percentage = static_cast<float>(power_.level);
 
 		// add life remaining label
-		lecui::widgets::label life_remaining(power_pane.get());
+		lecui::widgets::label life_remaining(power_pane.get(), "life_remaining");
 		life_remaining().rect = level_bar().rect;
 		life_remaining().rect.height(caption_height);
 		life_remaining().rect.snap_to(level_bar().rect, snap_type::bottom, margin_ / 2.f);
@@ -304,182 +442,7 @@ public:
 		life_remaining().text = power_.lifetime_remaining.empty() ? std::string() :
 			(power_.lifetime_remaining + " remaining");
 
-		// add pane for battery details
-		lecui::containers::tab_pane battery_tab_pane(power_pane.get());
-		battery_tab_pane().rect.left = 0.f;
-		battery_tab_pane().rect.right = power_pane.get().size().width;
-		battery_tab_pane().rect.top = life_remaining().rect.bottom;
-		battery_tab_pane().rect.bottom = power_pane.get().size().height;
-		battery_tab_pane().tab_side = lecui::containers::tab_pane::side::top;
-		battery_tab_pane().color_tabs.alpha = 0;
-		battery_tab_pane().color_tabs_border.alpha = 0;
-
-		// add as many tab panes as there are batterys
-		int battery_number = 0;
-		for (const auto& battery : power_.batteries) {
-			lecui::containers::tab battery_pane(battery_tab_pane, "Battery " + std::to_string(battery_number));
-
-			// add battery name
-			lecui::widgets::label battery_name_caption(battery_pane.get());
-			battery_name_caption().rect = { 0.f, battery_pane.get().size().width, 0.f, caption_height };
-			battery_name_caption().color_text = caption_color_;
-			battery_name_caption().font_size = caption_font_size_;
-			battery_name_caption().text = "Name";
-
-			lecui::widgets::label battery_name(battery_pane.get());
-			battery_name().rect = battery_name_caption().rect;
-			battery_name().rect.height(detail_height);
-			battery_name().rect.snap_to(battery_name_caption().rect, snap_type::bottom, 0.f);
-			battery_name().font_size = detail_font_size_;
-			battery_name().text = battery.name;
-
-			// add battery manufacturer
-			lecui::widgets::label manufacturer_caption(battery_pane.get());
-			manufacturer_caption().rect = battery_name_caption().rect;
-			manufacturer_caption().rect.width(battery_pane.get().size().width);
-			manufacturer_caption().rect.snap_to(battery_name().rect, snap_type::bottom, margin_);
-			manufacturer_caption().color_text = caption_color_;
-			manufacturer_caption().font_size = caption_font_size_;
-			manufacturer_caption().text = "Manufacturer";
-
-			lecui::widgets::label manufacturer(battery_pane.get());
-			manufacturer().rect = manufacturer_caption().rect;
-			manufacturer().rect.height(detail_height);
-			manufacturer().rect.snap_to(manufacturer_caption().rect, snap_type::bottom, 0.f);
-			manufacturer().font_size = detail_font_size_;
-			manufacturer().text = battery.manufacturer;
-
-			// add battery designed capacity
-			lecui::widgets::label designed_capacity_caption(battery_pane.get());
-			designed_capacity_caption().rect = manufacturer_caption().rect;
-			designed_capacity_caption().rect.width(battery_pane.get().size().width / 2.f);
-			designed_capacity_caption().rect.snap_to(manufacturer().rect, snap_type::bottom_left, margin_);
-			designed_capacity_caption().color_text = caption_color_;
-			designed_capacity_caption().font_size = caption_font_size_;
-			designed_capacity_caption().text = "Designed Capacity";
-
-			lecui::widgets::label designed_capacity(battery_pane.get());
-			designed_capacity().rect = designed_capacity_caption().rect;
-			designed_capacity().rect.height(detail_height);
-			designed_capacity().rect.snap_to(designed_capacity_caption().rect, snap_type::bottom, 0.f);
-			designed_capacity().font_size = detail_font_size_;
-			designed_capacity().text = std::to_string(battery.designed_capacity) + "mWh";
-
-			// add battery fully charged capacity
-			lecui::widgets::label fully_charged_capacity_caption(battery_pane.get());
-			fully_charged_capacity_caption().rect = designed_capacity_caption().rect;
-			fully_charged_capacity_caption().rect.snap_to(designed_capacity_caption().rect, snap_type::right, 0.f);
-			fully_charged_capacity_caption().color_text = caption_color_;
-			fully_charged_capacity_caption().font_size = caption_font_size_;
-			fully_charged_capacity_caption().text = "Fully Charged Capacity";
-
-			lecui::widgets::label fully_charged_capacity(battery_pane.get());
-			fully_charged_capacity().rect = fully_charged_capacity_caption().rect;
-			fully_charged_capacity().rect.height(detail_height);
-			fully_charged_capacity().rect.snap_to(fully_charged_capacity_caption().rect, snap_type::bottom, 0.f);
-			fully_charged_capacity().font_size = detail_font_size_;
-			fully_charged_capacity().text = std::to_string(battery.fully_charged_capacity) + "mWh";
-
-			// add battery health
-			lecui::widgets::progress_indicator health(battery_pane.get());
-			health().rect.snap_to(designed_capacity().rect, snap_type::bottom_left, margin_);
-			health().percentage = static_cast<float>(battery.health);
-
-			lecui::widgets::label health_caption(battery_pane.get());
-			health_caption().rect = health().rect;
-			health_caption().rect.right = battery_name().rect.right;
-			health_caption().rect.snap_to(health().rect, snap_type::right, margin_);
-			health_caption().color_text = caption_color_;
-			health_caption().font_size = caption_font_size_;
-			health_caption().text = "BATTERY HEALTH";
-			health_caption().center_v = true;
-
-			// add battery current capacity
-			lecui::widgets::label current_capacity_caption(battery_pane.get());
-			current_capacity_caption().rect = battery_name().rect;
-			current_capacity_caption().rect.width(battery_pane.get().size().width / 2.f);
-			current_capacity_caption().rect.snap_to(health().rect, snap_type::bottom_left, margin_);
-			current_capacity_caption().color_text = caption_color_;
-			current_capacity_caption().font_size = caption_font_size_;
-			current_capacity_caption().text = "Current Capacity";
-
-			lecui::widgets::label current_capacity(battery_pane.get());
-			current_capacity().rect = current_capacity_caption().rect;
-			current_capacity().rect.height(detail_height);
-			current_capacity().rect.snap_to(current_capacity_caption().rect, snap_type::bottom, 0.f);
-			current_capacity().font_size = detail_font_size_;
-			current_capacity().text = std::to_string(battery.current_capacity) + "mWh";
-
-			// add battery fully charged capacity
-			lecui::widgets::label charge_level_caption(battery_pane.get());
-			charge_level_caption().rect = current_capacity_caption().rect;
-			charge_level_caption().rect.snap_to(current_capacity_caption().rect, snap_type::right, 0.f);
-			charge_level_caption().color_text = caption_color_;
-			charge_level_caption().font_size = caption_font_size_;
-			charge_level_caption().text = "Charge Level";
-
-			lecui::widgets::label charge_level(battery_pane.get());
-			charge_level().rect = charge_level_caption().rect;
-			charge_level().rect.height(detail_height);
-			charge_level().rect.snap_to(charge_level_caption().rect, snap_type::bottom, 0.f);
-			charge_level().font_size = detail_font_size_;
-			charge_level().text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
-
-			// add battery current voltage
-			lecui::widgets::label current_voltage_caption(battery_pane.get());
-			current_voltage_caption().rect = battery_name().rect;
-			current_voltage_caption().rect.width(battery_pane.get().size().width / 2.f);
-			current_voltage_caption().rect.snap_to(current_capacity().rect, snap_type::bottom_left, margin_);
-			current_voltage_caption().color_text = caption_color_;
-			current_voltage_caption().font_size = caption_font_size_;
-			current_voltage_caption().text = "Current Voltage";
-
-			lecui::widgets::label current_voltage(battery_pane.get());
-			current_voltage().rect = current_voltage_caption().rect;
-			current_voltage().rect.height(detail_height);
-			current_voltage().rect.snap_to(current_voltage_caption().rect, snap_type::bottom, 0.f);
-			current_voltage().font_size = detail_font_size_;
-			current_voltage().text = std::to_string(battery.current_voltage) + "mV";
-
-			// add battery current charge rate
-			lecui::widgets::label charge_rate_caption(battery_pane.get());
-			charge_rate_caption().rect = current_voltage_caption().rect;
-			charge_rate_caption().rect.snap_to(current_voltage_caption().rect, snap_type::right, 0.f);
-			charge_rate_caption().color_text = caption_color_;
-			charge_rate_caption().font_size = caption_font_size_;
-			charge_rate_caption().text = "Charge Rate";
-
-			lecui::widgets::label charge_rate(battery_pane.get());
-			charge_rate().rect = charge_rate_caption().rect;
-			charge_rate().rect.height(detail_height);
-			charge_rate().rect.snap_to(charge_rate_caption().rect, snap_type::bottom, 0.f);
-			charge_rate().font_size = detail_font_size_;
-			charge_rate().text = std::to_string(battery.current_charge_rate) + "mW";
-
-			// add battery status
-			lecui::widgets::label status_caption(battery_pane.get());
-			status_caption().rect = battery_name_caption().rect;
-			status_caption().rect.width(battery_pane.get().size().width);
-			status_caption().rect.snap_to(current_voltage().rect, snap_type::bottom, margin_);
-			status_caption().color_text = caption_color_;
-			status_caption().font_size = caption_font_size_;
-			status_caption().text = "Status";
-
-			lecui::widgets::label status(battery_pane.get());
-			status().rect = status_caption().rect;
-			status().rect.height(detail_height);
-			status().rect.snap_to(status_caption().rect, snap_type::bottom, 0.f);
-			status().font_size = detail_font_size_;
-			status().text = pc_info_.to_string(battery.status);
-
-			battery_number++;
-		}
-
-		battery_tab_pane.select("Battery 0");
-
-
-
-
+		add_battery_pane(power_pane.get(), life_remaining().rect.bottom);
 
 		//////////////////////////////////////////////////
 		// 2. Add pane for cpu details
@@ -905,6 +868,181 @@ public:
 
 		page_man_.show("home");
 		return true;
+	}
+
+	void add_battery_pane(lecui::containers::page& power_pane, const float top) {
+		// add pane for battery details
+		lecui::containers::tab_pane battery_tab_pane(power_pane, "battery_tab_pane");
+		battery_tab_pane().rect.left = 0.f;
+		battery_tab_pane().rect.right = power_pane.size().width;
+		battery_tab_pane().rect.top = top;
+		battery_tab_pane().rect.bottom = power_pane.size().height;
+		battery_tab_pane().tab_side = lecui::containers::tab_pane::side::top;
+		battery_tab_pane().color_tabs.alpha = 0;
+		battery_tab_pane().color_tabs_border.alpha = 0;
+
+		// add as many tab panes as there are batteries
+		int battery_number = 0;
+		for (const auto& battery : power_.batteries) {
+			lecui::containers::tab battery_pane(battery_tab_pane, "Battery " + std::to_string(battery_number));
+
+			// add battery name
+			lecui::widgets::label battery_name_caption(battery_pane.get());
+			battery_name_caption().rect = { 0.f, battery_pane.get().size().width, 0.f, caption_height };
+			battery_name_caption().color_text = caption_color_;
+			battery_name_caption().font_size = caption_font_size_;
+			battery_name_caption().text = "Name";
+
+			lecui::widgets::label battery_name(battery_pane.get());
+			battery_name().rect = battery_name_caption().rect;
+			battery_name().rect.height(detail_height);
+			battery_name().rect.snap_to(battery_name_caption().rect, snap_type::bottom, 0.f);
+			battery_name().font_size = detail_font_size_;
+			battery_name().text = battery.name;
+
+			// add battery manufacturer
+			lecui::widgets::label manufacturer_caption(battery_pane.get());
+			manufacturer_caption().rect = battery_name_caption().rect;
+			manufacturer_caption().rect.width(battery_pane.get().size().width);
+			manufacturer_caption().rect.snap_to(battery_name().rect, snap_type::bottom, margin_);
+			manufacturer_caption().color_text = caption_color_;
+			manufacturer_caption().font_size = caption_font_size_;
+			manufacturer_caption().text = "Manufacturer";
+
+			lecui::widgets::label manufacturer(battery_pane.get());
+			manufacturer().rect = manufacturer_caption().rect;
+			manufacturer().rect.height(detail_height);
+			manufacturer().rect.snap_to(manufacturer_caption().rect, snap_type::bottom, 0.f);
+			manufacturer().font_size = detail_font_size_;
+			manufacturer().text = battery.manufacturer;
+
+			// add battery designed capacity
+			lecui::widgets::label designed_capacity_caption(battery_pane.get());
+			designed_capacity_caption().rect = manufacturer_caption().rect;
+			designed_capacity_caption().rect.width(battery_pane.get().size().width / 2.f);
+			designed_capacity_caption().rect.snap_to(manufacturer().rect, snap_type::bottom_left, margin_);
+			designed_capacity_caption().color_text = caption_color_;
+			designed_capacity_caption().font_size = caption_font_size_;
+			designed_capacity_caption().text = "Designed Capacity";
+
+			lecui::widgets::label designed_capacity(battery_pane.get(), "designed_capacity");
+			designed_capacity().rect = designed_capacity_caption().rect;
+			designed_capacity().rect.height(detail_height);
+			designed_capacity().rect.snap_to(designed_capacity_caption().rect, snap_type::bottom, 0.f);
+			designed_capacity().font_size = detail_font_size_;
+			designed_capacity().text = std::to_string(battery.designed_capacity) + "mWh";
+
+			// add battery fully charged capacity
+			lecui::widgets::label fully_charged_capacity_caption(battery_pane.get());
+			fully_charged_capacity_caption().rect = designed_capacity_caption().rect;
+			fully_charged_capacity_caption().rect.snap_to(designed_capacity_caption().rect, snap_type::right, 0.f);
+			fully_charged_capacity_caption().color_text = caption_color_;
+			fully_charged_capacity_caption().font_size = caption_font_size_;
+			fully_charged_capacity_caption().text = "Fully Charged Capacity";
+
+			lecui::widgets::label fully_charged_capacity(battery_pane.get(), "fully_charged_capacity");
+			fully_charged_capacity().rect = fully_charged_capacity_caption().rect;
+			fully_charged_capacity().rect.height(detail_height);
+			fully_charged_capacity().rect.snap_to(fully_charged_capacity_caption().rect, snap_type::bottom, 0.f);
+			fully_charged_capacity().font_size = detail_font_size_;
+			fully_charged_capacity().text = std::to_string(battery.fully_charged_capacity) + "mWh";
+
+			// add battery health
+			lecui::widgets::progress_indicator health(battery_pane.get(), "health");
+			health().rect.snap_to(designed_capacity().rect, snap_type::bottom_left, margin_);
+			health().percentage = static_cast<float>(battery.health);
+
+			lecui::widgets::label health_caption(battery_pane.get());
+			health_caption().rect = health().rect;
+			health_caption().rect.right = battery_name().rect.right;
+			health_caption().rect.snap_to(health().rect, snap_type::right, margin_);
+			health_caption().color_text = caption_color_;
+			health_caption().font_size = caption_font_size_;
+			health_caption().text = "BATTERY HEALTH";
+			health_caption().center_v = true;
+
+			// add battery current capacity
+			lecui::widgets::label current_capacity_caption(battery_pane.get());
+			current_capacity_caption().rect = battery_name().rect;
+			current_capacity_caption().rect.width(battery_pane.get().size().width / 2.f);
+			current_capacity_caption().rect.snap_to(health().rect, snap_type::bottom_left, margin_);
+			current_capacity_caption().color_text = caption_color_;
+			current_capacity_caption().font_size = caption_font_size_;
+			current_capacity_caption().text = "Current Capacity";
+
+			lecui::widgets::label current_capacity(battery_pane.get(), "current_capacity");
+			current_capacity().rect = current_capacity_caption().rect;
+			current_capacity().rect.height(detail_height);
+			current_capacity().rect.snap_to(current_capacity_caption().rect, snap_type::bottom, 0.f);
+			current_capacity().font_size = detail_font_size_;
+			current_capacity().text = std::to_string(battery.current_capacity) + "mWh";
+
+			// add battery fully charged capacity
+			lecui::widgets::label charge_level_caption(battery_pane.get());
+			charge_level_caption().rect = current_capacity_caption().rect;
+			charge_level_caption().rect.snap_to(current_capacity_caption().rect, snap_type::right, 0.f);
+			charge_level_caption().color_text = caption_color_;
+			charge_level_caption().font_size = caption_font_size_;
+			charge_level_caption().text = "Charge Level";
+
+			lecui::widgets::label charge_level(battery_pane.get(), "charge_level");
+			charge_level().rect = charge_level_caption().rect;
+			charge_level().rect.height(detail_height);
+			charge_level().rect.snap_to(charge_level_caption().rect, snap_type::bottom, 0.f);
+			charge_level().font_size = detail_font_size_;
+			charge_level().text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
+
+			// add battery current voltage
+			lecui::widgets::label current_voltage_caption(battery_pane.get());
+			current_voltage_caption().rect = battery_name().rect;
+			current_voltage_caption().rect.width(battery_pane.get().size().width / 2.f);
+			current_voltage_caption().rect.snap_to(current_capacity().rect, snap_type::bottom_left, margin_);
+			current_voltage_caption().color_text = caption_color_;
+			current_voltage_caption().font_size = caption_font_size_;
+			current_voltage_caption().text = "Current Voltage";
+
+			lecui::widgets::label current_voltage(battery_pane.get(), "current_voltage");
+			current_voltage().rect = current_voltage_caption().rect;
+			current_voltage().rect.height(detail_height);
+			current_voltage().rect.snap_to(current_voltage_caption().rect, snap_type::bottom, 0.f);
+			current_voltage().font_size = detail_font_size_;
+			current_voltage().text = std::to_string(battery.current_voltage) + "mV";
+
+			// add battery current charge rate
+			lecui::widgets::label charge_rate_caption(battery_pane.get());
+			charge_rate_caption().rect = current_voltage_caption().rect;
+			charge_rate_caption().rect.snap_to(current_voltage_caption().rect, snap_type::right, 0.f);
+			charge_rate_caption().color_text = caption_color_;
+			charge_rate_caption().font_size = caption_font_size_;
+			charge_rate_caption().text = "Charge Rate";
+
+			lecui::widgets::label charge_rate(battery_pane.get(), "charge_rate");
+			charge_rate().rect = charge_rate_caption().rect;
+			charge_rate().rect.height(detail_height);
+			charge_rate().rect.snap_to(charge_rate_caption().rect, snap_type::bottom, 0.f);
+			charge_rate().font_size = detail_font_size_;
+			charge_rate().text = std::to_string(battery.current_charge_rate) + "mW";
+
+			// add battery status
+			lecui::widgets::label status_caption(battery_pane.get());
+			status_caption().rect = battery_name_caption().rect;
+			status_caption().rect.width(battery_pane.get().size().width);
+			status_caption().rect.snap_to(current_voltage().rect, snap_type::bottom, margin_);
+			status_caption().color_text = caption_color_;
+			status_caption().font_size = caption_font_size_;
+			status_caption().text = "Status";
+
+			lecui::widgets::label status(battery_pane.get(), "status");
+			status().rect = status_caption().rect;
+			status().rect.height(detail_height);
+			status().rect.snap_to(status_caption().rect, snap_type::bottom, 0.f);
+			status().font_size = detail_font_size_;
+			status().text = pc_info_.to_string(battery.status);
+
+			battery_number++;
+		}
+
+		battery_tab_pane.select("Battery 0");
 	}
 };
 
