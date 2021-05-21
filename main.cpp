@@ -47,6 +47,7 @@ class dashboard : public lecui::form {
 	const std::string font_ = "Segoe UI";
 	const lecui::color caption_color_{ 100, 100, 100 };
 	const lecui::color ok_color_{ 0, 150, 0 };
+	const lecui::color not_ok_color_{ 200, 0, 0 };
 	const unsigned long refresh_interval_ = 3000;
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
@@ -188,7 +189,42 @@ class dashboard : public lecui::form {
 		catch (const std::exception) {}
 
 		try {
-			// to-do: refresh ram details
+			// to-do: refresh drive details
+			std::string error;
+			std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
+			if (!pc_info_.drives(drives_, error)) {}
+
+			if (drives_old_.size() != drives_.size()) {
+				// close old tab pane
+				page_man_.close("home/drive_pane/drive_tab_pane");
+
+				auto& drive_title = lecui::widgets::label::specs(*this, "home/drive_pane/drive_title");
+				auto& drive_pane = lecui::containers::pane::get(*this, "home/drive_pane");
+
+				// add drive details pane
+				add_drive_details_pane(drive_pane, drive_title.rect.bottom);
+
+				refresh_ui = true;
+			}
+			else {
+				for (size_t drive_number = 0; drive_number < drives_.size(); drive_number++) {
+					auto& drive_old = drives_old_[drive_number];
+					auto& drive = drives_[drive_number];
+
+					if (drive_old.status != drive.status) {
+						auto& status = lecui::widgets::label::specs(*this, "home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
+						status.text = drive.status;
+						if (drive.status == "OK")
+							status.color_text = ok_color_;
+						else {
+							status.color_text = not_ok_color_;
+							// to-do: handle more cases
+						}
+
+						refresh_ui = true;
+					}
+				}
+			}
 		}
 		catch (const std::exception) {}
 
@@ -744,127 +780,19 @@ public:
 
 		//////////////////////////////////////////////////
 		// 5. Add pane for drive details
-		lecui::containers::pane drive_pane(home);
+		lecui::containers::pane drive_pane(home, "drive_pane");
 		drive_pane().rect = ram_pane().rect;
 		drive_pane().rect.snap_to(ram_pane().rect, snap_type::right, margin_);
 
 		// add drive title
-		lecui::widgets::label drive_title(drive_pane.get());
+		lecui::widgets::label drive_title(drive_pane.get(), "drive_title");
 		drive_title().rect = { 0.f, drive_pane.get().size().width,
 			0.f, title_height };
 		drive_title().font_size = title_font_size_;
 		drive_title().text = "<strong>DRIVE DETAILS</strong>";
 
-		lecui::containers::tab_pane drive_tab_pane(drive_pane.get());
-		drive_tab_pane().rect.left = 0.f;
-		drive_tab_pane().rect.right = drive_pane.get().size().width;
-		drive_tab_pane().rect.top = drive_title().rect.bottom;
-		drive_tab_pane().rect.bottom = drive_pane.get().size().height;
-		drive_tab_pane().tab_side = lecui::containers::tab_pane::side::top;
-		drive_tab_pane().color_tabs.alpha = 0;
-		drive_tab_pane().color_tabs_border.alpha = 0;
-
-		// add as many tab panes as there are drives
-		int drive_number = 0;
-		for (const auto& drive : drives_) {
-			lecui::containers::tab drive_pane(drive_tab_pane, "Drive " + std::to_string(drive_number));
-
-			// add drive model
-			lecui::widgets::label drive_model_caption(drive_pane.get());
-			drive_model_caption().rect = { 0.f, drive_pane.get().size().width, 0.f, caption_height };
-			drive_model_caption().color_text = caption_color_;
-			drive_model_caption().font_size = caption_font_size_;
-			drive_model_caption().text = "Model";
-
-			lecui::widgets::label drive_model(drive_pane.get());
-			drive_model().rect = drive_model_caption().rect;
-			drive_model().rect.height(detail_height);
-			drive_model().rect.snap_to(drive_model_caption().rect, snap_type::bottom, 0.f);
-			drive_model().font_size = detail_font_size_;
-			drive_model().text = drive.model;
-
-			// add drive status
-			lecui::widgets::label status_caption(drive_pane.get());
-			status_caption().rect = drive_model_caption().rect;
-			status_caption().rect.width(drive_pane.get().size().width / 3.f);
-			status_caption().rect.snap_to(drive_model().rect, snap_type::bottom_left, margin_);
-			status_caption().color_text = caption_color_;
-			status_caption().font_size = caption_font_size_;
-			status_caption().text = "Status";
-
-			lecui::widgets::label status(drive_pane.get());
-			status().rect = status_caption().rect;
-			status().rect.height(detail_height);
-			status().rect.snap_to(status_caption().rect, snap_type::bottom, 0.f);
-			status().font_size = detail_font_size_;
-			status().text = drive.status;
-			if (drive.status == "OK")
-				status().color_text = ok_color_;
-
-			// add storage type
-			lecui::widgets::label storage_type_caption(drive_pane.get());
-			storage_type_caption().rect = status_caption().rect;
-			storage_type_caption().rect.snap_to(status_caption().rect, snap_type::right, 0.f);
-			storage_type_caption().color_text = caption_color_;
-			storage_type_caption().font_size = caption_font_size_;
-			storage_type_caption().text = "Storage Type";
-
-			lecui::widgets::label storage_type(drive_pane.get());
-			storage_type().rect = status().rect;
-			storage_type().rect.snap_to(status().rect, snap_type::right, 0.f);
-			storage_type().font_size = detail_font_size_;
-			storage_type().text = drive.storage_type;
-
-			// add bus type
-			lecui::widgets::label bus_type_caption(drive_pane.get());
-			bus_type_caption().rect = storage_type_caption().rect;
-			bus_type_caption().rect.snap_to(storage_type_caption().rect, snap_type::right, 0.f);
-			bus_type_caption().color_text = caption_color_;
-			bus_type_caption().font_size = caption_font_size_;
-			bus_type_caption().text = "Bus Type";
-
-			lecui::widgets::label bus_type(drive_pane.get());
-			bus_type().rect = storage_type().rect;
-			bus_type().rect.snap_to(storage_type().rect, snap_type::right, 0.f);
-			bus_type().font_size = detail_font_size_;
-			bus_type().text = drive.bus_type;
-
-			// add drive serial number
-			lecui::widgets::label serial_number_caption(drive_pane.get());
-			serial_number_caption().rect = drive_model_caption().rect;
-			serial_number_caption().rect.snap_to(status().rect, snap_type::bottom_left, margin_);
-			serial_number_caption().color_text = caption_color_;
-			serial_number_caption().font_size = caption_font_size_;
-			serial_number_caption().text = "Serial Number";
-
-			lecui::widgets::label serial_number(drive_pane.get());
-			serial_number().rect = serial_number_caption().rect;
-			serial_number().rect.height(detail_height);
-			serial_number().rect.snap_to(serial_number_caption().rect, snap_type::bottom, 0.f);
-			serial_number().font_size = detail_font_size_;
-			serial_number().text = drive.serial_number;
-
-			// add capacity
-			lecui::widgets::label capacity(drive_pane.get());
-			capacity().rect = serial_number().rect;
-			capacity().rect.height(highlight_height);
-			capacity().rect.snap_to(serial_number().rect, snap_type::bottom, margin_);
-			capacity().font_size = highlight_font_size_;
-			capacity().text = leccore::format_size(drive.size) + " " +
-				"<span style = 'font-size: 9.0pt;'>capacity</span>";
-
-			// add media type
-			lecui::widgets::label additional(drive_pane.get());
-			additional().rect = capacity().rect;
-			additional().rect.height(caption_height);
-			additional().rect.snap_to(capacity().rect, snap_type::bottom, 0.f);
-			additional().font_size = caption_font_size_;
-			additional().text = drive.media_type;
-
-			drive_number++;
-		}
-
-		drive_tab_pane.select("Drive 0");
+		// add pane for drive details
+		add_drive_details_pane(drive_pane.get(), drive_title().rect.bottom);
 
 		page_man_.show("home");
 		return true;
@@ -1043,6 +971,119 @@ public:
 		}
 
 		battery_tab_pane.select("Battery 0");
+	}
+
+	void add_drive_details_pane(lecui::containers::page& drive_pane, const float top) {
+		lecui::containers::tab_pane drive_tab_pane(drive_pane, "drive_tab_pane");
+		drive_tab_pane().rect.left = 0.f;
+		drive_tab_pane().rect.right = drive_pane.size().width;
+		drive_tab_pane().rect.top = top;
+		drive_tab_pane().rect.bottom = drive_pane.size().height;
+		drive_tab_pane().tab_side = lecui::containers::tab_pane::side::top;
+		drive_tab_pane().color_tabs.alpha = 0;
+		drive_tab_pane().color_tabs_border.alpha = 0;
+
+		// add as many tab panes as there are drives
+		int drive_number = 0;
+		for (const auto& drive : drives_) {
+			lecui::containers::tab drive_pane(drive_tab_pane, "Drive " + std::to_string(drive_number));
+
+			// add drive model
+			lecui::widgets::label drive_model_caption(drive_pane.get());
+			drive_model_caption().rect = { 0.f, drive_pane.get().size().width, 0.f, caption_height };
+			drive_model_caption().color_text = caption_color_;
+			drive_model_caption().font_size = caption_font_size_;
+			drive_model_caption().text = "Model";
+
+			lecui::widgets::label drive_model(drive_pane.get());
+			drive_model().rect = drive_model_caption().rect;
+			drive_model().rect.height(detail_height);
+			drive_model().rect.snap_to(drive_model_caption().rect, snap_type::bottom, 0.f);
+			drive_model().font_size = detail_font_size_;
+			drive_model().text = drive.model;
+
+			// add drive status
+			lecui::widgets::label status_caption(drive_pane.get());
+			status_caption().rect = drive_model_caption().rect;
+			status_caption().rect.width(drive_pane.get().size().width / 3.f);
+			status_caption().rect.snap_to(drive_model().rect, snap_type::bottom_left, margin_);
+			status_caption().color_text = caption_color_;
+			status_caption().font_size = caption_font_size_;
+			status_caption().text = "Status";
+
+			lecui::widgets::label status(drive_pane.get(), "status");
+			status().rect = status_caption().rect;
+			status().rect.height(detail_height);
+			status().rect.snap_to(status_caption().rect, snap_type::bottom, 0.f);
+			status().font_size = detail_font_size_;
+			status().text = drive.status;
+			if (drive.status == "OK")
+				status().color_text = ok_color_;
+
+			// add storage type
+			lecui::widgets::label storage_type_caption(drive_pane.get());
+			storage_type_caption().rect = status_caption().rect;
+			storage_type_caption().rect.snap_to(status_caption().rect, snap_type::right, 0.f);
+			storage_type_caption().color_text = caption_color_;
+			storage_type_caption().font_size = caption_font_size_;
+			storage_type_caption().text = "Storage Type";
+
+			lecui::widgets::label storage_type(drive_pane.get());
+			storage_type().rect = status().rect;
+			storage_type().rect.snap_to(status().rect, snap_type::right, 0.f);
+			storage_type().font_size = detail_font_size_;
+			storage_type().text = drive.storage_type;
+
+			// add bus type
+			lecui::widgets::label bus_type_caption(drive_pane.get());
+			bus_type_caption().rect = storage_type_caption().rect;
+			bus_type_caption().rect.snap_to(storage_type_caption().rect, snap_type::right, 0.f);
+			bus_type_caption().color_text = caption_color_;
+			bus_type_caption().font_size = caption_font_size_;
+			bus_type_caption().text = "Bus Type";
+
+			lecui::widgets::label bus_type(drive_pane.get());
+			bus_type().rect = storage_type().rect;
+			bus_type().rect.snap_to(storage_type().rect, snap_type::right, 0.f);
+			bus_type().font_size = detail_font_size_;
+			bus_type().text = drive.bus_type;
+
+			// add drive serial number
+			lecui::widgets::label serial_number_caption(drive_pane.get());
+			serial_number_caption().rect = drive_model_caption().rect;
+			serial_number_caption().rect.snap_to(status().rect, snap_type::bottom_left, margin_);
+			serial_number_caption().color_text = caption_color_;
+			serial_number_caption().font_size = caption_font_size_;
+			serial_number_caption().text = "Serial Number";
+
+			lecui::widgets::label serial_number(drive_pane.get());
+			serial_number().rect = serial_number_caption().rect;
+			serial_number().rect.height(detail_height);
+			serial_number().rect.snap_to(serial_number_caption().rect, snap_type::bottom, 0.f);
+			serial_number().font_size = detail_font_size_;
+			serial_number().text = drive.serial_number;
+
+			// add capacity
+			lecui::widgets::label capacity(drive_pane.get());
+			capacity().rect = serial_number().rect;
+			capacity().rect.height(highlight_height);
+			capacity().rect.snap_to(serial_number().rect, snap_type::bottom, margin_);
+			capacity().font_size = highlight_font_size_;
+			capacity().text = leccore::format_size(drive.size) + " " +
+				"<span style = 'font-size: 9.0pt;'>capacity</span>";
+
+			// add media type
+			lecui::widgets::label additional(drive_pane.get());
+			additional().rect = capacity().rect;
+			additional().rect.height(caption_height);
+			additional().rect.snap_to(capacity().rect, snap_type::bottom, 0.f);
+			additional().font_size = caption_font_size_;
+			additional().text = drive.media_type;
+
+			drive_number++;
+		}
+
+		drive_tab_pane.select("Drive 0");
 	}
 };
 
