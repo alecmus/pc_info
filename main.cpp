@@ -81,171 +81,6 @@ class dashboard : public lecui::form {
 		timer_man_.stop("refresh");
 	}
 
-	void on_refresh() {
-		stop_refresh_timer();
-		bool refresh_ui = false;
-
-		std::string error;
-		std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
-		if (!pc_info_.drives(drives_, error)) {}
-
-		leccore::pc_info::power_info power_old_ = power_;
-		if (!pc_info_.power(power_, error)) {}
-
-		try {
-			// refresh pc details
-			if (drives_old_.size() != drives_.size()) {
-				auto& drive_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/drive_summary");
-				drive_summary.text = std::to_string(drives_.size()) + "<span style = 'font-size: 8.0pt;'>" +
-					std::string(drives_.size() == 1 ? " drive" : " drives") +
-					"</span>";
-			}
-
-			if (power_old_.batteries.size() != power_.batteries.size()) {
-				auto& battery_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/battery_summary");
-				battery_summary.text = std::to_string(power_.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
-					std::string(power_.batteries.size() == 1 ? " battery" : " batteries") +
-					"</span>";
-			}
-		}
-		catch (const std::exception) {}
-
-		try {
-			// refresh power details
-			if (power_old_.ac != power_.ac) {
-				auto& power_status = lecui::widgets::label::specs(*this, "home/power_pane/power_status");
-				power_status.text = power_.ac ? "On AC" : "On Battery";
-				power_status.text += ", ";
-				power_status.text += ("<span style = 'font-size: 8.0pt;'>" +
-					pc_info_.to_string(power_.status) + "</span>");
-				refresh_ui = true;
-			}
-
-			if (power_old_.level != power_.level) {
-				auto& level = lecui::widgets::label::specs(*this, "home/power_pane/level");
-				level.text = (power_.level != -1 ?
-					(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) +
-					"<span style = 'font-size: 8.0pt;'>overall power level</span>";
-
-				auto& level_bar = lecui::widgets::progress_bar::specs(*this, "home/power_pane/level_bar");
-				level_bar.percentage = static_cast<float>(power_.level);
-				refresh_ui = true;
-			}
-
-			if (power_old_.lifetime_remaining != power_.lifetime_remaining) {
-				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
-				life_remaining.text = power_.lifetime_remaining.empty() ? std::string() :
-					(power_.lifetime_remaining + " remaining");
-				refresh_ui = true;
-			}
-
-			if (power_old_.batteries.size() != power_.batteries.size()) {
-				// close old tab pane
-				page_man_.close("home/power_pane/battery_tab_pane");
-
-				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
-				auto& power_pane = lecui::containers::pane::get(*this, "home/power_pane");
-
-				// add battery pane
-				add_battery_pane(power_pane, life_remaining.rect.bottom);
-
-				refresh_ui = true;
-			}
-			else {
-				for (size_t battery_number = 0; battery_number < power_.batteries.size(); battery_number++) {
-					auto& battery_old = power_old_.batteries[battery_number];
-					auto& battery = power_.batteries[battery_number];
-
-					if (battery_old != battery) {
-						if (battery_old.current_capacity != battery.current_capacity) {
-							auto& current_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
-							current_capacity.text = std::to_string(battery.current_capacity) + "mWh";
-						}
-
-						if (battery_old.level != battery.level) {
-							auto& charge_level = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
-							charge_level.text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
-						}
-
-						if (battery_old.current_charge_rate != battery.current_charge_rate) {
-							auto& charge_rate = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
-							charge_rate.text = std::to_string(battery.current_charge_rate) + "mW";
-						}
-
-						if (battery_old.current_voltage != battery.current_voltage) {
-							auto& current_voltage = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
-							current_voltage.text = std::to_string(battery.current_voltage) + "mV";
-						}
-
-						if (battery_old.status != battery.status) {
-							auto& status = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
-							status.text = pc_info_.to_string(battery.status);
-						}
-
-						if (battery_old.designed_capacity != battery.designed_capacity) {
-							auto& designed_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
-							designed_capacity.text = std::to_string(battery.designed_capacity) + "mWh";
-						}
-
-						if (battery_old.fully_charged_capacity != battery.fully_charged_capacity) {
-							auto& fully_charged_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
-							fully_charged_capacity.text = std::to_string(battery.fully_charged_capacity) + "mWh";
-						}
-
-						if (battery_old.health != battery.health) {
-							auto& health = lecui::widgets::progress_indicator::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/health");
-							health.percentage = static_cast<float>(battery.health);
-						}
-
-						refresh_ui = true;
-					}
-				}
-			}
-		}
-		catch (const std::exception) {}
-
-		try {
-			// to-do: refresh drive details
-			if (drives_old_.size() != drives_.size()) {
-				// close old tab pane
-				page_man_.close("home/drive_pane/drive_tab_pane");
-
-				auto& drive_title = lecui::widgets::label::specs(*this, "home/drive_pane/drive_title");
-				auto& drive_pane = lecui::containers::pane::get(*this, "home/drive_pane");
-
-				// add drive details pane
-				add_drive_details_pane(drive_pane, drive_title.rect.bottom);
-
-				refresh_ui = true;
-			}
-			else {
-				for (size_t drive_number = 0; drive_number < drives_.size(); drive_number++) {
-					auto& drive_old = drives_old_[drive_number];
-					auto& drive = drives_[drive_number];
-
-					if (drive_old.status != drive.status) {
-						auto& status = lecui::widgets::label::specs(*this, "home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
-						status.text = drive.status;
-						if (drive.status == "OK")
-							status.color_text = ok_color_;
-						else {
-							status.color_text = not_ok_color_;
-							// to-do: handle more cases
-						}
-
-						refresh_ui = true;
-					}
-				}
-			}
-		}
-		catch (const std::exception) {}
-
-		if (refresh_ui)
-			update();
-
-		start_refresh_timer();
-	}
-
 public:
 	dashboard(const std::string& caption) :
 		form(caption) {
@@ -270,6 +105,7 @@ public:
 		if (!pc_info_.drives(drives_, error)) {}
 	}
 
+private:
 	bool on_layout(std::string& error) override {
 		ctrls_.resize(false);
 		apprnc_.theme(lecui::themes::light);
@@ -1096,6 +932,171 @@ public:
 		}
 
 		drive_tab_pane.select("Drive 0");
+	}
+
+	void on_refresh() {
+		stop_refresh_timer();
+		bool refresh_ui = false;
+
+		std::string error;
+		std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
+		if (!pc_info_.drives(drives_, error)) {}
+
+		leccore::pc_info::power_info power_old_ = power_;
+		if (!pc_info_.power(power_, error)) {}
+
+		try {
+			// refresh pc details
+			if (drives_old_.size() != drives_.size()) {
+				auto& drive_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/drive_summary");
+				drive_summary.text = std::to_string(drives_.size()) + "<span style = 'font-size: 8.0pt;'>" +
+					std::string(drives_.size() == 1 ? " drive" : " drives") +
+					"</span>";
+			}
+
+			if (power_old_.batteries.size() != power_.batteries.size()) {
+				auto& battery_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/battery_summary");
+				battery_summary.text = std::to_string(power_.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
+					std::string(power_.batteries.size() == 1 ? " battery" : " batteries") +
+					"</span>";
+			}
+		}
+		catch (const std::exception) {}
+
+		try {
+			// refresh power details
+			if (power_old_.ac != power_.ac) {
+				auto& power_status = lecui::widgets::label::specs(*this, "home/power_pane/power_status");
+				power_status.text = power_.ac ? "On AC" : "On Battery";
+				power_status.text += ", ";
+				power_status.text += ("<span style = 'font-size: 8.0pt;'>" +
+					pc_info_.to_string(power_.status) + "</span>");
+				refresh_ui = true;
+			}
+
+			if (power_old_.level != power_.level) {
+				auto& level = lecui::widgets::label::specs(*this, "home/power_pane/level");
+				level.text = (power_.level != -1 ?
+					(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) +
+					"<span style = 'font-size: 8.0pt;'>overall power level</span>";
+
+				auto& level_bar = lecui::widgets::progress_bar::specs(*this, "home/power_pane/level_bar");
+				level_bar.percentage = static_cast<float>(power_.level);
+				refresh_ui = true;
+			}
+
+			if (power_old_.lifetime_remaining != power_.lifetime_remaining) {
+				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
+				life_remaining.text = power_.lifetime_remaining.empty() ? std::string() :
+					(power_.lifetime_remaining + " remaining");
+				refresh_ui = true;
+			}
+
+			if (power_old_.batteries.size() != power_.batteries.size()) {
+				// close old tab pane
+				page_man_.close("home/power_pane/battery_tab_pane");
+
+				auto& life_remaining = lecui::widgets::label::specs(*this, "home/power_pane/life_remaining");
+				auto& power_pane = lecui::containers::pane::get(*this, "home/power_pane");
+
+				// add battery pane
+				add_battery_pane(power_pane, life_remaining.rect.bottom);
+
+				refresh_ui = true;
+			}
+			else {
+				for (size_t battery_number = 0; battery_number < power_.batteries.size(); battery_number++) {
+					auto& battery_old = power_old_.batteries[battery_number];
+					auto& battery = power_.batteries[battery_number];
+
+					if (battery_old != battery) {
+						if (battery_old.current_capacity != battery.current_capacity) {
+							auto& current_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
+							current_capacity.text = std::to_string(battery.current_capacity) + "mWh";
+						}
+
+						if (battery_old.level != battery.level) {
+							auto& charge_level = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
+							charge_level.text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
+						}
+
+						if (battery_old.current_charge_rate != battery.current_charge_rate) {
+							auto& charge_rate = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
+							charge_rate.text = std::to_string(battery.current_charge_rate) + "mW";
+						}
+
+						if (battery_old.current_voltage != battery.current_voltage) {
+							auto& current_voltage = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
+							current_voltage.text = std::to_string(battery.current_voltage) + "mV";
+						}
+
+						if (battery_old.status != battery.status) {
+							auto& status = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
+							status.text = pc_info_.to_string(battery.status);
+						}
+
+						if (battery_old.designed_capacity != battery.designed_capacity) {
+							auto& designed_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
+							designed_capacity.text = std::to_string(battery.designed_capacity) + "mWh";
+						}
+
+						if (battery_old.fully_charged_capacity != battery.fully_charged_capacity) {
+							auto& fully_charged_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
+							fully_charged_capacity.text = std::to_string(battery.fully_charged_capacity) + "mWh";
+						}
+
+						if (battery_old.health != battery.health) {
+							auto& health = lecui::widgets::progress_indicator::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/health");
+							health.percentage = static_cast<float>(battery.health);
+						}
+
+						refresh_ui = true;
+					}
+				}
+			}
+		}
+		catch (const std::exception) {}
+
+		try {
+			// to-do: refresh drive details
+			if (drives_old_.size() != drives_.size()) {
+				// close old tab pane
+				page_man_.close("home/drive_pane/drive_tab_pane");
+
+				auto& drive_title = lecui::widgets::label::specs(*this, "home/drive_pane/drive_title");
+				auto& drive_pane = lecui::containers::pane::get(*this, "home/drive_pane");
+
+				// add drive details pane
+				add_drive_details_pane(drive_pane, drive_title.rect.bottom);
+
+				refresh_ui = true;
+			}
+			else {
+				for (size_t drive_number = 0; drive_number < drives_.size(); drive_number++) {
+					auto& drive_old = drives_old_[drive_number];
+					auto& drive = drives_[drive_number];
+
+					if (drive_old.status != drive.status) {
+						auto& status = lecui::widgets::label::specs(*this, "home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
+						status.text = drive.status;
+						if (drive.status == "OK")
+							status.color_text = ok_color_;
+						else {
+							status.color_text = not_ok_color_;
+							// to-do: handle more cases
+						}
+
+						refresh_ui = true;
+					}
+				}
+			}
+		}
+		catch (const std::exception) {}
+
+		if (refresh_ui)
+			update();
+
+		start_refresh_timer();
 	}
 };
 
