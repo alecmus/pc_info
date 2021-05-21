@@ -85,17 +85,33 @@ class dashboard : public lecui::form {
 		stop_refresh_timer();
 		bool refresh_ui = false;
 
+		std::string error;
+		std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
+		if (!pc_info_.drives(drives_, error)) {}
+
+		leccore::pc_info::power_info power_old_ = power_;
+		if (!pc_info_.power(power_, error)) {}
+
 		try {
-			// to-do: refresh pc details
+			// refresh pc details
+			if (drives_old_.size() != drives_.size()) {
+				auto& drive_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/drive_summary");
+				drive_summary.text = std::to_string(drives_.size()) + "<span style = 'font-size: 8.0pt;'>" +
+					std::string(drives_.size() == 1 ? " drive" : " drives") +
+					"</span>";
+			}
+
+			if (power_old_.batteries.size() != power_.batteries.size()) {
+				auto& battery_summary = lecui::widgets::label::specs(*this, "home/pc_details_pane/battery_summary");
+				battery_summary.text = std::to_string(power_.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
+					std::string(power_.batteries.size() == 1 ? " battery" : " batteries") +
+					"</span>";
+			}
 		}
 		catch (const std::exception) {}
 
 		try {
 			// refresh power details
-			std::string error;
-			leccore::pc_info::power_info power_old_ = power_;
-			if (!pc_info_.power(power_, error)) {}
-
 			if (power_old_.ac != power_.ac) {
 				auto& power_status = lecui::widgets::label::specs(*this, "home/power_pane/power_status");
 				power_status.text = power_.ac ? "On AC" : "On Battery";
@@ -190,10 +206,6 @@ class dashboard : public lecui::form {
 
 		try {
 			// to-do: refresh drive details
-			std::string error;
-			std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
-			if (!pc_info_.drives(drives_, error)) {}
-
 			if (drives_old_.size() != drives_.size()) {
 				// close old tab pane
 				page_man_.close("home/drive_pane/drive_tab_pane");
@@ -274,7 +286,7 @@ public:
 
 		//////////////////////////////////////////////////
 		// 1. Add pane for pc details
-		lecui::containers::pane pc_details_pane(home);
+		lecui::containers::pane pc_details_pane(home, "pc_details_pane");
 		pc_details_pane().rect = { margin_, margin_ + 200.f, margin_, home.size().height - margin_ };
 
 		// add pc details title
@@ -400,7 +412,7 @@ public:
 				std::string(ram_.ram_chips.size() == 1 ? " RAM chip" : " RAM chips") +
 				"</span>";
 
-			lecui::widgets::label drive_summary(pc_details_pane.get());
+			lecui::widgets::label drive_summary(pc_details_pane.get(), "drive_summary");
 			drive_summary().rect = pc_name().rect;
 			drive_summary().rect.height(highlight_height);
 			drive_summary().rect.snap_to(ram_summary().rect, snap_type::bottom, 0.f);
@@ -409,7 +421,7 @@ public:
 				std::string(drives_.size() == 1 ? " drive" : " drives") +
 				"</span>";
 
-			lecui::widgets::label battery_summary(pc_details_pane.get());
+			lecui::widgets::label battery_summary(pc_details_pane.get(), "battery_summary");
 			battery_summary().rect = pc_name().rect;
 			battery_summary().rect.height(highlight_height);
 			battery_summary().rect.snap_to(drive_summary().rect, snap_type::bottom, 0.f);
