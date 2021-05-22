@@ -178,10 +178,22 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="version_info.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="resource.rc" />
     <ResourceCompile Include="version_info.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\ico\icon.ico" />
+    <Image Include="resources\png\icon_128.png" />
+    <Image Include="resources\png\icon_256.png" />
+    <Image Include="resources\png\icon_32.png" />
+    <Image Include="resources\png\icon_512.png" />
+    <Image Include="resources\png\icon_64.png" />
+    <Image Include="resources\png\splash_128.png" />
+    <Image Include="resources\png\splash_256.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

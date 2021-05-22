@@ -5,6 +5,15 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="pc_info\resources">
+      <UniqueIdentifier>{216e9f25-6cb4-4d23-ae2e-58a06a81f42b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pc_info\resources\ico">
+      <UniqueIdentifier>{cd667afe-3b11-4c92-be84-54e03fe2dd2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pc_info\resources\png">
+      <UniqueIdentifier>{91baafcb-3483-4064-ac53-e25aba5daa24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -15,10 +24,42 @@
     <ClInclude Include="version_info.h">
       <Filter>pc_info</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>pc_info</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version_info.rc">
       <Filter>pc_info</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="resource.rc">
+      <Filter>pc_info</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\ico\icon.ico">
+      <Filter>pc_info\resources\ico</Filter>
+    </Image>
+    <Image Include="resources\png\icon_32.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\icon_64.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\icon_128.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\icon_256.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\icon_512.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\splash_128.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\splash_256.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
   </ItemGroup>
 </Project>

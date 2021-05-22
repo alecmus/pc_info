@@ -24,15 +24,13 @@
 
 #pragma once
 
-#define appname			"PC Info"
-#define appdescription	"Get Essential PC Specs"
-#define appcomments		"Powered by liblec"
-#define appcopyright	"(c) 2021 Alec Musasa"
-#define appfilename		"pc_info.exe"
+#define ico_resource		100
 
-#define appversion		"1.0.0 beta 1"
-#define appmajor		1
-#define appminor		0
-#define apprevision		0
+#define splash_image_128	110
+#define splash_image_256	111
 
-#define appdate			"22 May 2021"
+#define icon_png_512		112
+#define icon_png_256		113
+#define icon_png_128		114
+#define icon_png_64			115
+#define icon_png_32			116

@@ -23,6 +23,7 @@
 */
 
 #include "version_info.h"
+#include "resource.h"
 #include <liblec/lecui/containers/page.h>
 #include <liblec/lecui/containers/pane.h>
 #include <liblec/lecui/containers/tab_pane.h>
@@ -32,6 +33,7 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/utilities/splash.h>
 #include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
 using namespace liblec;
@@ -55,6 +57,7 @@ class dashboard : public lecui::form {
 	lecui::dimensions dim_{ *this };
 	lecui::instance_management instance_man_{ *this, "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}" };
 	lecui::timer_management timer_man_{ *this };
+	lecui::splash splash_{ *this };
 
 	leccore::pc_info pc_info_;
 	leccore::pc_info::pc_details pc_details_;
@@ -71,6 +74,7 @@ class dashboard : public lecui::form {
 
 	void on_start() override {
 		start_refresh_timer();
+		splash_.remove();
 	}
 
 	void start_refresh_timer() {
@@ -89,11 +93,14 @@ class dashboard : public lecui::form {
 			
 		display_text += "\n<span style = 'font-size: 8.0pt;'>© 2021 Alec Musasa</span>";
 
-		display_text += "\n\nFor more info visit:\nhttps://github.com/alecmus/pc_info";
+		display_text += "\n\n<strong>For more info</strong>\nVisit https://github.com/alecmus/pc_info";
 
-		display_text += "\n\n<strong>Libraries used:</strong>";
+		display_text += "\n\n<strong>Libraries used</strong>";
 		display_text += "\n" + leccore::version();
 		display_text += "\n" + lecui::version();
+
+		display_text += "\n\n<strong>Additional credits</strong>\nMain icon designed by DinosoftLabs\nhttps://www.flaticon.com/authors/dinosoftlabs";
+		display_text += "\nfrom https://www.flaticon.com";
 
 		display_text += "\n\nThis app is free software released under the MIT License.";
 
@@ -103,9 +110,13 @@ class dashboard : public lecui::form {
 public:
 	dashboard(const std::string& caption) :
 		form(caption) {
-		form::on_caption([&]() { on_caption(); });
-
 		std::string error;
+		if (get_dpi_scale() < 2.f)
+			splash_.display(splash_image_128, false, error);
+		else
+			splash_.display(splash_image_256, false, error);
+
+		form::on_caption([&]() { on_caption(); });
 
 		// read pc details
 		if (!pc_info_.pc(pc_details_, error)) {}
@@ -130,6 +141,7 @@ private:
 	bool on_layout(std::string& error) override {
 		ctrls_.resize(false);
 		apprnc_.theme(lecui::themes::light);
+		apprnc_.set_icons(ico_resource, ico_resource);
 		dim_.size({ 1120, 570 });
 
 		auto& home = page_man_.add("home");
