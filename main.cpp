@@ -81,9 +81,30 @@ class dashboard : public lecui::form {
 		timer_man_.stop("refresh");
 	}
 
+	void on_caption() {
+		std::string display_text =
+			"<span style = 'font-size: 9.0pt;'>" +
+			std::string(appname) + " " + std::string(appversion) + " " + std::string(appdate) +
+			"</span>";
+			
+		display_text += "\n<span style = 'font-size: 8.0pt;'>© 2021 Alec Musasa</span>";
+
+		display_text += "\n\nFor more info visit:\nhttps://github.com/alecmus/pc_info";
+
+		display_text += "\n\n<strong>Libraries used:</strong>";
+		display_text += "\n" + leccore::version();
+		display_text += "\n" + lecui::version();
+
+		display_text += "\n\nThis app is free software released under the MIT License.";
+
+		message(display_text);
+	}
+
 public:
 	dashboard(const std::string& caption) :
 		form(caption) {
+		form::on_caption([&]() { on_caption(); });
+
 		std::string error;
 
 		// read pc details
