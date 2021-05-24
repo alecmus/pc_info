@@ -6,6 +6,7 @@ View essential pc specs in a snap
   <br>
   <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/alecmus/pc_info">
   <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/alecmus/pc_info">
+  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/alecmus/pc_info/total">
 </p>
 
 <p>
