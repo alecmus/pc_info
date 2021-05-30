@@ -28,11 +28,12 @@
 #define appdescription	"Get Essential PC Specs"
 #define appcomments		"Powered by liblec"
 #define appcopyright	"(c) 2021 Alec Musasa"
+#define appcompany		"Alec Musasa"
 #define appfilename		"pc_info.exe"
 
-#define appversion		"1.0.0 beta 1"
+#define appversion		"1.0.0 beta 2"
 #define appmajor		1
 #define appminor		0
 #define apprevision		0
 
-#define appdate			"22 May 2021"
+#define appdate			"30 May 2021"

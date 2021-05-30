@@ -34,6 +34,7 @@
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
 #include <liblec/lecui/utilities/splash.h>
+#include <liblec/lecui/menus/form_menu.h>
 #include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
 using namespace liblec;
@@ -58,6 +59,7 @@ class dashboard : public lecui::form {
 	lecui::instance_management instance_man_{ *this, "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}" };
 	lecui::timer_management timer_man_{ *this };
 	lecui::splash splash_{ *this };
+	lecui::form_menu form_menu_{ *this };
 
 	leccore::pc_info pc_info_;
 	leccore::pc_info::pc_details pc_details_;
@@ -72,6 +74,42 @@ class dashboard : public lecui::form {
 	float detail_height;
 	float caption_height;
 
+	bool on_initialize(std::string& error) override {
+		// display splash screen
+		if (get_dpi_scale() < 2.f)
+			splash_.display(splash_image_128, false, error);
+		else
+			splash_.display(splash_image_256, false, error);
+
+		// size and stuff
+		ctrls_.resize(false);
+		apprnc_.theme(lecui::themes::light);
+		apprnc_.set_icons(ico_resource, ico_resource);
+		dim_.size({ 1120, 570 });
+
+		// add form caption handler
+		form::on_caption([this]() { about(); });
+
+		// add form menu
+		form_menu_.add("File", {
+			{ "Exit", [this]() { close(); } }
+			}, error);
+
+		form_menu_.add("Help", {
+			{ "About", [this]() { about(); } }
+			}, error);
+
+		// read pc, power, cpu, gpu, memory and drive info
+		pc_info_.pc(pc_details_, error);
+		pc_info_.power(power_, error);
+		pc_info_.cpu(cpus_, error);
+		pc_info_.gpu(gpus_, error);
+		pc_info_.ram(ram_, error);
+		pc_info_.drives(drives_, error);
+
+		return true;
+	}
+
 	void on_start() override {
 		start_refresh_timer();
 		splash_.remove();
@@ -85,7 +123,7 @@ class dashboard : public lecui::form {
 		timer_man_.stop("refresh");
 	}
 
-	void on_caption() {
+	void about() {
 		std::string display_text =
 			"<span style = 'font-size: 9.0pt;'>" +
 			std::string(appname) + " " + std::string(appversion) + " " + std::string(appdate) +
@@ -107,43 +145,8 @@ class dashboard : public lecui::form {
 		message(display_text);
 	}
 
-public:
-	dashboard(const std::string& caption) :
-		form(caption) {
-		std::string error;
-		if (get_dpi_scale() < 2.f)
-			splash_.display(splash_image_128, false, error);
-		else
-			splash_.display(splash_image_256, false, error);
-
-		form::on_caption([&]() { on_caption(); });
-
-		// read pc details
-		if (!pc_info_.pc(pc_details_, error)) {}
-
-		// read power info
-		if (!pc_info_.power(power_, error)) {}
-
-		// read cpu info
-		if (!pc_info_.cpu(cpus_, error)) {}
-
-		// read gpu info
-		if (!pc_info_.gpu(gpus_, error)) {}
-
-		// read memory into
-		if (!pc_info_.ram(ram_, error)) {}
-
-		// read drive info
-		if (!pc_info_.drives(drives_, error)) {}
-	}
-
-private:
 	bool on_layout(std::string& error) override {
-		ctrls_.resize(false);
-		apprnc_.theme(lecui::themes::light);
-		apprnc_.set_icons(ico_resource, ico_resource);
-		dim_.size({ 1120, 570 });
-
+		// add home page
 		auto& home = page_man_.add("home");
 
 		// compute label heights
@@ -1131,6 +1134,10 @@ private:
 
 		start_refresh_timer();
 	}
+
+public:
+	dashboard(const std::string& caption) :
+		form(caption) {}
 };
 
 // gui app using main
