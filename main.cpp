@@ -527,7 +527,7 @@ class dashboard : public lecui::form {
 			resolution().rect.snap_to(resolution_caption().rect, snap_type::bottom, 0.f);
 			resolution().font_size = detail_font_size_;
 			resolution().text = std::to_string(gpu.horizontal_resolution) + "x" +
-				std::to_string(gpu.vertical_resolution);
+				std::to_string(gpu.vertical_resolution) + " (" + gpu.resolution_name + ")";
 
 			// add refresh rate and memory
 			lecui::widgets::label additional(gpu_pane.get());
