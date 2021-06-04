@@ -62,4 +62,9 @@
       <Filter>pc_info\resources\png</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="latest_update.xml">
+      <Filter>pc_info</Filter>
+    </Xml>
+  </ItemGroup>
 </Project>
