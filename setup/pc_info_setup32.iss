@@ -7,6 +7,7 @@
 #define MyAppName "PC Info"
 #define MyAppNameCode "pc_info"
 #define MyAppVersion GetVersionNumbersString('..\..\bin\pc_info32.exe')
+#define MyProductVersion GetStringFileInfo("..\..\bin\pc_info32.exe", "ProductVersion")
 #define MyAppPublisher "Alec Musasa"
 #define MyAppURL "https://github.com/alecmus/pc_info"
 #define MyAppCopyright "© 2021 Alec Musasa"
@@ -16,7 +17,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}
 AppName={#MyAppName}
-AppVersion={#MyAppVersion}
+AppVersion={#MyProductVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoVersion={#MyAppVersion}
@@ -25,13 +26,13 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={localappdata}\{#MyAppPublisher}\{#MyAppName}
+DefaultDirName={localappdata}\{#MyAppPublisher}\{#MyAppNameCode}\{#Architecture}
 DisableDirPage=yes
-DefaultGroupName={#MyAppName}
+DefaultGroupName={#MyAppName} {#Architecture}
 DisableProgramGroupPage=yes
 LicenseFile=..\License
 OutputDir={#OutputPath}
-OutputBaseFilename={#MyAppNameCode}{#Architecture}.setup.{#MyAppVersion}
+OutputBaseFilename={#MyAppNameCode}{#Architecture}.setup.{#MyProductVersion}
 ;Installer rights
 PrivilegesRequired=lowest
 Compression=lzma2/max
@@ -44,7 +45,7 @@ RestartIfNeededByRun=no
 ;Uninstall icon
 UninstallDisplayIcon={uninstallexe}
 ;Name displayed in Add/Remove Programs
-UninstallDisplayName={#MyAppName}{#Architecture}
+UninstallDisplayName={#MyAppName} {#Architecture}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
