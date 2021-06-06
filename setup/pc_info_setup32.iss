@@ -76,11 +76,7 @@ Source: "{#ModulesPath}sqlcipher32.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#ModulesPath}libeay32.dll"; DestDir: "{app}"; Flags: ignoreversion;
 
 ; vs2019 redistributable
-Source: "{#RedistPath}concrt140.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#RedistPath}msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "{#RedistPath}msvcp140_1.dll"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "{#RedistPath}msvcp140_2.dll"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "{#RedistPath}vccorlib140.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#RedistPath}vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion;
 
 [Icons]
