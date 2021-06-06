@@ -6,11 +6,21 @@
 
 #define MyAppName "PC Info"
 #define MyAppNameCode "pc_info"
+#define MyAppExeName "pc_info32.exe"
 #define MyAppVersion GetVersionNumbersString('..\..\bin\pc_info32.exe')
 #define MyProductVersion GetStringFileInfo("..\..\bin\pc_info32.exe", "ProductVersion")
 #define MyAppPublisher "Alec Musasa"
+#define MyAppPublisherPath "com.github.alecmus"
+#define MyAppPublisherURL "https://alecmus.github.io"
 #define MyAppURL "https://github.com/alecmus/pc_info"
+#define MyAppUpdates "https://github.com/alecmus/pc_info/releases"
 #define MyAppCopyright "© 2021 Alec Musasa"
+
+[Messages]
+// define wizard title and tray status msg
+// both are normally defined in innosetup's default.isl (install folder)
+SetupAppTitle = Setup - {#MyAppName} {#MyProductVersion} ({#Architecture} bit)  
+SetupWindowTitle = Setup - {#MyAppName} {#MyProductVersion} ({#Architecture} bit)
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -24,11 +34,11 @@ VersionInfoVersion={#MyAppVersion}
 AppCopyright={#MyAppCopyright}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
-DefaultDirName={localappdata}\{#MyAppPublisher}\{#MyAppNameCode}\{#Architecture}
+AppSupportURL={#MyAppPublisherURL}
+AppUpdatesURL={#MyAppUpdates}
+DefaultDirName={localappdata}\{#MyAppPublisherPath}\{#MyAppNameCode}{#Architecture}
 DisableDirPage=yes
-DefaultGroupName={#MyAppName} {#Architecture}
+DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\License
 OutputDir={#OutputPath}
@@ -36,7 +46,7 @@ OutputBaseFilename={#MyAppNameCode}{#Architecture}.setup.{#MyProductVersion}
 ;Installer rights
 PrivilegesRequired=lowest
 Compression=lzma2/max
-SolidCompression=yes
+SolidCompression=no
 ;Appearance of setup
 WizardStyle=modern
 SetupIconFile=..\resources\ico\icon.ico
@@ -45,7 +55,7 @@ RestartIfNeededByRun=no
 ;Uninstall icon
 UninstallDisplayIcon={uninstallexe}
 ;Name displayed in Add/Remove Programs
-UninstallDisplayName={#MyAppName} {#Architecture}
+UninstallDisplayName={#MyAppName} ({#Architecture} bit)
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -72,3 +82,11 @@ Source: "{#RedistPath}msvcp140_1.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#RedistPath}msvcp140_2.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#RedistPath}vccorlib140.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "{#RedistPath}vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion;
+
+[Icons]
+
+; my programs shortcuts
+Name: "{group}\{#MyAppName} ({#Architecture} bit)"; Filename: "{app}\{#MyAppExeName}";
+
+; desktop icons
+Name: "{userdesktop}\{#MyAppName} ({#Architecture} bit)"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon;
