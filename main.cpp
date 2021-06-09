@@ -91,12 +91,10 @@ class dashboard : public lecui::form {
 		form::on_caption([this]() { about(); });
 
 		// add form menu
-		form_menu_.add("File", {
+		form_menu_.add("• • •", {
+			{ "About", [this]() { about(); } },
+			{ "" },
 			{ "Exit", [this]() { close(); } }
-			}, error);
-
-		form_menu_.add("Help", {
-			{ "About", [this]() { about(); } }
 			}, error);
 
 		// read pc, power, cpu, gpu, memory and drive info
