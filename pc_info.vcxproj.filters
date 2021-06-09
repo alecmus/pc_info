@@ -28,6 +28,9 @@
     <ClCompile Include="gui\about.cpp">
       <Filter>pc_info\gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui\settings.cpp">
+      <Filter>pc_info\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="version_info.h">

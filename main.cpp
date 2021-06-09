@@ -28,9 +28,18 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
 int main() {
-	std::string error;
-	main_form fm(appname);
-	if (!fm.show(error))
-		fm.message(error);
+	bool restart = false;
+
+	do {
+		std::string error;
+		main_form fm(appname);
+		if (!fm.show(error)) {
+			fm.message(error);
+			return 1;
+		}
+
+		restart = fm.restart_now();
+	} while (restart);
+
 	return 0;
 }

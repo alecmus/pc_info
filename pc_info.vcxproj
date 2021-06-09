@@ -177,6 +177,7 @@
   <ItemGroup>
     <ClCompile Include="gui\about.cpp" />
     <ClCompile Include="gui\main_form.cpp" />
+    <ClCompile Include="gui\settings.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

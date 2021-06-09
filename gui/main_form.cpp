@@ -23,6 +23,19 @@
 */
 
 #include "../gui.h"
+#include <liblec/leccore/settings.h>
+
+const float main_form::margin_ = 10.f;
+const float main_form::title_font_size_ = 12.f;
+const float main_form::highlight_font_size_ = 14.f;
+const float main_form::detail_font_size_ = 10.f;
+const float main_form::caption_font_size_ = 8.f;
+const std::string main_form::sample_text_ = "<u><strong>Aq</strong></u>";
+const std::string main_form::font_ = "Segoe UI";
+const lecui::color main_form::caption_color_{ 100, 100, 100 };
+const lecui::color main_form::ok_color_{ 0, 150, 0 };
+const lecui::color main_form::not_ok_color_{ 200, 0, 0 };
+const unsigned long main_form::refresh_interval_ = 3000;
 
 bool main_form::on_initialize(std::string& error) {
 	// display splash screen
@@ -31,9 +44,30 @@ bool main_form::on_initialize(std::string& error) {
 	else
 		splash_.display(splash_image_256, false, error);
 
+	// to-do: figure out from inno setup registry entries
+	installed_ = false;
+
+	// settings objects
+	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
+	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
+
+	leccore::ini_settings ini_settings_("config.cfg");
+	ini_settings_.set_ini_path("");	// use current folder
+
+	leccore::settings* p_settings_ = &ini_settings_;
+	if (installed_)
+		p_settings_ = &reg_settings_;
+
+	// read application settings
+	std::string value;
+	if (!p_settings_->read_value("", "darktheme", value, error))
+		return false;
+	else
+		setting_darktheme_ = value == "on";
+
 	// size and stuff
 	ctrls_.resize(false);
-	apprnc_.theme(lecui::themes::light);
+	apprnc_.theme(setting_darktheme_ ? lecui::themes::dark : lecui::themes::light);
 	apprnc_.set_icons(ico_resource, ico_resource);
 	dim_.size({ 1120, 570 });
 
@@ -42,6 +76,7 @@ bool main_form::on_initialize(std::string& error) {
 
 	// add form menu
 	form_menu_.add("• • •", {
+		{ "Settings", [this]() { settings(); } },
 		{ "About", [this]() { about(); } },
 		{ "" },
 		{ "Exit", [this]() { close(); } }

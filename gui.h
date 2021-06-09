@@ -43,17 +43,22 @@ using namespace liblec;
 using snap_type = lecui::rect::snap_type;
 
 class main_form : public lecui::form {
-	const float margin_ = 10.f;
-	const float title_font_size_ = 12.f;
-	const float highlight_font_size_ = 14.f;
-	const float detail_font_size_ = 10.f;
-	const float caption_font_size_ = 8.f;
-	const std::string sample_text_ = "<u><strong>Aq</strong></u>";
-	const std::string font_ = "Segoe UI";
-	const lecui::color caption_color_{ 100, 100, 100 };
-	const lecui::color ok_color_{ 0, 150, 0 };
-	const lecui::color not_ok_color_{ 200, 0, 0 };
-	const unsigned long refresh_interval_ = 3000;
+	static const float margin_;
+	static const float title_font_size_;
+	static const float highlight_font_size_;
+	static const float detail_font_size_;
+	static const float caption_font_size_;
+	static const std::string sample_text_;
+	static const std::string font_;
+	static const lecui::color caption_color_;
+	static const lecui::color ok_color_;
+	static const lecui::color not_ok_color_;
+	static const unsigned long refresh_interval_;
+
+	bool restart_now_ = false;
+	bool installed_ = false;
+	bool setting_darktheme_ = false;
+
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
 	lecui::appearance apprnc_{ *this };
@@ -81,6 +86,7 @@ class main_form : public lecui::form {
 	void start_refresh_timer();
 	void stop_refresh_timer();
 	void about();
+	void settings();
 	bool on_layout(std::string& error) override;
 	void add_battery_pane(lecui::containers::page& power_pane, const float top);
 	void add_drive_details_pane(lecui::containers::page& drive_pane, const float top);
@@ -88,4 +94,7 @@ class main_form : public lecui::form {
 
 public:
 	main_form(const std::string& caption);
+	bool restart_now() {
+		return restart_now_;
+	}
 };
