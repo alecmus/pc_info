@@ -19,12 +19,18 @@
     <ClCompile Include="main.cpp">
       <Filter>pc_info</Filter>
     </ClCompile>
+    <ClCompile Include="dashboard.cpp">
+      <Filter>pc_info</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="version_info.h">
       <Filter>pc_info</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>pc_info</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
       <Filter>pc_info</Filter>
     </ClInclude>
   </ItemGroup>
