@@ -22,9 +22,9 @@
 ** SOFTWARE.
 */
 
-#include "gui.h"
+#include "../gui.h"
 
-bool dashboard::on_initialize(std::string& error) {
+bool main_form::on_initialize(std::string& error) {
 	// display splash screen
 	if (get_dpi_scale() < 2.f)
 		splash_.display(splash_image_128, false, error);
@@ -58,42 +58,20 @@ bool dashboard::on_initialize(std::string& error) {
 	return true;
 }
 
-void dashboard::on_start() {
+void main_form::on_start() {
 	start_refresh_timer();
 	splash_.remove();
 }
 
-void dashboard::start_refresh_timer() {
+void main_form::start_refresh_timer() {
 	timer_man_.add("refresh", refresh_interval_, [&]() { on_refresh(); });
 }
 
-void dashboard::stop_refresh_timer() {
+void main_form::stop_refresh_timer() {
 	timer_man_.stop("refresh");
 }
 
-void dashboard::about() {
-	std::string display_text =
-		"<span style = 'font-size: 9.0pt;'>" +
-		std::string(appname) + " " + std::string(appversion) + " " + std::string(appdate) +
-		"</span>";
-
-	display_text += "\n<span style = 'font-size: 8.0pt;'>© 2021 Alec Musasa</span>";
-
-	display_text += "\n\n<strong>For more info</strong>\nVisit https://github.com/alecmus/pc_info";
-
-	display_text += "\n\n<strong>Libraries used</strong>";
-	display_text += "\n" + leccore::version();
-	display_text += "\n" + lecui::version();
-
-	display_text += "\n\n<strong>Additional credits</strong>\nMain icon designed by DinosoftLabs\nhttps://www.flaticon.com/authors/dinosoftlabs";
-	display_text += "\nfrom https://www.flaticon.com";
-
-	display_text += "\n\nThis app is free software released under the MIT License.";
-
-	message(display_text);
-}
-
-bool dashboard::on_layout(std::string& error) {
+bool main_form::on_layout(std::string& error) {
 	// add home page
 	auto& home = page_man_.add("home");
 
@@ -630,7 +608,7 @@ bool dashboard::on_layout(std::string& error) {
 	return true;
 }
 
-void dashboard::add_battery_pane(lecui::containers::page& power_pane, const float top) {
+void main_form::add_battery_pane(lecui::containers::page& power_pane, const float top) {
 	// add pane for battery details
 	lecui::containers::tab_pane battery_tab_pane(power_pane, "battery_tab_pane");
 	battery_tab_pane().rect.left = 0.f;
@@ -805,7 +783,7 @@ void dashboard::add_battery_pane(lecui::containers::page& power_pane, const floa
 	battery_tab_pane.select("Battery 0");
 }
 
-void dashboard::add_drive_details_pane(lecui::containers::page& drive_pane, const float top) {
+void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, const float top) {
 	lecui::containers::tab_pane drive_tab_pane(drive_pane, "drive_tab_pane");
 	drive_tab_pane().rect.left = 0.f;
 	drive_tab_pane().rect.right = drive_pane.size().width;
@@ -918,7 +896,7 @@ void dashboard::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 	drive_tab_pane.select("Drive 0");
 }
 
-void dashboard::on_refresh() {
+void main_form::on_refresh() {
 	stop_refresh_timer();
 	bool refresh_ui = false;
 
@@ -1083,5 +1061,5 @@ void dashboard::on_refresh() {
 	start_refresh_timer();
 }
 
-dashboard::dashboard(const std::string& caption) :
+main_form::main_form(const std::string& caption) :
 	form(caption) {}

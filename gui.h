@@ -42,7 +42,7 @@
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
 
-class dashboard : public lecui::form {
+class main_form : public lecui::form {
 	const float margin_ = 10.f;
 	const float title_font_size_ = 12.f;
 	const float highlight_font_size_ = 14.f;
@@ -87,5 +87,5 @@ class dashboard : public lecui::form {
 	void on_refresh();
 
 public:
-	dashboard(const std::string& caption);
+	main_form(const std::string& caption);
 };

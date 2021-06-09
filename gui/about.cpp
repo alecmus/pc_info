@@ -22,15 +22,26 @@
 ** SOFTWARE.
 */
 
-#include "gui.h"
+#include "../gui.h"
 
-// gui app using main
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+void main_form::about() {
+	std::string display_text =
+		"<span style = 'font-size: 9.0pt;'>" +
+		std::string(appname) + " " + std::string(appversion) + " " + std::string(appdate) +
+		"</span>";
 
-int main() {
-	std::string error;
-	main_form fm(appname);
-	if (!fm.show(error))
-		fm.message(error);
-	return 0;
+	display_text += "\n<span style = 'font-size: 8.0pt;'>© 2021 Alec Musasa</span>";
+
+	display_text += "\n\n<strong>For more info</strong>\nVisit https://github.com/alecmus/pc_info";
+
+	display_text += "\n\n<strong>Libraries used</strong>";
+	display_text += "\n" + leccore::version();
+	display_text += "\n" + lecui::version();
+
+	display_text += "\n\n<strong>Additional credits</strong>\nMain icon designed by DinosoftLabs\nhttps://www.flaticon.com/authors/dinosoftlabs";
+	display_text += "\nfrom https://www.flaticon.com";
+
+	display_text += "\n\nThis app is free software released under the MIT License.";
+
+	message(display_text);
 }

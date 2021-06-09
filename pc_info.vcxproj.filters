@@ -14,13 +14,19 @@
     <Filter Include="pc_info\resources\png">
       <UniqueIdentifier>{91baafcb-3483-4064-ac53-e25aba5daa24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pc_info\gui">
+      <UniqueIdentifier>{4bd299d2-f110-4ec5-8b5d-49d526e1212b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>pc_info</Filter>
     </ClCompile>
-    <ClCompile Include="dashboard.cpp">
-      <Filter>pc_info</Filter>
+    <ClCompile Include="gui\main_form.cpp">
+      <Filter>pc_info\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\about.cpp">
+      <Filter>pc_info\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
