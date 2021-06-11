@@ -38,6 +38,7 @@ void main_form::settings() {
 		// use darktheme setting from parent for consistency before restart
 		const bool& setting_darktheme_parent_;
 		bool setting_darktheme_ = false;
+		bool& setting_milliunits_;
 
 		bool on_initialize(std::string& error) override {
 			// read application settings
@@ -45,7 +46,12 @@ void main_form::settings() {
 			if (!settings_.read_value("", "darktheme", value, error))
 				return false;
 			else
-				setting_darktheme_ = value == "on";
+				setting_darktheme_ = value == "on";		// default to "off"
+
+			if (!settings_.read_value("", "milliunits", value, error))
+				return false;
+			else
+				setting_milliunits_ = value != "no";	// default to "yes"
 
 			// size and stuff
 			ctrls_.resize(false);
@@ -77,6 +83,20 @@ void main_form::settings() {
 			darktheme().on = setting_darktheme_;
 			darktheme().events().toggle = [&](bool on) { on_darktheme(on); };
 
+			// add milliunits toggle button
+			lecui::widgets::label milliunits_caption(home);
+			milliunits_caption().rect = darktheme_caption().rect;
+			milliunits_caption().rect.snap_to(darktheme().rect, snap_type::bottom, margin_);
+			milliunits_caption().text = "Use milliunits";
+			
+			lecui::widgets::toggle milliunits(home);
+			milliunits().rect = darktheme().rect;
+			milliunits().rect.snap_to(milliunits_caption().rect, snap_type::bottom, 0.f);
+			milliunits().text = "Yes";
+			milliunits().text_off = "No";
+			milliunits().on = setting_milliunits_;
+			milliunits().events().toggle = [&](bool on) { on_milliunits(on); };
+
 			page_man_.show("home");
 			return true;
 		}
@@ -85,7 +105,6 @@ void main_form::settings() {
 			std::string error;
 			if (!settings_.write_value("", "darktheme", on ? "on" : "off", error)) {
 				message("Error saving dark theme setting: " + error);
-
 				// to-do: set toggle button to saved setting (or default if unreadable)
 			}
 			else {
@@ -100,14 +119,26 @@ void main_form::settings() {
 			}
 		}
 
+		void on_milliunits(bool on) {
+			std::string error;
+			if (!settings_.write_value("", "milliunits", on ? "yes" : "no", error)) {
+				message("Error saving milliunits setting: " + error);
+				// to-do: set toggle button to saved setting (or default if unreadable)
+			}
+			else
+				setting_milliunits_ = on;
+		}
+
 	public:
 		settings_form(const std::string& caption,
 			form& parent,
 			leccore::settings& settings,
-			bool& setting_darktheme_parent) :
+			bool& setting_darktheme_parent,
+			bool& setting_milliunits) :
 			form(caption, parent),
 			settings_(settings),
-			setting_darktheme_parent_(setting_darktheme_parent) {}
+			setting_darktheme_parent_(setting_darktheme_parent),
+			setting_milliunits_(setting_milliunits) {}
 
 		bool restart_now() {
 			return restart_now_;
@@ -125,7 +156,8 @@ void main_form::settings() {
 	if (installed_)
 		p_settings_ = &reg_settings_;
 
-	settings_form fm(std::string(appname) + " - Settings", *this, *p_settings_, setting_darktheme_);
+	settings_form fm(std::string(appname) + " - Settings", *this, *p_settings_,
+		setting_darktheme_, setting_milliunits_);
 	std::string error;
 	if (!fm.show(error))
 		message(error);

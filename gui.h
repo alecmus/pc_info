@@ -68,6 +68,8 @@ class main_form : public lecui::form {
 	// file exists in the same directory.
 	bool installed_ = false;
 	bool setting_darktheme_ = false;
+	bool setting_milliunits_ = true;
+	bool setting_milliunits_old_ = setting_milliunits_;
 
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
