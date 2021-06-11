@@ -24,6 +24,7 @@
 
 #include "../gui.h"
 #include <liblec/leccore/settings.h>
+#include <liblec/leccore/system.h>
 #include <filesystem>
 
 const float main_form::margin_ = 10.f;
@@ -39,11 +40,15 @@ const lecui::color main_form::not_ok_color_{ 200, 0, 0 };
 const unsigned long main_form::refresh_interval_ = 3000;
 
 bool main_form::on_initialize(std::string& error) {
-	// display splash screen
-	if (get_dpi_scale() < 2.f)
-		splash_.display(splash_image_128, false, error);
-	else
-		splash_.display(splash_image_256, false, error);
+	const auto cleanup = leccore::commandline_arguments::contains("/cleanup");
+
+	if (!cleanup) {
+		// display splash screen
+		if (get_dpi_scale() < 2.f)
+			splash_.display(splash_image_128, false, error);
+		else
+			splash_.display(splash_image_256, false, error);
+	}
 
 	// check if application is installed
 	std::string install_location_32, install_location_64;
@@ -81,6 +86,24 @@ bool main_form::on_initialize(std::string& error) {
 	leccore::settings* p_settings_ = &ini_settings_;
 	if (installed_)
 		p_settings_ = &reg_settings_;
+
+	if (cleanup) {
+		if (prompt("Would you like to delete the app settings?")) {
+			// cleanup application settings
+			if (!p_settings_->delete_recursive("", error))
+				return false;
+
+			if (installed_) {
+				// cleanup company settings (will delete the company subkey if no
+				// other apps have placed subkeys under it
+				leccore::registry reg(leccore::registry::scope::current_user);
+				if (!reg.do_delete("Software\\com.github.alecmus\\", error)) {}
+			}
+		}
+
+		close();
+		return true;
+	}
 
 	// read application settings
 	std::string value;

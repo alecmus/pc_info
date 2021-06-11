@@ -27,6 +27,17 @@
 // gui app using main
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
+/// <summary>
+/// Main application entry point.
+/// </summary>
+/// <returns>
+/// Returns 1 if an error was encountered else returns 0.
+/// </returns>
+/// <remarks>
+/// Supported command-line flags:
+/// /cleanup: delete all application settings (prompts user if they would like to delete the app settings).
+/// Designed to be used by the uninstaller.
+/// </remarks>
 int main() {
 	bool restart = false;
 
