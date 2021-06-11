@@ -1085,7 +1085,9 @@ void main_form::on_refresh() {
 
 					if (battery_old.current_charge_rate != battery.current_charge_rate) {
 						auto& charge_rate = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
-						charge_rate.text = std::to_string(battery.current_charge_rate) + "mW";
+						charge_rate.text = setting_milliunits_ ?
+							std::to_string(battery.current_charge_rate) + "mW" :
+							leccore::round_off::tostr<char>(battery.current_charge_rate / 1000.f, 1) + "W";
 					}
 
 					if (battery_old.current_voltage != battery.current_voltage ||
