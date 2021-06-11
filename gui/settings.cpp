@@ -36,7 +36,7 @@ void main_form::settings() {
 		bool restart_now_ = false;
 
 		// use darktheme setting from parent for consistency before restart
-		bool& setting_darktheme_parent_;
+		const bool& setting_darktheme_parent_;
 		bool setting_darktheme_ = false;
 
 		bool on_initialize(std::string& error) override {
@@ -104,7 +104,7 @@ void main_form::settings() {
 		settings_form(const std::string& caption,
 			form& parent,
 			leccore::settings& settings,
-			bool setting_darktheme_parent) :
+			bool& setting_darktheme_parent) :
 			form(caption, parent),
 			settings_(settings),
 			setting_darktheme_parent_(setting_darktheme_parent) {}
