@@ -24,10 +24,16 @@
 
 #include "../gui.h"
 
+#ifdef _WIN64
+#define architecture	"64bit"
+#else
+#define architecture	"32bit"
+#endif
+
 void main_form::about() {
 	std::string display_text =
 		"<span style = 'font-size: 9.0pt;'>" +
-		std::string(appname) + " " + std::string(appversion) + " " + std::string(appdate) +
+		std::string(appname) + " " + std::string(appversion) + " (" + std::string(architecture) + "), " + std::string(appdate) +
 		"</span>";
 
 	display_text += "\n<span style = 'font-size: 8.0pt;'>© 2021 Alec Musasa</span>";
