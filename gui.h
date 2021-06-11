@@ -54,8 +54,18 @@ class main_form : public lecui::form {
 	static const lecui::color ok_color_;
 	static const lecui::color not_ok_color_;
 	static const unsigned long refresh_interval_;
+	
+	const std::string instance_guid_ = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
+	const std::string install_guid_32_ = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
+	const std::string install_guid_64_ = "{5F794184-4C64-402C-AE99-E88BBF681851}";
 
 	bool restart_now_ = false;
+
+	// 1. If application is installed and running from an install directory this will be true.
+	// 2. If application is installed and not running from an install directory this will also
+	// be true unless there is a .portable file in the same directory.
+	// 3. If application is not installed then portable mode will be used whether or not a .portable
+	// file exists in the same directory.
 	bool installed_ = false;
 	bool setting_darktheme_ = false;
 
@@ -63,7 +73,7 @@ class main_form : public lecui::form {
 	lecui::page_management page_man_{ *this };
 	lecui::appearance apprnc_{ *this };
 	lecui::dimensions dim_{ *this };
-	lecui::instance_management instance_man_{ *this, "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}" };
+	lecui::instance_management instance_man_{ *this, instance_guid_ };
 	lecui::timer_management timer_man_{ *this };
 	lecui::splash splash_{ *this };
 	lecui::form_menu form_menu_{ *this };

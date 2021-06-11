@@ -24,6 +24,7 @@
 
 #include "../gui.h"
 #include <liblec/leccore/settings.h>
+#include <filesystem>
 
 const float main_form::margin_ = 10.f;
 const float main_form::title_font_size_ = 12.f;
@@ -44,8 +45,31 @@ bool main_form::on_initialize(std::string& error) {
 	else
 		splash_.display(splash_image_256, false, error);
 
-	// to-do: figure out from inno setup registry entries
-	installed_ = false;
+	// check if application is installed
+	std::string install_location_32, install_location_64;
+	leccore::registry reg(leccore::registry::scope::current_user);
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
+		"InstallLocation", install_location_32, error)) {}
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
+		"InstallLocation", install_location_64, error)) {}
+
+	installed_ = !install_location_32.empty() || !install_location_64.empty();
+
+	if (installed_) {
+		// check if app is running from the install location
+		try {
+			const auto current_path = std::filesystem::current_path().string() + "\\";
+
+			if (current_path != install_location_32 &&
+				current_path != install_location_64) {
+				// check if .portable file exists
+				std::filesystem::path path(".portable");
+				if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path))
+					installed_ = false;	// run in portable mode
+			}
+		}
+		catch (const std::exception&) {}
+	}
 
 	// settings objects
 	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);

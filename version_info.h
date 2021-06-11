@@ -36,4 +36,4 @@
 #define appminor		0
 #define apprevision		0
 
-#define appdate			"30 May 2021"
+#define appdate			"11 Jun 2021"
