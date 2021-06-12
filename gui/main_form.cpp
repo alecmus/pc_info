@@ -267,14 +267,18 @@ bool main_form::on_initialize(std::string& error) {
 						if (!p_settings_->delete_value("", "updates_rawfiles", error)) {}
 						if (!p_settings_->delete_value("", "updates_target", error)) {}
 
-						// update inno setup version number
+						if (installed_) {
+							// update inno setup version number
 #ifdef _WIN64
-						if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
-							"DisplayVersion", std::string(appversion), error)) {}
+							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
+								"DisplayVersion", std::string(appversion), error)) {
+							}
 #else
-						if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
-							"DisplayVersion", std::string(appversion), error)) {}
+							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
+								"DisplayVersion", std::string(appversion), error)) {
+							}
 #endif
+						}
 
 						// to-do: use a timer instead for all the calls below, for better user experience
 						message("App updated successfully to version " + std::string(appversion));
