@@ -22,18 +22,32 @@
 ** SOFTWARE.
 */
 
-#pragma once
+#include "create_process.h"
+#include <Windows.h>
 
-#define appname			"PC Info"
-#define appdescription	"Get Essential PC Specs"
-#define appcomments		"Powered by liblec"
-#define appcopyright	"(c) 2021 Alec Musasa"
-#define appcompany		"Alec Musasa"
-#define appfilename		"pc_info.exe"
+// for PathQuoteSpaces
+#include <Shlwapi.h>
+#pragma comment (lib, "Shlwapi.lib")
 
-#define appversion		"1.0.0 beta 2"
-#define appmajor		1
-#define appminor		0
-#define apprevision		0
+bool create_process(const std::string& fullpath,
+	const std::vector<std::string>& args, std::string& error) {
+	CHAR szAppPath[MAX_PATH];
+	lstrcpynA(szAppPath, fullpath.c_str(), static_cast<int>(fullpath.length() + 1));
+	PathQuoteSpacesA(szAppPath);
 
-#define appdate			"12 Jun 2021"
+	// add commandline flags
+	for (const auto& it : args) {
+		lstrcatA(szAppPath, " ");
+		lstrcatA(szAppPath, it.c_str());
+	}
+
+	STARTUPINFOA			si = { 0 };
+	PROCESS_INFORMATION		pi = { 0 };
+	si.cb = sizeof(STARTUPINFO);
+	if (!CreateProcessA(NULL, szAppPath, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+		error = "Creating process failed: " + fullpath;
+		return false;
+	}
+
+	return true;
+}

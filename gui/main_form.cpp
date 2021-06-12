@@ -23,8 +23,14 @@
 */
 
 #include "../gui.h"
+#include "../create_process.h"
 #include <liblec/leccore/settings.h>
 #include <liblec/leccore/system.h>
+#include <liblec/leccore/app_version_info.h>
+#include <liblec/leccore/hash.h>
+#include <liblec/leccore/file.h>
+#include <liblec/leccore/system.h>
+#include <liblec/leccore/zip.h>
 #include <filesystem>
 
 const float main_form::margin_ = 10.f;
@@ -40,9 +46,7 @@ const lecui::color main_form::not_ok_color_{ 200, 0, 0 };
 const unsigned long main_form::refresh_interval_ = 3000;
 
 bool main_form::on_initialize(std::string& error) {
-	const auto cleanup = leccore::commandline_arguments::contains("/cleanup");
-
-	if (!cleanup) {
+	if (!cleanup_mode_ && !update_mode_) {
 		// display splash screen
 		if (get_dpi_scale() < 2.f)
 			splash_.display(splash_image_128, false, error);
@@ -60,6 +64,7 @@ bool main_form::on_initialize(std::string& error) {
 
 	installed_ = !install_location_32.empty() || !install_location_64.empty();
 
+	bool real_portable_mode = false;
 	if (installed_) {
 		// check if app is running from the install location
 		try {
@@ -69,11 +74,20 @@ bool main_form::on_initialize(std::string& error) {
 				current_path != install_location_64) {
 				// check if .portable file exists
 				std::filesystem::path path(".portable");
-				if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path))
+				if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path)) {
+					real_portable_mode = true;
 					installed_ = false;	// run in portable mode
+				}
 			}
 		}
 		catch (const std::exception&) {}
+	}
+	else {
+		// check if .portable file exists
+		std::filesystem::path path(".portable");
+		if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path)) {
+			real_portable_mode = true;
+		}
 	}
 
 	// settings objects
@@ -87,7 +101,7 @@ bool main_form::on_initialize(std::string& error) {
 	if (installed_)
 		p_settings_ = &reg_settings_;
 
-	if (cleanup) {
+	if (cleanup_mode_) {
 		if (prompt("Would you like to delete the app settings?")) {
 			// cleanup application settings
 			if (!p_settings_->delete_recursive("", error))
@@ -104,18 +118,222 @@ bool main_form::on_initialize(std::string& error) {
 		close();
 		return true;
 	}
+	else {
+		// check if there is an update ready to be installed
+		std::string value;
+		if (p_settings_->read_value("", "updates_readytoinstall", value, error)) {}
+
+		// clear the registry entry
+		if (!p_settings_->delete_value("", "updates_readytoinstall", error)) {}
+
+		if (!value.empty()) {
+			try {
+				const std::string fullpath(value);
+				std::filesystem::path file_path(fullpath);
+
+				const std::string directory = file_path.parent_path().string();
+				const std::string filename = file_path.filename().string();
+					
+				std::string unzipped_folder;
+				const auto idx = filename.find(".zip");
+
+				if (idx != std::string::npos)
+					unzipped_folder = directory + "\\" + filename.substr(0, idx);
+
+				// unzip the file into the same directory
+				leccore::unzip unzip;
+				unzip.start(fullpath, directory);
+
+				while (unzip.unzipping()) {
+					if (!keep_alive()) {
+						// to-do: implement stopping mechanism
+						//unzip.stop()
+						close();
+						return true;
+					}
+				}
+					
+				leccore::unzip::unzip_log log;
+				if (unzip.result(log, error) && std::filesystem::exists(unzipped_folder)) {
+					// get target directory
+					std::string target_directory;
+
+					if (installed_) {
+#ifdef _WIN64
+						target_directory = install_location_64;
+#else
+						target_directory = install_location_32;
+#endif
+					}
+					else {
+						if (real_portable_mode) {
+							try { target_directory = std::filesystem::current_path().string() + "\\"; }
+							catch (const std::exception&) {}
+						}
+					}
+
+					if (!target_directory.empty()) {
+						if (p_settings_->write_value("", "updates_rawfiles", unzipped_folder, error) &&
+							p_settings_->write_value("", "updates_target", target_directory, error)) {
+							if (real_portable_mode) {
+								try {
+									// copy the .config file to the unzipped folder
+									std::filesystem::path p("config.cfg");
+									const std::string dest_file = unzipped_folder + "\\" + p.filename().string();
+									std::filesystem::copy_file(p, dest_file, std::filesystem::copy_options::overwrite_existing);
+								}
+								catch (const std::exception&) {}
+							}
+
+							// run downloaded app from the unzipped folder
+#ifdef _WIN64
+							const std::string new_exe_fullpath = unzipped_folder + "\\pc_info64.exe";
+#else
+							const std::string new_exe_fullpath = unzipped_folder + "\\pc_info32.exe";
+#endif
+							if (create_process(new_exe_fullpath, { "/update" }, error)) {
+								close();
+								return true;
+							}
+						}
+					}
+
+					// continue app execution normally
+				}
+				else {
+					// delete the update folder ... there many be something wrong with the update file
+					if (!leccore::file::remove_directory(directory, error)) {}
+
+					// continue app execution normally
+				}
+			}
+			catch (const std::exception&) {
+				// continue app execution normally
+			}
+		}
+		else
+			if (update_mode_) {
+				// get the location of the raw files
+				if (p_settings_->read_value("", "updates_rawfiles", value, error) && !value.empty()) {
+					const std::string raw_files_directory(value);
+
+					if (p_settings_->read_value("", "updates_target", value, error)) {
+						std::string target(value);
+						if (!target.empty()) {
+							try {
+								// overrwrite the files in target with the files in raw_files_directory
+								for (const auto& path : std::filesystem::directory_iterator(raw_files_directory)) {
+									std::filesystem::path p(path);
+									const std::string dest_file = target + p.filename().string();
+									std::filesystem::copy_file(path, dest_file, std::filesystem::copy_options::overwrite_existing);
+								}
+
+								// files copied successfully, now execute the app in the target directory
+#ifdef _WIN64
+								const std::string updated_exe_fullpath = target + "\\pc_info64.exe";
+#else
+								const std::string updated_exe_fullpath = target + "\\pc_info32.exe";
+#endif
+								if (create_process(updated_exe_fullpath, { "/recentupdate" }, error)) {}
+
+								close();
+								return true;
+							}
+							catch (const std::exception& e) {
+								error = e.what();
+
+								// exit
+								close();
+								return true;
+							}
+						}
+					}
+				}
+				else {
+					close();
+					return true;
+				}
+			}
+			else
+				if (recent_update_mode_) {
+					// check if the updates_rawfiles and updates_target settings are set, and eliminated them if so then notify user of successful update
+					std::string updates_rawfiles;
+					if (!p_settings_->read_value("", "updates_rawfiles", updates_rawfiles, error) && !value.empty()) {}
+
+					std::string updates_target;
+					if (!p_settings_->read_value("", "updates_target", updates_target, error)) {}
+
+					if (!updates_rawfiles.empty() || !updates_target.empty()) {
+						if (!p_settings_->delete_value("", "updates_rawfiles", error)) {}
+						if (!p_settings_->delete_value("", "updates_target", error)) {}
+
+						// update inno setup version number
+#ifdef _WIN64
+						if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
+							"DisplayVersion", std::string(appversion), error)) {}
+#else
+						if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
+							"DisplayVersion", std::string(appversion), error)) {}
+#endif
+
+						// to-do: use a timer instead for all the calls below, for better user experience
+						message("App updated successfully to version " + std::string(appversion));
+
+						std::string updates_tempdirectory;
+						if (!p_settings_->read_value("", "updates_tempdirectory", updates_tempdirectory, error)) {}
+						else {
+							// delete updates temp directory
+							if (!leccore::file::remove_directory(updates_tempdirectory, error)) {}
+						}
+						if (!p_settings_->delete_value("", "updates_tempdirectory", error)) {}
+					}
+				}
+	}
 
 	// read application settings
 	std::string value;
 	if (!p_settings_->read_value("", "darktheme", value, error))
 		return false;
 	else
-		setting_darktheme_ = value == "on";		// default to "off"
+		// default to "off"
+		setting_darktheme_ = value == "on";
 
 	if (!p_settings_->read_value("", "milliunits", value, error))
 		return false;
 	else
-		setting_milliunits_ = value != "no";	// default to "yes"
+		// default to "yes"
+		setting_milliunits_ = value != "no";
+
+	if (!p_settings_->read_value("", "updates_autocheck", value, error))
+		return false;
+	else {
+		// default to yes
+		setting_autocheck_updates_ = value != "no";
+
+		if (setting_autocheck_updates_) {
+			if (!p_settings_->read_value("", "updates_did_run_once", value, error))
+				return false;
+			else {
+				if (value != "yes") {
+					// do nothing ... for better first time impression
+					if (!p_settings_->write_value("", "updates_did_run_once", "yes", error)) {}
+				}
+				else {
+					// start checking for updates
+					check_update_.start();
+
+					// start timer to keep progress of the update check
+					timer_man_.add("update_check", 1500, [&]() { on_update_autocheck(); });
+				}
+			}
+		}
+	}
+
+	if (!p_settings_->read_value("", "updates_autodownload", value, error))
+		return false;
+	else
+		// default to yes
+		setting_autodownload_updates_ = value != "no";
 
 	// size and stuff
 	ctrls_.resize(false);
@@ -1175,5 +1393,138 @@ void main_form::on_refresh() {
 	start_refresh_timer();
 }
 
+void main_form::on_update_autocheck() {
+	if (check_update_.checking())
+		return;
+
+	// stop the update check timer
+	timer_man_.stop("update_check");
+
+	std::string error;
+	if (!check_update_.result(update_info_, error))
+		return;
+	
+	// update found
+	const std::string current_version(appversion);
+	if (leccore::compare_versions(current_version, update_info_.version) == -1) {
+		// newer version available
+		if (!setting_autodownload_updates_) {
+			if (!prompt("<span style = 'font-size: 11.0pt;'>Update Available</span>\n\n"
+				"Your version:\n" + current_version + "\n\n"
+				"New version:\n<span style = 'color: rgb(0, 150, 0);'>" + update_info_.version + "</span>, " + update_info_.date + "\n\n"
+				"<span style = 'font-size: 11.0pt;'>Description</span>\n" +
+				update_info_.description + "\n\n"
+				"Would you like to download the update now? (" +
+				leccore::format_size(update_info_.size, 2) + ")\n\n"))
+				return;
+		}
+
+		// create update download folder
+		update_directory_ = leccore::user_folder::temp() + "\\" + leccore::hash_string::uuid();
+
+		if (!leccore::file::create_directory(update_directory_, error))
+			return;	// to-do: perhaps try again one or two more times? But then again, why would this method fail?
+
+		if (setting_autodownload_updates_) {
+			// download update silently
+			download_update_.start(update_info_.download_url, update_directory_);
+			timer_man_.add("update_download", 1000, [&]() { on_update_autodownload(); });
+			return;
+		}
+		else {
+			// to-do: implement manual update download dialog
+		}
+	}
+}
+
+void main_form::on_update_autodownload() {
+	if (download_update_.downloading())
+		return;
+
+	// stop the update download timer
+	timer_man_.stop("update_download");
+
+	auto delete_update_directory = [&]() {
+		std::string error;
+		if (!leccore::file::remove_directory(update_directory_, error)) {}
+	};
+
+	std::string error, fullpath;
+	if (!download_update_.result(fullpath, error)) {
+		message("Auto-download of update failed: " + error);
+		delete_update_directory();
+		return;
+	}
+	
+	// update downloaded ... check file hash
+	leccore::hash_file hash;
+	hash.start(fullpath, { leccore::hash_file::algorithm::sha256 });
+
+	while (hash.hashing()) {
+		if (!keep_alive()) {
+			// to-do: implement stopping mechanism
+			//hash.stop()
+			delete_update_directory();
+			return;
+		}
+	}
+
+	leccore::hash_file::hash_results results;
+	if (!hash.result(results, error)) {
+		message("Update downloaded but file integrity check failed: " + error);
+		delete_update_directory();
+		return;
+	}
+
+	try {
+		const auto result_hash = results.at(leccore::hash_file::algorithm::sha256);
+		if (result_hash != update_info_.hash) {
+			// update file possibly corrupted
+			message("Update downloaded but files seem to be corrupt and so cannot be installed. "
+				"If the problem persists try downloading the latest version of the app manually.");
+			delete_update_directory();
+			return;
+		}
+	}
+	catch (const std::exception& e) {
+		error = e.what();
+		message("Update downloaded but file integrity check failed: " + error);
+		delete_update_directory();
+		return;
+	}
+
+	// save update location
+	
+	// settings objects
+	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
+	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
+
+	leccore::ini_settings ini_settings_("config.cfg");
+	ini_settings_.set_ini_path("");	// use current folder
+
+	leccore::settings* p_settings_ = &ini_settings_;
+	if (installed_)
+		p_settings_ = &reg_settings_;
+	
+	if (!p_settings_->write_value("", "updates_readytoinstall", fullpath, error) ||
+		!p_settings_->write_value("", "updates_tempdirectory", update_directory_, error)) {
+		message("Update downloaded and verified but the following error occurred: " + error);
+		delete_update_directory();
+		return;
+	}
+
+	// file integrity confirmed ... install update
+	if (prompt("Version " + update_info_.version + " is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
+		restart_now_ = true;
+		close();
+	}
+}
+
 main_form::main_form(const std::string& caption) :
-	form(caption) {}
+	cleanup_mode_(leccore::commandline_arguments::contains("/cleanup")),
+	update_mode_(leccore::commandline_arguments::contains("/update")),
+	recent_update_mode_(leccore::commandline_arguments::contains("/recentupdate")),
+	form(caption) {
+	if (cleanup_mode_ || update_mode_ || recent_update_mode_)
+		force_instance();
+}

@@ -39,10 +39,17 @@
 #include <liblec/lecui/menus/form_menu.h>
 #include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
+#include <liblec/leccore/web_update.h>
+
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
 
 class main_form : public lecui::form {
+	const std::string instance_guid_ = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
+	const std::string install_guid_32_ = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
+	const std::string install_guid_64_ = "{5F794184-4C64-402C-AE99-E88BBF681851}";
+	const std::string update_xml_url_ = "https://raw.githubusercontent.com/alecmus/pc_info/master/latest_update.xml";
+
 	static const float margin_;
 	static const float title_font_size_;
 	static const float highlight_font_size_;
@@ -54,10 +61,6 @@ class main_form : public lecui::form {
 	static const lecui::color ok_color_;
 	static const lecui::color not_ok_color_;
 	static const unsigned long refresh_interval_;
-	
-	const std::string instance_guid_ = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
-	const std::string install_guid_32_ = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
-	const std::string install_guid_64_ = "{5F794184-4C64-402C-AE99-E88BBF681851}";
 
 	bool restart_now_ = false;
 
@@ -70,6 +73,16 @@ class main_form : public lecui::form {
 	bool setting_darktheme_ = false;
 	bool setting_milliunits_ = true;
 	bool setting_milliunits_old_ = setting_milliunits_;
+	bool setting_autocheck_updates_ = true;
+	leccore::check_update check_update_{ update_xml_url_ };
+	leccore::check_update::update_info update_info_;
+	bool setting_autodownload_updates_ = false;
+	leccore::download_update download_update_;
+	std::string update_directory_;
+
+	const bool cleanup_mode_;
+	const bool update_mode_;
+	const bool recent_update_mode_;
 
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
@@ -103,6 +116,8 @@ class main_form : public lecui::form {
 	void add_battery_pane(lecui::containers::page& power_pane, const float top);
 	void add_drive_details_pane(lecui::containers::page& drive_pane, const float top);
 	void on_refresh();
+	void on_update_autocheck();
+	void on_update_autodownload();
 
 public:
 	main_form(const std::string& caption);

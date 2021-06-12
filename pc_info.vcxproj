@@ -175,12 +175,14 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="create_process.cpp" />
     <ClCompile Include="gui\about.cpp" />
     <ClCompile Include="gui\main_form.cpp" />
     <ClCompile Include="gui\settings.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="create_process.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="version_info.h" />

@@ -31,6 +31,9 @@
     <ClCompile Include="gui\settings.cpp">
       <Filter>pc_info\gui</Filter>
     </ClCompile>
+    <ClCompile Include="create_process.cpp">
+      <Filter>pc_info</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="version_info.h">
@@ -40,6 +43,9 @@
       <Filter>pc_info</Filter>
     </ClInclude>
     <ClInclude Include="gui.h">
+      <Filter>pc_info</Filter>
+    </ClInclude>
+    <ClInclude Include="create_process.h">
       <Filter>pc_info</Filter>
     </ClInclude>
   </ItemGroup>

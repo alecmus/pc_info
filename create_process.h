@@ -24,16 +24,8 @@
 
 #pragma once
 
-#define appname			"PC Info"
-#define appdescription	"Get Essential PC Specs"
-#define appcomments		"Powered by liblec"
-#define appcopyright	"(c) 2021 Alec Musasa"
-#define appcompany		"Alec Musasa"
-#define appfilename		"pc_info.exe"
+#include <string>
+#include <vector>
 
-#define appversion		"1.0.0 beta 2"
-#define appmajor		1
-#define appminor		0
-#define apprevision		0
-
-#define appdate			"12 Jun 2021"
+bool create_process(const std::string& fullpath,
+	const std::vector<std::string>& args, std::string& error);
