@@ -121,10 +121,10 @@ bool main_form::on_initialize(std::string& error) {
 	else {
 		// check if there is an update ready to be installed
 		std::string value;
-		if (p_settings_->read_value("", "updates_readytoinstall", value, error)) {}
+		if (p_settings_->read_value("updates", "readytoinstall", value, error)) {}
 
 		// clear the registry entry
-		if (!p_settings_->delete_value("", "updates_readytoinstall", error)) {}
+		if (!p_settings_->delete_value("updates", "readytoinstall", error)) {}
 
 		if (!value.empty()) {
 			try {
@@ -133,14 +133,15 @@ bool main_form::on_initialize(std::string& error) {
 
 				const std::string directory = file_path.parent_path().string();
 				const std::string filename = file_path.filename().string();
-					
+				
+				// assume the zip file extracts to a directory with the same name
 				std::string unzipped_folder;
 				const auto idx = filename.find(".zip");
 
 				if (idx != std::string::npos)
 					unzipped_folder = directory + "\\" + filename.substr(0, idx);
 
-				// unzip the file into the same directory
+				// unzip the file into the same directory as the zip file
 				leccore::unzip unzip;
 				unzip.start(fullpath, directory);
 
@@ -173,8 +174,8 @@ bool main_form::on_initialize(std::string& error) {
 					}
 
 					if (!target_directory.empty()) {
-						if (p_settings_->write_value("", "updates_rawfiles", unzipped_folder, error) &&
-							p_settings_->write_value("", "updates_target", target_directory, error)) {
+						if (p_settings_->write_value("updates", "rawfiles", unzipped_folder, error) &&
+							p_settings_->write_value("updates", "target", target_directory, error)) {
 							if (real_portable_mode) {
 								try {
 									// copy the .config file to the unzipped folder
@@ -214,10 +215,10 @@ bool main_form::on_initialize(std::string& error) {
 		else
 			if (update_mode_) {
 				// get the location of the raw files
-				if (p_settings_->read_value("", "updates_rawfiles", value, error) && !value.empty()) {
+				if (p_settings_->read_value("updates", "rawfiles", value, error) && !value.empty()) {
 					const std::string raw_files_directory(value);
 
-					if (p_settings_->read_value("", "updates_target", value, error)) {
+					if (p_settings_->read_value("updates", "target", value, error)) {
 						std::string target(value);
 						if (!target.empty()) {
 							try {
@@ -258,14 +259,14 @@ bool main_form::on_initialize(std::string& error) {
 				if (recent_update_mode_) {
 					// check if the updates_rawfiles and updates_target settings are set, and eliminated them if so then notify user of successful update
 					std::string updates_rawfiles;
-					if (!p_settings_->read_value("", "updates_rawfiles", updates_rawfiles, error) && !value.empty()) {}
+					if (!p_settings_->read_value("updates", "rawfiles", updates_rawfiles, error) && !value.empty()) {}
 
 					std::string updates_target;
-					if (!p_settings_->read_value("", "updates_target", updates_target, error)) {}
+					if (!p_settings_->read_value("updates", "target", updates_target, error)) {}
 
 					if (!updates_rawfiles.empty() || !updates_target.empty()) {
-						if (!p_settings_->delete_value("", "updates_rawfiles", error)) {}
-						if (!p_settings_->delete_value("", "updates_target", error)) {}
+						if (!p_settings_->delete_value("updates", "rawfiles", error)) {}
+						if (!p_settings_->delete_value("updates", "target", error)) {}
 
 						if (installed_) {
 							// update inno setup version number
@@ -284,12 +285,12 @@ bool main_form::on_initialize(std::string& error) {
 						message("App updated successfully to version " + std::string(appversion));
 
 						std::string updates_tempdirectory;
-						if (!p_settings_->read_value("", "updates_tempdirectory", updates_tempdirectory, error)) {}
+						if (!p_settings_->read_value("updates", "tempdirectory", updates_tempdirectory, error)) {}
 						else {
 							// delete updates temp directory
 							if (!leccore::file::remove_directory(updates_tempdirectory, error)) {}
 						}
-						if (!p_settings_->delete_value("", "updates_tempdirectory", error)) {}
+						if (!p_settings_->delete_value("updates", "tempdirectory", error)) {}
 					}
 				}
 	}
@@ -308,19 +309,19 @@ bool main_form::on_initialize(std::string& error) {
 		// default to "yes"
 		setting_milliunits_ = value != "no";
 
-	if (!p_settings_->read_value("", "updates_autocheck", value, error))
+	if (!p_settings_->read_value("updates", "autocheck", value, error))
 		return false;
 	else {
 		// default to yes
 		setting_autocheck_updates_ = value != "no";
 
 		if (setting_autocheck_updates_) {
-			if (!p_settings_->read_value("", "updates_did_run_once", value, error))
+			if (!p_settings_->read_value("updates", "did_run_once", value, error))
 				return false;
 			else {
 				if (value != "yes") {
 					// do nothing ... for better first time impression
-					if (!p_settings_->write_value("", "updates_did_run_once", "yes", error)) {}
+					if (!p_settings_->write_value("updates", "did_run_once", "yes", error)) {}
 				}
 				else {
 					// start checking for updates
@@ -333,7 +334,7 @@ bool main_form::on_initialize(std::string& error) {
 		}
 	}
 
-	if (!p_settings_->read_value("", "updates_autodownload", value, error))
+	if (!p_settings_->read_value("updates", "autodownload", value, error))
 		return false;
 	else
 		// default to yes
@@ -1510,8 +1511,8 @@ void main_form::on_update_autodownload() {
 	if (installed_)
 		p_settings_ = &reg_settings_;
 	
-	if (!p_settings_->write_value("", "updates_readytoinstall", fullpath, error) ||
-		!p_settings_->write_value("", "updates_tempdirectory", update_directory_, error)) {
+	if (!p_settings_->write_value("updates", "readytoinstall", fullpath, error) ||
+		!p_settings_->write_value("updates", "tempdirectory", update_directory_, error)) {
 		message("Update downloaded and verified but the following error occurred: " + error);
 		delete_update_directory();
 		return;

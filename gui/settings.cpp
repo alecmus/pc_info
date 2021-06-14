@@ -58,13 +58,13 @@ void main_form::settings() {
 				// default to "yes"
 				setting_milliunits_ = value != "no";
 
-			if (!settings_.read_value("", "updates_autocheck", value, error))
+			if (!settings_.read_value("updates", "autocheck", value, error))
 				return false;
 			else
 				// default to "yes"
 				setting_autocheck_updates_ = value != "no";
 
-			if (!settings_.read_value("", "updates_autodownload", value, error))
+			if (!settings_.read_value("updates", "autodownload", value, error))
 				return false;
 			else
 				// default to "yes"
@@ -197,7 +197,7 @@ void main_form::settings() {
 
 		void on_autocheck_updates(bool on) {
 			std::string error;
-			if (!settings_.write_value("", "updates_autocheck", on ? "yes" : "no", error)) {
+			if (!settings_.write_value("updates", "autocheck", on ? "yes" : "no", error)) {
 				message("Error saving auto-check for updates setting: " + error);
 				// to-do: set toggle button to saved setting (or default if unreadable)
 			}
@@ -211,7 +211,7 @@ void main_form::settings() {
 
 		void on_autodownload_updates(bool on) {
 			std::string error;
-			if (!settings_.write_value("", "updates_autodownload", on ? "yes" : "no", error)) {
+			if (!settings_.write_value("updates", "autodownload", on ? "yes" : "no", error)) {
 				message("Error saving auto-download updates setting: " + error);
 				// to-do: set toggle button to saved setting (or default if unreadable)
 			}
