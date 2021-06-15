@@ -94,7 +94,7 @@ bool main_form::on_initialize(std::string& error) {
 	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
 	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
 
-	leccore::ini_settings ini_settings_("config.cfg");
+	leccore::ini_settings ini_settings_("pc_info.ini");
 	ini_settings_.set_ini_path("");	// use current folder
 
 	leccore::settings* p_settings_ = &ini_settings_;
@@ -179,7 +179,7 @@ bool main_form::on_initialize(std::string& error) {
 							if (real_portable_mode) {
 								try {
 									// copy the .config file to the unzipped folder
-									std::filesystem::path p("config.cfg");
+									std::filesystem::path p("pc_info.ini");
 									const std::string dest_file = unzipped_folder + "\\" + p.filename().string();
 									std::filesystem::copy_file(p, dest_file, std::filesystem::copy_options::overwrite_existing);
 								}
@@ -1504,7 +1504,7 @@ void main_form::on_update_autodownload() {
 	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
 	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
 
-	leccore::ini_settings ini_settings_("config.cfg");
+	leccore::ini_settings ini_settings_("pc_info.ini");
 	ini_settings_.set_ini_path("");	// use current folder
 
 	leccore::settings* p_settings_ = &ini_settings_;

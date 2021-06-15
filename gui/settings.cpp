@@ -243,7 +243,7 @@ void main_form::settings() {
 	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
 	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
 
-	leccore::ini_settings ini_settings_("config.cfg");
+	leccore::ini_settings ini_settings_("pc_info.ini");
 	ini_settings_.set_ini_path("");	// use current folder
 
 	leccore::settings* p_settings_ = &ini_settings_;
