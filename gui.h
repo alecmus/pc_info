@@ -40,6 +40,7 @@
 #include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
 #include <liblec/leccore/web_update.h>
+#include <liblec/leccore/settings.h>
 
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
@@ -70,6 +71,11 @@ class main_form : public lecui::form {
 	// 3. If application is not installed then portable mode will be used whether or not a .portable
 	// file exists in the same directory.
 	bool installed_ = false;
+	bool real_portable_mode_ = false;
+	std::string install_location_32_, install_location_64_;
+	leccore::settings& settings_;
+	leccore::registry_settings reg_settings_{ leccore::registry::scope::current_user };
+	leccore::ini_settings ini_settings_{ "pc_info.ini" };
 	bool setting_darktheme_ = false;
 	bool setting_milliunits_ = true;
 	bool setting_milliunits_old_ = setting_milliunits_;
@@ -118,6 +124,7 @@ class main_form : public lecui::form {
 	void on_refresh();
 	void on_update_autocheck();
 	void on_update_autodownload();
+	bool installed();
 
 public:
 	main_form(const std::string& caption);

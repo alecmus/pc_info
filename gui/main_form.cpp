@@ -24,7 +24,6 @@
 
 #include "../gui.h"
 #include "../create_process.h"
-#include <liblec/leccore/settings.h>
 #include <liblec/leccore/system.h>
 #include <liblec/leccore/app_version_info.h>
 #include <liblec/leccore/hash.h>
@@ -54,57 +53,10 @@ bool main_form::on_initialize(std::string& error) {
 			splash_.display(splash_image_256, false, error);
 	}
 
-	// check if application is installed
-	std::string install_location_32, install_location_64;
-	leccore::registry reg(leccore::registry::scope::current_user);
-	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
-		"InstallLocation", install_location_32, error)) {}
-	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
-		"InstallLocation", install_location_64, error)) {}
-
-	installed_ = !install_location_32.empty() || !install_location_64.empty();
-
-	bool real_portable_mode = false;
-	if (installed_) {
-		// check if app is running from the install location
-		try {
-			const auto current_path = std::filesystem::current_path().string() + "\\";
-
-			if (current_path != install_location_32 &&
-				current_path != install_location_64) {
-				// check if .portable file exists
-				std::filesystem::path path(".portable");
-				if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path)) {
-					real_portable_mode = true;
-					installed_ = false;	// run in portable mode
-				}
-			}
-		}
-		catch (const std::exception&) {}
-	}
-	else {
-		// check if .portable file exists
-		std::filesystem::path path(".portable");
-		if (std::filesystem::exists(path) && std::filesystem::is_regular_file(path)) {
-			real_portable_mode = true;
-		}
-	}
-
-	// settings objects
-	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
-	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
-
-	leccore::ini_settings ini_settings_("pc_info.ini");
-	ini_settings_.set_ini_path("");	// use current folder
-
-	leccore::settings* p_settings_ = &ini_settings_;
-	if (installed_)
-		p_settings_ = &reg_settings_;
-
 	if (cleanup_mode_) {
 		if (prompt("Would you like to delete the app settings?")) {
 			// cleanup application settings
-			if (!p_settings_->delete_recursive("", error))
+			if (!settings_.delete_recursive("", error))
 				return false;
 
 			if (installed_) {
@@ -121,10 +73,10 @@ bool main_form::on_initialize(std::string& error) {
 	else {
 		// check if there is an update ready to be installed
 		std::string value;
-		if (p_settings_->read_value("updates", "readytoinstall", value, error)) {}
+		if (settings_.read_value("updates", "readytoinstall", value, error)) {}
 
 		// clear the registry entry
-		if (!p_settings_->delete_value("updates", "readytoinstall", error)) {}
+		if (!settings_.delete_value("updates", "readytoinstall", error)) {}
 
 		if (!value.empty()) {
 			try {
@@ -161,22 +113,22 @@ bool main_form::on_initialize(std::string& error) {
 
 					if (installed_) {
 #ifdef _WIN64
-						target_directory = install_location_64;
+						target_directory = install_location_64_;
 #else
-						target_directory = install_location_32;
+						target_directory = install_location_32_;
 #endif
 					}
 					else {
-						if (real_portable_mode) {
+						if (real_portable_mode_) {
 							try { target_directory = std::filesystem::current_path().string() + "\\"; }
 							catch (const std::exception&) {}
 						}
 					}
 
 					if (!target_directory.empty()) {
-						if (p_settings_->write_value("updates", "rawfiles", unzipped_folder, error) &&
-							p_settings_->write_value("updates", "target", target_directory, error)) {
-							if (real_portable_mode) {
+						if (settings_.write_value("updates", "rawfiles", unzipped_folder, error) &&
+							settings_.write_value("updates", "target", target_directory, error)) {
+							if (real_portable_mode_) {
 								try {
 									// copy the .config file to the unzipped folder
 									std::filesystem::path p("pc_info.ini");
@@ -215,10 +167,10 @@ bool main_form::on_initialize(std::string& error) {
 		else
 			if (update_mode_) {
 				// get the location of the raw files
-				if (p_settings_->read_value("updates", "rawfiles", value, error) && !value.empty()) {
+				if (settings_.read_value("updates", "rawfiles", value, error) && !value.empty()) {
 					const std::string raw_files_directory(value);
 
-					if (p_settings_->read_value("updates", "target", value, error)) {
+					if (settings_.read_value("updates", "target", value, error)) {
 						std::string target(value);
 						if (!target.empty()) {
 							try {
@@ -259,17 +211,18 @@ bool main_form::on_initialize(std::string& error) {
 				if (recent_update_mode_) {
 					// check if the updates_rawfiles and updates_target settings are set, and eliminated them if so then notify user of successful update
 					std::string updates_rawfiles;
-					if (!p_settings_->read_value("updates", "rawfiles", updates_rawfiles, error) && !value.empty()) {}
+					if (!settings_.read_value("updates", "rawfiles", updates_rawfiles, error) && !value.empty()) {}
 
 					std::string updates_target;
-					if (!p_settings_->read_value("updates", "target", updates_target, error)) {}
+					if (!settings_.read_value("updates", "target", updates_target, error)) {}
 
 					if (!updates_rawfiles.empty() || !updates_target.empty()) {
-						if (!p_settings_->delete_value("updates", "rawfiles", error)) {}
-						if (!p_settings_->delete_value("updates", "target", error)) {}
+						if (!settings_.delete_value("updates", "rawfiles", error)) {}
+						if (!settings_.delete_value("updates", "target", error)) {}
 
 						if (installed_) {
 							// update inno setup version number
+							leccore::registry reg(leccore::registry::scope::current_user);
 #ifdef _WIN64
 							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
 								"DisplayVersion", std::string(appversion), error)) {
@@ -285,43 +238,43 @@ bool main_form::on_initialize(std::string& error) {
 						message("App updated successfully to version " + std::string(appversion));
 
 						std::string updates_tempdirectory;
-						if (!p_settings_->read_value("updates", "tempdirectory", updates_tempdirectory, error)) {}
+						if (!settings_.read_value("updates", "tempdirectory", updates_tempdirectory, error)) {}
 						else {
 							// delete updates temp directory
 							if (!leccore::file::remove_directory(updates_tempdirectory, error)) {}
 						}
-						if (!p_settings_->delete_value("updates", "tempdirectory", error)) {}
+						if (!settings_.delete_value("updates", "tempdirectory", error)) {}
 					}
 				}
 	}
 
 	// read application settings
 	std::string value;
-	if (!p_settings_->read_value("", "darktheme", value, error))
+	if (!settings_.read_value("", "darktheme", value, error))
 		return false;
 	else
 		// default to "off"
 		setting_darktheme_ = value == "on";
 
-	if (!p_settings_->read_value("", "milliunits", value, error))
+	if (!settings_.read_value("", "milliunits", value, error))
 		return false;
 	else
 		// default to "yes"
 		setting_milliunits_ = value != "no";
 
-	if (!p_settings_->read_value("updates", "autocheck", value, error))
+	if (!settings_.read_value("updates", "autocheck", value, error))
 		return false;
 	else {
 		// default to yes
 		setting_autocheck_updates_ = value != "no";
 
 		if (setting_autocheck_updates_) {
-			if (!p_settings_->read_value("updates", "did_run_once", value, error))
+			if (!settings_.read_value("updates", "did_run_once", value, error))
 				return false;
 			else {
 				if (value != "yes") {
 					// do nothing ... for better first time impression
-					if (!p_settings_->write_value("updates", "did_run_once", "yes", error)) {}
+					if (!settings_.write_value("updates", "did_run_once", "yes", error)) {}
 				}
 				else {
 					// start checking for updates
@@ -334,7 +287,7 @@ bool main_form::on_initialize(std::string& error) {
 		}
 	}
 
-	if (!p_settings_->read_value("updates", "autodownload", value, error))
+	if (!settings_.read_value("updates", "autodownload", value, error))
 		return false;
 	else
 		// default to yes
@@ -1499,20 +1452,8 @@ void main_form::on_update_autodownload() {
 	}
 
 	// save update location
-	
-	// settings objects
-	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
-	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
-
-	leccore::ini_settings ini_settings_("pc_info.ini");
-	ini_settings_.set_ini_path("");	// use current folder
-
-	leccore::settings* p_settings_ = &ini_settings_;
-	if (installed_)
-		p_settings_ = &reg_settings_;
-	
-	if (!p_settings_->write_value("updates", "readytoinstall", fullpath, error) ||
-		!p_settings_->write_value("updates", "tempdirectory", update_directory_, error)) {
+	if (!settings_.write_value("updates", "readytoinstall", fullpath, error) ||
+		!settings_.write_value("updates", "tempdirectory", update_directory_, error)) {
 		message("Update downloaded and verified but the following error occurred: " + error);
 		delete_update_directory();
 		return;
@@ -1525,11 +1466,64 @@ void main_form::on_update_autodownload() {
 	}
 }
 
+bool main_form::installed() {
+	// check if application is installed
+	std::string error;
+	leccore::registry reg(leccore::registry::scope::current_user);
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
+		"InstallLocation", install_location_32_, error)) {
+	}
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
+		"InstallLocation", install_location_64_, error)) {
+	}
+
+	installed_ = !install_location_32_.empty() || !install_location_64_.empty();
+
+	auto portable_file_exists = []()->bool {
+		try {
+			std::filesystem::path path(".portable");
+			return std::filesystem::exists(path) && std::filesystem::is_regular_file(path);
+		}
+		catch (const std::exception&) {
+			return false;
+		}
+	};
+
+	if (installed_) {
+		// check if app is running from the install location
+		try {
+			const auto current_path = std::filesystem::current_path().string() + "\\";
+
+			if (current_path != install_location_32_ &&
+				current_path != install_location_64_) {
+				if (portable_file_exists()) {
+					real_portable_mode_ = true;
+					installed_ = false;	// run in portable mode
+				}
+			}
+		}
+		catch (const std::exception&) {}
+	}
+	else {
+		if (portable_file_exists())
+			real_portable_mode_ = true;
+	}
+
+	return installed_;
+}
+
 main_form::main_form(const std::string& caption) :
 	cleanup_mode_(leccore::commandline_arguments::contains("/cleanup")),
 	update_mode_(leccore::commandline_arguments::contains("/update")),
 	recent_update_mode_(leccore::commandline_arguments::contains("/recentupdate")),
+	install_location_32_(""),
+	install_location_64_(""),
+	installed_(installed()),
+	settings_(installed_ ? reg_settings_.base() : ini_settings_.base()),
 	form(caption) {
+	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
+	ini_settings_.set_ini_path("");	// use app folder for ini settings
+
 	if (cleanup_mode_ || update_mode_ || recent_update_mode_)
 		force_instance();
 }

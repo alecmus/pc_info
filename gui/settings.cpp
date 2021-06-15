@@ -24,7 +24,6 @@
 
 #include "../gui.h"
 #include <liblec/lecui/widgets/toggle.h>
-#include <liblec/leccore/settings.h>
 
 void main_form::settings() {
 	class settings_form : public form {
@@ -239,18 +238,7 @@ void main_form::settings() {
 		}
 	};
 
-	// settings objects
-	leccore::registry_settings reg_settings_(leccore::registry::scope::current_user);
-	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
-
-	leccore::ini_settings ini_settings_("pc_info.ini");
-	ini_settings_.set_ini_path("");	// use current folder
-
-	leccore::settings* p_settings_ = &ini_settings_;
-	if (installed_)
-		p_settings_ = &reg_settings_;
-
-	settings_form fm(std::string(appname) + " - Settings", *this, *p_settings_,
+	settings_form fm(std::string(appname) + " - Settings", *this, settings_,
 		setting_darktheme_, setting_milliunits_,
 		setting_autocheck_updates_, setting_autodownload_updates_);
 	std::string error;
