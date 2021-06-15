@@ -2,6 +2,12 @@
 View essential pc specs in a snap
 
 <p>
+  <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/alecmus/pc_info">
+  <img alt="GitHub issues" src="https://img.shields.io/github/issues-raw/alecmus/pc_info">
+  <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed-raw/alecmus/pc_info">
+</p>
+
+<p>
   <em>Release Info</em>
   <br>
   <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/alecmus/pc_info">
