@@ -281,7 +281,7 @@ bool main_form::on_initialize(std::string& error) {
 					check_update_.start();
 
 					// start timer to keep progress of the update check
-					timer_man_.add("update_check", 1500, [&]() { on_update_autocheck(); });
+					timer_man_.add("update_check", 1500, [&]() { on_update_check(); });
 				}
 			}
 		}
@@ -305,6 +305,7 @@ bool main_form::on_initialize(std::string& error) {
 	// add form menu
 	form_menu_.add("• • •", {
 		{ "Settings", [this]() { settings(); } },
+		{ "Updates", [this]() { updates(); } },
 		{ "About", [this]() { about(); } },
 		{ "" },
 		{ "Exit", [this]() { close(); } }
@@ -319,6 +320,35 @@ bool main_form::on_initialize(std::string& error) {
 	pc_info_.drives(drives_, error);
 
 	return true;
+}
+
+void main_form::updates() {
+	if (check_update_.checking() || timer_man_.running("update_check"))
+		return;
+
+	if (download_update_.downloading() || timer_man_.running("update_download"))
+		return;
+
+	std::string error, value;
+	if (!settings_.read_value("updates", "readytoinstall", value, error)) {}
+
+	if (!value.empty()) {
+		// file integrity confirmed ... install update
+		if (prompt("An update has already been downloaded and is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
+			restart_now_ = true;
+			close();
+		}
+		return;
+	}
+
+	message("We will check for updates in the background and notify you if any are found.");
+	update_check_initiated_manually_ = true;
+
+	// start checking for updates
+	check_update_.start();
+
+	// start timer to keep progress of the update check
+	timer_man_.add("update_check", 1500, [&]() { on_update_check(); });
 }
 
 void main_form::on_start() {
@@ -1351,7 +1381,7 @@ void main_form::on_refresh() {
 	start_refresh_timer();
 }
 
-void main_form::on_update_autocheck() {
+void main_form::on_update_check() {
 	if (check_update_.checking())
 		return;
 
@@ -1359,12 +1389,17 @@ void main_form::on_update_autocheck() {
 	timer_man_.stop("update_check");
 
 	std::string error;
-	if (!check_update_.result(update_info_, error))
+	if (!check_update_.result(update_info_, error)) {
+		if (!setting_autocheck_updates_ || update_check_initiated_manually_)
+			message("An error occurred while checking for updates:\n" + error);
+
 		return;
+	}
 	
 	// update found
 	const std::string current_version(appversion);
-	if (leccore::compare_versions(current_version, update_info_.version) == -1) {
+	const int result = leccore::compare_versions(current_version, update_info_.version);
+	if (result == -1) {
 		// newer version available
 		if (!setting_autodownload_updates_) {
 			if (!prompt("<span style = 'font-size: 11.0pt;'>Update Available</span>\n\n"
@@ -1383,19 +1418,17 @@ void main_form::on_update_autocheck() {
 		if (!leccore::file::create_directory(update_directory_, error))
 			return;	// to-do: perhaps try again one or two more times? But then again, why would this method fail?
 
-		if (setting_autodownload_updates_) {
-			// download update silently
-			download_update_.start(update_info_.download_url, update_directory_);
-			timer_man_.add("update_download", 1000, [&]() { on_update_autodownload(); });
-			return;
-		}
-		else {
-			// to-do: implement manual update download dialog
-		}
+		// download update
+		download_update_.start(update_info_.download_url, update_directory_);
+		timer_man_.add("update_download", 1000, [&]() { on_update_download(); });
+	}
+	else {
+		if (!setting_autocheck_updates_ || update_check_initiated_manually_)
+			message("The latest version is already installed.");
 	}
 }
 
-void main_form::on_update_autodownload() {
+void main_form::on_update_download() {
 	if (download_update_.downloading())
 		return;
 
@@ -1409,7 +1442,7 @@ void main_form::on_update_autodownload() {
 
 	std::string error, fullpath;
 	if (!download_update_.result(fullpath, error)) {
-		message("Auto-download of update failed: " + error);
+		message("Download of update failed:\n" + error);
 		delete_update_directory();
 		return;
 	}
@@ -1429,7 +1462,7 @@ void main_form::on_update_autodownload() {
 
 	leccore::hash_file::hash_results results;
 	if (!hash.result(results, error)) {
-		message("Update downloaded but file integrity check failed: " + error);
+		message("Update downloaded but file integrity check failed:\n" + error);
 		delete_update_directory();
 		return;
 	}
@@ -1446,7 +1479,7 @@ void main_form::on_update_autodownload() {
 	}
 	catch (const std::exception& e) {
 		error = e.what();
-		message("Update downloaded but file integrity check failed: " + error);
+		message("Update downloaded but file integrity check failed:\n" + error);
 		delete_update_directory();
 		return;
 	}
@@ -1454,7 +1487,7 @@ void main_form::on_update_autodownload() {
 	// save update location
 	if (!settings_.write_value("updates", "readytoinstall", fullpath, error) ||
 		!settings_.write_value("updates", "tempdirectory", update_directory_, error)) {
-		message("Update downloaded and verified but the following error occurred: " + error);
+		message("Update downloaded and verified but the following error occurred:\n" + error);
 		delete_update_directory();
 		return;
 	}

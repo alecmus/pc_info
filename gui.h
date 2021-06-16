@@ -70,8 +70,8 @@ class main_form : public lecui::form {
 	// be true unless there is a .portable file in the same directory.
 	// 3. If application is not installed then portable mode will be used whether or not a .portable
 	// file exists in the same directory.
-	bool installed_ = false;
-	bool real_portable_mode_ = false;
+	bool installed_;
+	bool real_portable_mode_;
 	std::string install_location_32_, install_location_64_;
 	leccore::settings& settings_;
 	leccore::registry_settings reg_settings_{ leccore::registry::scope::current_user };
@@ -83,6 +83,7 @@ class main_form : public lecui::form {
 	leccore::check_update check_update_{ update_xml_url_ };
 	leccore::check_update::update_info update_info_;
 	bool setting_autodownload_updates_ = false;
+	bool update_check_initiated_manually_ = false;
 	leccore::download_update download_update_;
 	std::string update_directory_;
 
@@ -118,12 +119,13 @@ class main_form : public lecui::form {
 	void stop_refresh_timer();
 	void about();
 	void settings();
+	void updates();
 	bool on_layout(std::string& error) override;
 	void add_battery_pane(lecui::containers::page& power_pane, const float top);
 	void add_drive_details_pane(lecui::containers::page& drive_pane, const float top);
 	void on_refresh();
-	void on_update_autocheck();
-	void on_update_autodownload();
+	void on_update_check();
+	void on_update_download();
 	bool installed();
 
 public:
