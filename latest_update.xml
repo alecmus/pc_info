@@ -2,15 +2,22 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Second beta release. With an important bug fix (in the newer leccore release) that prevented the app from starting on machines with some missing battery information. Now also using the newer lecui release that features a form menu.</description>
-    <version>1.0.0 beta 2</version>
-    <date>30 May 2021</date>
+    <description>Third beta release. Various improvements including but not limited to the following: application installer, portable version, dark theme option, showing display resolution standard name, application settings, and built-in online update mechanism.</description>
+    <version>1.0.0 beta 3</version>
+    <date>16 Jun 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.2/pc_info_1.0.0-beta.2.zip</download_url>
-      <size>2401564</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.32.zip</download_url>
+      <size>2260603</size>
       <hash>
-        <sha256>792207FA2F7AB7ED3342BF6D221501EC3D9D4DA898D34CA1F93F16935DEA60A1</sha256>
+        <sha256>FE2E1CC884B8EBEA1C460997E332866BED377D79D42807B1A0FE7A41A95C54FF</sha256>
       </hash>
     </x86>
+    <x64>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.64.zip</download_url>
+      <size>2894526</size>
+      <hash>
+        <sha256>A23CFE2D3C4547EB3502D5F9031BD51DD7E415CF4C06067F186289549761A1CF</sha256>
+      </hash>
+    </x64>
   </update>
 </leccore>
