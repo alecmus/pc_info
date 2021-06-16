@@ -1549,11 +1549,9 @@ main_form::main_form(const std::string& caption) :
 	cleanup_mode_(leccore::commandline_arguments::contains("/cleanup")),
 	update_mode_(leccore::commandline_arguments::contains("/update")),
 	recent_update_mode_(leccore::commandline_arguments::contains("/recentupdate")),
-	install_location_32_(""),
-	install_location_64_(""),
-	installed_(installed()),
-	settings_(installed_ ? reg_settings_.base() : ini_settings_.base()),
+	settings_(installed() ? reg_settings_.base() : ini_settings_.base()),
 	form(caption) {
+	installed_ = installed();
 	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
 	ini_settings_.set_ini_path("");	// use app folder for ini settings
 
