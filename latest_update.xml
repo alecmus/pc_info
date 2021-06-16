@@ -7,16 +7,16 @@
     <date>16 Jun 2021</date>
     <x86>
       <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.32.zip</download_url>
-      <size>2260603</size>
+      <size>2260584</size>
       <hash>
-        <sha256>FE2E1CC884B8EBEA1C460997E332866BED377D79D42807B1A0FE7A41A95C54FF</sha256>
+        <sha256>89C004F6B1135C61170B4B4489107ED370CF48F41214B62EE6955C8BE895C745</sha256>
       </hash>
     </x86>
     <x64>
       <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.64.zip</download_url>
-      <size>2894526</size>
+      <size>2894540</size>
       <hash>
-        <sha256>A23CFE2D3C4547EB3502D5F9031BD51DD7E415CF4C06067F186289549761A1CF</sha256>
+        <sha256>5D508A1A4705BD12A0F8DF505B0C2F09506B5C93D8C745AE9DB69F69DD4B8507</sha256>
       </hash>
     </x64>
   </update>
