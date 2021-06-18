@@ -360,17 +360,22 @@ void main_form::updates() {
 void main_form::on_start() {
 	start_refresh_timer();
 
-	std::string error;
-	if (!tray_icon_.add(ico_resource, std::string(appname) + " " +
-		std::string(appversion) + " (" + std::string(architecture) + ")",
-		{
-		{ "Settings", [this]() { settings(); } },
-		{ "Updates", [this]() { updates(); } },
-		{ "About", [this]() { about(); } },
-		{ "" },
-		{ "Exit", [this]() { close(); } }
-		},
-		error)) {}
+	if (installed_) {
+		std::string error;
+		if (!tray_icon_.add(ico_resource, std::string(appname) + " " +
+			std::string(appversion) + " (" + std::string(architecture) + ")",
+			{
+			{ "<strong>Show PC Info</strong>", [this]() { restore(); } },
+			{ "" },
+			{ "Settings", [this]() { settings(); } },
+			{ "Updates", [this]() { updates(); } },
+			{ "About", [this]() { about(); } },
+			{ "" },
+			{ "Exit", [this]() { close(); } }
+			},
+			"Show PC Info", error)) {
+		}
+	}
 
 	splash_.remove();
 }
@@ -1447,6 +1452,13 @@ void main_form::on_update_check() {
 	}
 }
 
+void main_form::on_close() {
+	if (installed_)
+		hide();
+	else
+		close();
+}
+
 void main_form::on_update_download() {
 	if (download_update_.downloading())
 		return;
@@ -1578,6 +1590,4 @@ main_form::main_form(const std::string& caption) :
 		force_instance();
 }
 
-main_form::~main_form() {
-	tray_icon_.remove();
-}
+main_form::~main_form() {}

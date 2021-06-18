@@ -117,6 +117,7 @@ class main_form : public lecui::form {
 
 	bool on_initialize(std::string& error) override;
 	void on_start() override;
+	void on_close() override;
 	void start_refresh_timer();
 	void stop_refresh_timer();
 	void about();
