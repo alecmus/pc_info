@@ -36,6 +36,7 @@
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
 #include <liblec/lecui/utilities/splash.h>
+#include <liblec/lecui/utilities/tray_icon.h>
 #include <liblec/lecui/menus/form_menu.h>
 #include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
@@ -99,6 +100,7 @@ class main_form : public lecui::form {
 	lecui::timer_management timer_man_{ *this };
 	lecui::splash splash_{ *this };
 	lecui::form_menu form_menu_{ *this };
+	lecui::tray_icon tray_icon_{ *this };
 
 	leccore::pc_info pc_info_;
 	leccore::pc_info::pc_details pc_details_;
@@ -130,6 +132,7 @@ class main_form : public lecui::form {
 
 public:
 	main_form(const std::string& caption);
+	~main_form();
 	bool restart_now() {
 		return restart_now_;
 	}

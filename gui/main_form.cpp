@@ -32,6 +32,12 @@
 #include <liblec/leccore/zip.h>
 #include <filesystem>
 
+#ifdef _WIN64
+#define architecture	"64bit"
+#else
+#define architecture	"32bit"
+#endif
+
 const float main_form::margin_ = 10.f;
 const float main_form::title_font_size_ = 12.f;
 const float main_form::highlight_font_size_ = 14.f;
@@ -353,6 +359,19 @@ void main_form::updates() {
 
 void main_form::on_start() {
 	start_refresh_timer();
+
+	std::string error;
+	if (!tray_icon_.add(ico_resource, std::string(appname) + " " +
+		std::string(appversion) + " (" + std::string(architecture) + ")",
+		{
+		{ "Settings", [this]() { settings(); } },
+		{ "Updates", [this]() { updates(); } },
+		{ "About", [this]() { about(); } },
+		{ "" },
+		{ "Exit", [this]() { close(); } }
+		},
+		error)) {}
+
 	splash_.remove();
 }
 
@@ -1557,4 +1576,8 @@ main_form::main_form(const std::string& caption) :
 
 	if (cleanup_mode_ || update_mode_ || recent_update_mode_)
 		force_instance();
+}
+
+main_form::~main_form() {
+	tray_icon_.remove();
 }
