@@ -51,7 +51,7 @@ const lecui::color main_form::not_ok_color_{ 200, 0, 0 };
 const unsigned long main_form::refresh_interval_ = 3000;
 
 bool main_form::on_initialize(std::string& error) {
-	if (!cleanup_mode_ && !update_mode_) {
+	if (!cleanup_mode_ && !update_mode_ && !system_tray_mode_) {
 		// display splash screen
 		if (get_dpi_scale() < 2.f)
 			splash_.display(splash_image_128, false, error);
@@ -299,11 +299,35 @@ bool main_form::on_initialize(std::string& error) {
 		// default to yes
 		setting_autodownload_updates_ = value != "no";
 
+	if (!settings_.read_value("", "autostart", value, error))
+		return false;
+	else
+		// default to no
+		setting_autostart_ = value == "yes";
+
+	if (setting_autostart_) {
+		std::string command;
+#ifdef _WIN64
+		command = "\"" + install_location_64_ + "pc_info64.exe\"";
+#else
+		command = "\"" + install_location_32_ + "pc_info32.exe\"";
+#endif
+		command += " /systemtray";
+
+		leccore::registry reg(leccore::registry::scope::current_user);
+		if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Run", "pc_info", command, error)) {}
+	}
+	else {
+		leccore::registry reg(leccore::registry::scope::current_user);
+		if (!reg.do_delete("Software\\Microsoft\\Windows\\CurrentVersion\\Run", "pc_info", error)) {}
+	}
+
 	// size and stuff
 	ctrls_.resize(false);
 	apprnc_.theme(setting_darktheme_ ? lecui::themes::dark : lecui::themes::light);
 	apprnc_.set_icons(ico_resource, ico_resource);
 	dim_.size({ 1120, 570 });
+	ctrls_.start_hidden(system_tray_mode_);
 
 	// add form caption handler
 	form::on_caption([this]() { about(); });
@@ -1580,9 +1604,15 @@ main_form::main_form(const std::string& caption) :
 	cleanup_mode_(leccore::commandline_arguments::contains("/cleanup")),
 	update_mode_(leccore::commandline_arguments::contains("/update")),
 	recent_update_mode_(leccore::commandline_arguments::contains("/recentupdate")),
+	system_tray_mode_(leccore::commandline_arguments::contains("/systemtray")),
 	settings_(installed() ? reg_settings_.base() : ini_settings_.base()),
 	form(caption) {
 	installed_ = installed();
+
+	if (!installed_)
+		// don't allow system tray mode when running in portable mode
+		system_tray_mode_ = false;
+
 	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
 	ini_settings_.set_ini_path("");	// use app folder for ini settings
 

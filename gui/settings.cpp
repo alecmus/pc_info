@@ -41,6 +41,10 @@ void main_form::settings() {
 		bool& setting_milliunits_;
 		bool& setting_autocheck_updates_;
 		bool& setting_autodownload_updates_;
+		bool& setting_autostart_;
+		const std::string& install_location_64_;
+		const std::string& install_location_32_;
+		const bool& installed_;
 
 		bool on_initialize(std::string& error) override {
 			// read application settings
@@ -69,12 +73,18 @@ void main_form::settings() {
 				// default to "yes"
 				setting_autodownload_updates_ = value != "no";
 
+			if (!settings_.read_value("", "autostart", value, error))
+				return false;
+			else
+				// default to no
+				setting_autostart_ = value == "yes";
+
 			// size and stuff
 			ctrls_.resize(false);
 			ctrls_.minimize(false);
 			apprnc_.theme(setting_darktheme_parent_ ? lecui::themes::dark : lecui::themes::light);
 			apprnc_.set_icons(ico_resource, ico_resource);
-			dim_.size({ 300, 300 });
+			dim_.size({ 300, 270 });
 
 			return true;
 		}
@@ -94,16 +104,16 @@ void main_form::settings() {
 			//settings_pane().color_fill.alpha = 0;
 			settings_pane().color_tabs.alpha = 0;
 			
-			// add appearance tab
-			lecui::containers::tab appearance_tab(settings_pane, "Appearance");
+			// add general tab
+			lecui::containers::tab general_tab(settings_pane, "General");
 
 			// add dark theme toggle button
-			lecui::widgets::label darktheme_caption(appearance_tab.get());
-			darktheme_caption().rect.width(appearance_tab.get().size().width);
+			lecui::widgets::label darktheme_caption(general_tab.get());
+			darktheme_caption().rect.width(general_tab.get().size().width);
 			darktheme_caption().rect.height(20.f);
 			darktheme_caption().text = "Dark theme";
 
-			lecui::widgets::toggle darktheme(appearance_tab.get());
+			lecui::widgets::toggle darktheme(general_tab.get());
 			darktheme().rect.width(darktheme_caption().rect.width());
 			darktheme().rect.snap_to(darktheme_caption().rect, snap_type::bottom, 0.f);
 			darktheme().text = "On";
@@ -112,18 +122,32 @@ void main_form::settings() {
 			darktheme().events().toggle = [&](bool on) { on_darktheme(on); };
 
 			// add milliunits toggle button
-			lecui::widgets::label milliunits_caption(appearance_tab.get());
+			lecui::widgets::label milliunits_caption(general_tab.get());
 			milliunits_caption().rect = darktheme_caption().rect;
 			milliunits_caption().rect.snap_to(darktheme().rect, snap_type::bottom, 2.f * margin_);
 			milliunits_caption().text = "Use milliunits";
 			
-			lecui::widgets::toggle milliunits(appearance_tab.get());
+			lecui::widgets::toggle milliunits(general_tab.get());
 			milliunits().rect = darktheme().rect;
 			milliunits().rect.snap_to(milliunits_caption().rect, snap_type::bottom, 0.f);
 			milliunits().text = "Yes";
 			milliunits().text_off = "No";
 			milliunits().on = setting_milliunits_;
 			milliunits().events().toggle = [&](bool on) { on_milliunits(on); };
+
+			// add auto start with windows checkbox
+			lecui::widgets::label autostart_label(general_tab.get());
+			autostart_label().rect = milliunits().rect;
+			autostart_label().rect.snap_to(milliunits().rect, snap_type::bottom, 2.f * margin_);
+			autostart_label().text = "Start automatically with Windows";
+
+			lecui::widgets::toggle autostart(general_tab.get(), "autostart");
+			autostart().rect = milliunits().rect;
+			autostart().rect.snap_to(autostart_label().rect, snap_type::bottom, 0.f);
+			autostart().text = "Yes";
+			autostart().text_off = "No";
+			autostart().on = setting_autostart_;
+			autostart().events().toggle = [&](bool on) { on_autostart(on); };
 
 			// add updates tab
 			lecui::containers::tab updates_tab(settings_pane, "Updates");
@@ -156,7 +180,7 @@ void main_form::settings() {
 			autodownload_updates().on = setting_autodownload_updates_;
 			autodownload_updates().events().toggle = [&](bool on) { on_autodownload_updates(on); };
 
-			settings_pane.select("Appearance");
+			settings_pane.select("General");
 			page_man_.show("home");
 			return true;
 		}
@@ -164,6 +188,7 @@ void main_form::settings() {
 		void on_start() override {
 			// disable autodownload_updates toggle button is autocheck_updates is off
 			widget_man_.enable("home/settings/Updates/autodownload_updates", setting_autocheck_updates_);
+			widget_man_.enable("home/settings/General/autostart", installed_);
 		}
 
 		void on_darktheme(bool on) {
@@ -218,6 +243,33 @@ void main_form::settings() {
 				setting_autodownload_updates_ = on;
 		}
 
+		void on_autostart(bool on) {
+			std::string error;
+			if (!settings_.write_value("", "autostart", on ? "yes" : "no", error)) {
+				message("Error saving auto-start setting: " + error);
+				// to-do: set toggle button to saved setting (or default if unreadable)
+			}
+			else
+				setting_autostart_ = on;
+
+			if (setting_autostart_) {
+				std::string command;
+#ifdef _WIN64
+				command = "\"" + install_location_64_ + "pc_info64.exe\"";
+#else
+				command = "\"" + install_location_32_ + "pc_info32.exe\"";
+#endif
+				command += " /systemtray";
+
+				leccore::registry reg(leccore::registry::scope::current_user);
+				if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Run", "pc_info", command, error)) {}
+			}
+			else {
+				leccore::registry reg(leccore::registry::scope::current_user);
+				if (!reg.do_delete("Software\\Microsoft\\Windows\\CurrentVersion\\Run", "pc_info", error)) {}
+			}
+		}
+
 	public:
 		settings_form(const std::string& caption,
 			form& parent,
@@ -225,13 +277,21 @@ void main_form::settings() {
 			bool& setting_darktheme_parent,
 			bool& setting_milliunits,
 			bool& setting_autocheck_updates,
-			bool& setting_autodownload_updates) :
+			bool& setting_autodownload_updates,
+			bool& setting_autostart,
+			const std::string& install_location_64,
+			const std::string& install_location_32,
+			const bool& installed) :
 			form(caption, parent),
 			settings_(settings),
 			setting_darktheme_parent_(setting_darktheme_parent),
 			setting_milliunits_(setting_milliunits),
 			setting_autocheck_updates_(setting_autocheck_updates),
-			setting_autodownload_updates_(setting_autodownload_updates) {}
+			setting_autodownload_updates_(setting_autodownload_updates),
+			setting_autostart_(setting_autostart),
+			install_location_64_(install_location_64),
+			install_location_32_(install_location_32),
+			installed_(installed) {}
 
 		bool restart_now() {
 			return restart_now_;
@@ -240,7 +300,8 @@ void main_form::settings() {
 
 	settings_form fm(std::string(appname) + " - Settings", *this, settings_,
 		setting_darktheme_, setting_milliunits_,
-		setting_autocheck_updates_, setting_autodownload_updates_);
+		setting_autocheck_updates_, setting_autodownload_updates_,
+		setting_autostart_, install_location_64_, install_location_32_, installed_);
 	std::string error;
 	if (!fm.show(error))
 		message(error);

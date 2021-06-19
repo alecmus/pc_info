@@ -37,6 +37,9 @@
 /// Supported command-line flags:
 /// /cleanup: delete all application settings (prompts user if they would like to delete the app settings).
 /// Designed to be used by the uninstaller.
+/// /update: update exe running in temp directory. For overwriting files in install directory with the unzipped update files.
+/// /recentupdate: new exe running from the install directory for the first time after an update.
+/// /systemtray: start application in the background. Only the system tray will be visible and no splash screen will be displayed.
 /// </remarks>
 int main() {
 	bool restart = false;

@@ -73,6 +73,7 @@ class main_form : public lecui::form {
 	// file exists in the same directory.
 	bool installed_;
 	bool real_portable_mode_;
+	bool system_tray_mode_;
 	std::string install_location_32_, install_location_64_;
 	leccore::settings& settings_;
 	leccore::registry_settings reg_settings_{ leccore::registry::scope::current_user };
@@ -87,6 +88,7 @@ class main_form : public lecui::form {
 	bool update_check_initiated_manually_ = false;
 	leccore::download_update download_update_;
 	std::string update_directory_;
+	bool setting_autostart_ = false;
 
 	const bool cleanup_mode_;
 	const bool update_mode_;
