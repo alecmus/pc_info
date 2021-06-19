@@ -46,6 +46,7 @@
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
 
+// the main form
 class main_form : public lecui::form {
 	const std::string instance_guid_ = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
 	const std::string install_guid_32_ = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
@@ -94,6 +95,9 @@ class main_form : public lecui::form {
 	const bool update_mode_;
 	const bool recent_update_mode_;
 
+	bool settings_open_ = false;
+	bool about_open_ = false;
+
 	lecui::controls ctrls_{ *this };
 	lecui::page_management page_man_{ *this };
 	lecui::appearance apprnc_{ *this };
@@ -139,4 +143,20 @@ public:
 	bool restart_now() {
 		return restart_now_;
 	}
+};
+
+// helper class for managing asynchronous access to a method
+// sets the param to true for as long as the object is within scope
+class manage_async_access {
+	bool& param_;
+
+public:
+	manage_async_access(bool& param) :
+		param_(param) {
+		param = true;
+	}
+	~manage_async_access() { param_ = false; }
+
+private:
+	manage_async_access() = delete;
 };

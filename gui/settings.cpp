@@ -26,6 +26,13 @@
 #include <liblec/lecui/widgets/toggle.h>
 
 void main_form::settings() {
+	restore();
+
+	if (settings_open_)
+		return;
+
+	manage_async_access a_(settings_open_);
+
 	class settings_form : public form {
 		lecui::controls ctrls_{ *this };
 		lecui::page_management page_man_{ *this };

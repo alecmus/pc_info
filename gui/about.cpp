@@ -31,6 +31,13 @@
 #endif
 
 void main_form::about() {
+	restore();
+
+	if (about_open_)
+		return;
+
+	manage_async_access a_(about_open_);
+
 	std::string display_text =
 		"<span style = 'font-size: 9.0pt;'>" +
 		std::string(appname) + " " + std::string(appversion) + " (" + std::string(architecture) + "), " + std::string(appdate) +
