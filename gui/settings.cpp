@@ -87,11 +87,11 @@ void main_form::settings() {
 				setting_autostart_ = value == "yes";
 
 			// size and stuff
-			ctrls_.resize(false);
-			ctrls_.minimize(false);
+			ctrls_.allow_resize(false);
+			ctrls_.allow_minimize(false);
 			apprnc_.theme(setting_darktheme_parent_ ? lecui::themes::dark : lecui::themes::light);
 			apprnc_.set_icons(ico_resource, ico_resource);
-			dim_.size({ 300, 270 });
+			dim_.set_size({ 300, 270 });
 
 			return true;
 		}
