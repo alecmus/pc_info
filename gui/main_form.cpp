@@ -697,7 +697,7 @@ bool main_form::on_layout(std::string& error) {
 		base_speed().rect.height(highlight_height);
 		base_speed().rect.snap_to(status().rect, snap_type::bottom, margin_);
 		base_speed().font_size = highlight_font_size_;
-		base_speed().text = leccore::round_off::tostr<char>(cpu.base_speed, 2) + "GHz "
+		base_speed().text = leccore::round_off::to_string(cpu.base_speed, 2) + "GHz "
 			"<span style = 'font-size: 8.0pt;'>base speed</span>";
 
 		// add cpu cores
@@ -1011,7 +1011,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		designed_capacity().font_size = detail_font_size_;
 		designed_capacity().text = setting_milliunits_ ?
 			std::to_string(battery.designed_capacity) + "mWh" :
-			leccore::round_off::tostr<char>(battery.designed_capacity / 1000.f, 1) + "Wh";
+			leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh";
 
 		// add battery fully charged capacity
 		lecui::widgets::label fully_charged_capacity_caption(battery_pane.get());
@@ -1028,7 +1028,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		fully_charged_capacity().font_size = detail_font_size_;
 		fully_charged_capacity().text = setting_milliunits_ ?
 			std::to_string(battery.fully_charged_capacity) + "mWh" :
-			leccore::round_off::tostr<char>(battery.fully_charged_capacity / 1000.f, 1) + "Wh";
+			leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh";
 
 		// add battery health
 		lecui::widgets::progress_indicator health(battery_pane.get(), "health");
@@ -1060,7 +1060,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		current_capacity().font_size = detail_font_size_;
 		current_capacity().text = setting_milliunits_ ?
 			std::to_string(battery.current_capacity) + "mWh" :
-			leccore::round_off::tostr<char>(battery.current_capacity / 1000.f, 1) + "Wh";
+			leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh";
 
 		// add battery fully charged capacity
 		lecui::widgets::label charge_level_caption(battery_pane.get());
@@ -1075,7 +1075,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		charge_level().rect.height(detail_height);
 		charge_level().rect.snap_to(charge_level_caption().rect, snap_type::bottom, 0.f);
 		charge_level().font_size = detail_font_size_;
-		charge_level().text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
+		charge_level().text = leccore::round_off::to_string(battery.level, 1) + "%";
 
 		// add battery current voltage
 		lecui::widgets::label current_voltage_caption(battery_pane.get());
@@ -1093,7 +1093,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		current_voltage().font_size = detail_font_size_;
 		current_voltage().text = setting_milliunits_ ?
 			std::to_string(battery.current_voltage) + "mV" :
-			leccore::round_off::tostr<char>(battery.current_voltage / 1000.f, 2) + "V";
+			leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V";
 
 		// add battery current charge rate
 		lecui::widgets::label charge_rate_caption(battery_pane.get());
@@ -1110,7 +1110,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		charge_rate().font_size = detail_font_size_;
 		charge_rate().text = setting_milliunits_ ?
 			std::to_string(battery.current_charge_rate) + "mW" :
-			leccore::round_off::tostr<char>(battery.current_charge_rate / 1000.f, 1) + "W";
+			leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W";
 
 		// add battery status
 		lecui::widgets::label status_caption(battery_pane.get());
@@ -1329,19 +1329,19 @@ void main_form::on_refresh() {
 						auto& current_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
 						current_capacity.text = setting_milliunits_ ?
 							std::to_string(battery.current_capacity) + "mWh" :
-							leccore::round_off::tostr<char>(battery.current_capacity / 1000.f, 1) + "Wh";
+							leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh";
 					}
 
 					if (battery_old.level != battery.level) {
 						auto& charge_level = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
-						charge_level.text = leccore::round_off::tostr<char>(battery.level, 1) + "%";
+						charge_level.text = leccore::round_off::to_string(battery.level, 1) + "%";
 					}
 
 					if (battery_old.current_charge_rate != battery.current_charge_rate) {
 						auto& charge_rate = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
 						charge_rate.text = setting_milliunits_ ?
 							std::to_string(battery.current_charge_rate) + "mW" :
-							leccore::round_off::tostr<char>(battery.current_charge_rate / 1000.f, 1) + "W";
+							leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W";
 					}
 
 					if (battery_old.current_voltage != battery.current_voltage ||
@@ -1349,7 +1349,7 @@ void main_form::on_refresh() {
 						auto& current_voltage = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
 						current_voltage.text = setting_milliunits_ ?
 							std::to_string(battery.current_voltage) + "mV" :
-							leccore::round_off::tostr<char>(battery.current_voltage / 1000.f, 2) + "V";
+							leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V";
 					}
 
 					if (battery_old.status != battery.status) {
@@ -1362,7 +1362,7 @@ void main_form::on_refresh() {
 						auto& designed_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
 						designed_capacity.text = setting_milliunits_ ?
 							std::to_string(battery.designed_capacity) + "mWh" :
-							leccore::round_off::tostr<char>(battery.designed_capacity / 1000.f, 1) + "Wh";
+							leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh";
 					}
 
 					if (battery_old.fully_charged_capacity != battery.fully_charged_capacity ||
@@ -1370,7 +1370,7 @@ void main_form::on_refresh() {
 						auto& fully_charged_capacity = lecui::widgets::label::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
 						fully_charged_capacity.text = setting_milliunits_ ?
 							std::to_string(battery.fully_charged_capacity) + "mWh" :
-							leccore::round_off::tostr<char>(battery.fully_charged_capacity / 1000.f, 1) + "Wh";
+							leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh";
 					}
 
 					if (battery_old.health != battery.health) {
