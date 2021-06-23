@@ -330,10 +330,10 @@ bool main_form::on_initialize(std::string& error) {
 	ctrls_.start_hidden(system_tray_mode_);
 
 	// add form caption handler
-	form::on_caption([this]() { about(); });
+	form::on_caption([this]() { about(); }, "View info about this app");
 
 	// add form menu
-	form_menu_.add("• • •", {
+	form_menu_.add("• • •", "Settings and more", {
 		{ "Settings", [this]() { settings(); } },
 		{ "Updates", [this]() { updates(); } },
 		{ "About", [this]() { about(); } },

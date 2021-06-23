@@ -125,6 +125,7 @@ void main_form::settings() {
 			darktheme().rect.snap_to(darktheme_caption().rect, snap_type::bottom, 0.f);
 			darktheme().text = "On";
 			darktheme().text_off = "Off";
+			darktheme().tooltip = "Change the UI theme";
 			darktheme().on = setting_darktheme_;
 			darktheme().events().toggle = [&](bool on) { on_darktheme(on); };
 
@@ -139,6 +140,7 @@ void main_form::settings() {
 			milliunits().rect.snap_to(milliunits_caption().rect, snap_type::bottom, 0.f);
 			milliunits().text = "Yes";
 			milliunits().text_off = "No";
+			milliunits().tooltip = "Change the UI unit display preference";
 			milliunits().on = setting_milliunits_;
 			milliunits().events().toggle = [&](bool on) { on_milliunits(on); };
 
@@ -153,6 +155,7 @@ void main_form::settings() {
 			autostart().rect.snap_to(autostart_label().rect, snap_type::bottom, 0.f);
 			autostart().text = "Yes";
 			autostart().text_off = "No";
+			autostart().tooltip = "Select whether to automatically start the app when the user signs into Windows";
 			autostart().on = setting_autostart_;
 			autostart().events().toggle = [&](bool on) { on_autostart(on); };
 
@@ -170,6 +173,7 @@ void main_form::settings() {
 			autocheck_updates().rect.snap_to(autocheck_updates_caption().rect, snap_type::bottom, 0.f);
 			autocheck_updates().text = "Yes";
 			autocheck_updates().text_off = "No";
+			autocheck_updates().tooltip = "Select whether to automatically check for updates";
 			autocheck_updates().on = setting_autocheck_updates_;
 			autocheck_updates().events().toggle = [&](bool on) { on_autocheck_updates(on); };
 
@@ -184,6 +188,7 @@ void main_form::settings() {
 			autodownload_updates().rect.snap_to(autodownload_updates_caption().rect, snap_type::bottom, 0.f);
 			autodownload_updates().text = "Yes";
 			autodownload_updates().text_off = "No";
+			autodownload_updates().tooltip = "Select whether to automatically download updates";
 			autodownload_updates().on = setting_autodownload_updates_;
 			autodownload_updates().events().toggle = [&](bool on) { on_autodownload_updates(on); };
 
