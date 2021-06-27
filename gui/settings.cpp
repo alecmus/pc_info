@@ -101,95 +101,86 @@ void main_form::settings() {
 			auto& home = page_man_.add("home");
 
 			// add settings tab pane
-			lecui::containers::tab_pane settings_pane(home, "settings");
-			settings_pane().rect.left = margin_;
-			settings_pane().rect.top = margin_;
-			settings_pane().rect.width(home.size().width - 2.f * margin_);
-			settings_pane().rect.height(home.size().height - 2.f * margin_);
-			//settings_pane().color_border.alpha = 0;
-			settings_pane().color_tabs_border.alpha = 0;
-			//settings_pane().color_fill.alpha = 0;
-			settings_pane().color_tabs.alpha = 0;
+			lecui::containers::tab_pane_builder settings_pane(home, "settings");
+			settings_pane().rect()
+				.left(margin_).top(margin_)
+				.width(home.size().width - 2.f * margin_).height(home.size().height - 2.f * margin_);
+			settings_pane().color_tabs_border().alpha(0);
+			settings_pane().color_tabs().alpha(0);
 			
 			// add general tab
-			lecui::containers::tab general_tab(settings_pane, "General");
+			lecui::containers::tab_builder general_tab(settings_pane, "General");
 
 			// add dark theme toggle button
-			lecui::widgets::label darktheme_caption(general_tab.get());
-			darktheme_caption().rect.width(general_tab.get().size().width);
-			darktheme_caption().rect.height(20.f);
-			darktheme_caption().text = "Dark theme";
+			lecui::widgets::label_builder darktheme_caption(general_tab.get());
+			darktheme_caption().text("Dark theme");
+			darktheme_caption().rect()
+				.width(general_tab.get().size().width)
+				.height(20.f);
 
-			lecui::widgets::toggle darktheme(general_tab.get());
-			darktheme().rect.width(darktheme_caption().rect.width());
-			darktheme().rect.snap_to(darktheme_caption().rect, snap_type::bottom, 0.f);
-			darktheme().text = "On";
-			darktheme().text_off = "Off";
-			darktheme().tooltip = "Change the UI theme";
-			darktheme().on = setting_darktheme_;
+			lecui::widgets::toggle_builder darktheme(general_tab.get());
+			darktheme()
+				.text("On").text_off("Off").tooltip("Change the UI theme").on(setting_darktheme_)
+				.rect().width(darktheme_caption().rect().width()).snap_to(darktheme_caption().rect(), snap_type::bottom, 0.f);
 			darktheme().events().toggle = [&](bool on) { on_darktheme(on); };
 
 			// add milliunits toggle button
-			lecui::widgets::label milliunits_caption(general_tab.get());
-			milliunits_caption().rect = darktheme_caption().rect;
-			milliunits_caption().rect.snap_to(darktheme().rect, snap_type::bottom, 2.f * margin_);
-			milliunits_caption().text = "Use milliunits";
+			lecui::widgets::label_builder milliunits_caption(general_tab.get());
+			milliunits_caption()
+				.text("Use milliunits")
+				.rect(darktheme_caption().rect())
+				.rect().snap_to(darktheme().rect(), snap_type::bottom, 2.f * margin_);
 			
-			lecui::widgets::toggle milliunits(general_tab.get());
-			milliunits().rect = darktheme().rect;
-			milliunits().rect.snap_to(milliunits_caption().rect, snap_type::bottom, 0.f);
-			milliunits().text = "Yes";
-			milliunits().text_off = "No";
-			milliunits().tooltip = "Change the UI unit display preference";
-			milliunits().on = setting_milliunits_;
+			lecui::widgets::toggle_builder milliunits(general_tab.get());
+			milliunits()
+				.text("Yes").text_off("No").tooltip("Change the UI unit display preference").on(setting_milliunits_)
+				.rect(darktheme().rect())
+				.rect().snap_to(milliunits_caption().rect(), snap_type::bottom, 0.f);
 			milliunits().events().toggle = [&](bool on) { on_milliunits(on); };
 
 			// add auto start with windows checkbox
-			lecui::widgets::label autostart_label(general_tab.get());
-			autostart_label().rect = milliunits().rect;
-			autostart_label().rect.snap_to(milliunits().rect, snap_type::bottom, 2.f * margin_);
-			autostart_label().text = "Start automatically with Windows";
+			lecui::widgets::label_builder autostart_label(general_tab.get());
+			autostart_label()
+				.text("Start automatically with Windows")
+				.rect(milliunits().rect())
+				.rect().snap_to(milliunits().rect(), snap_type::bottom, 2.f * margin_);
 
-			lecui::widgets::toggle autostart(general_tab.get(), "autostart");
-			autostart().rect = milliunits().rect;
-			autostart().rect.snap_to(autostart_label().rect, snap_type::bottom, 0.f);
-			autostart().text = "Yes";
-			autostart().text_off = "No";
-			autostart().tooltip = "Select whether to automatically start the app when the user signs into Windows";
-			autostart().on = setting_autostart_;
+			lecui::widgets::toggle_builder autostart(general_tab.get(), "autostart");
+			autostart().text("Yes").text_off("No")
+				.tooltip("Select whether to automatically start the app when the user signs into Windows").on(setting_autostart_)
+				.rect(milliunits().rect())
+				.rect().snap_to(autostart_label().rect(), snap_type::bottom, 0.f);
 			autostart().events().toggle = [&](bool on) { on_autostart(on); };
 
 			// add updates tab
-			lecui::containers::tab updates_tab(settings_pane, "Updates");
+			lecui::containers::tab_builder updates_tab(settings_pane, "Updates");
 
 			// add auto check updates toggle button
-			lecui::widgets::label autocheck_updates_caption(updates_tab.get());
-			autocheck_updates_caption().rect.width(updates_tab.get().size().width);
-			autocheck_updates_caption().rect.height(20.f);
-			autocheck_updates_caption().text = "Auto-check";
+			lecui::widgets::label_builder autocheck_updates_caption(updates_tab.get());
+			autocheck_updates_caption()
+				.text("Auto-check")
+				.rect().width(updates_tab.get().size().width).height(20.f);
 
-			lecui::widgets::toggle autocheck_updates(updates_tab.get());
-			autocheck_updates().rect = darktheme().rect;
-			autocheck_updates().rect.snap_to(autocheck_updates_caption().rect, snap_type::bottom, 0.f);
-			autocheck_updates().text = "Yes";
-			autocheck_updates().text_off = "No";
-			autocheck_updates().tooltip = "Select whether to automatically check for updates";
-			autocheck_updates().on = setting_autocheck_updates_;
+			lecui::widgets::toggle_builder autocheck_updates(updates_tab.get());
+			autocheck_updates()
+				.text("Yes").text_off("No").tooltip("Select whether to automatically check for updates").on(setting_autocheck_updates_)
+				.rect(darktheme().rect())
+				.rect().snap_to(autocheck_updates_caption().rect(), snap_type::bottom, 0.f);
 			autocheck_updates().events().toggle = [&](bool on) { on_autocheck_updates(on); };
 
 			// add auto download updates toggle button
-			lecui::widgets::label autodownload_updates_caption(updates_tab.get());
-			autodownload_updates_caption().rect = autocheck_updates_caption().rect;
-			autodownload_updates_caption().rect.snap_to(autocheck_updates().rect, snap_type::bottom, 2.f * margin_);
-			autodownload_updates_caption().text = "Auto-download";
+			lecui::widgets::label_builder autodownload_updates_caption(updates_tab.get());
+			autodownload_updates_caption()
+				.text("Auto-download")
+				.rect(autocheck_updates_caption().rect())
+				.rect().snap_to(autocheck_updates().rect(), snap_type::bottom, 2.f * margin_);
 
-			lecui::widgets::toggle autodownload_updates(updates_tab.get(), "autodownload_updates");
-			autodownload_updates().rect = autocheck_updates().rect;
-			autodownload_updates().rect.snap_to(autodownload_updates_caption().rect, snap_type::bottom, 0.f);
-			autodownload_updates().text = "Yes";
-			autodownload_updates().text_off = "No";
-			autodownload_updates().tooltip = "Select whether to automatically download updates";
-			autodownload_updates().on = setting_autodownload_updates_;
+			lecui::widgets::toggle_builder autodownload_updates(updates_tab.get(), "autodownload_updates");
+			autodownload_updates()
+				.text("Yes").text_off("No").tooltip("Select whether to automatically download updates").on(setting_autodownload_updates_)
+				.rect(autocheck_updates().rect())
+				.rect().snap_to(autodownload_updates_caption().rect(), snap_type::bottom, 0.f);
+			
 			autodownload_updates().events().toggle = [&](bool on) { on_autodownload_updates(on); };
 
 			settings_pane.select("General");
