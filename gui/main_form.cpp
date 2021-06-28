@@ -769,7 +769,7 @@ bool main_form::on_layout(std::string& error) {
 			.color_text(caption_color_)
 			.font_size(caption_font_size_)
 			.rect(gpu_name_caption().rect())
-			.rect().snap_to(gpu_name().rect(), snap_type::bottom, margin_);
+			.rect().width(gpu_pane.get().size().width / 4.f).snap_to(gpu_name().rect(), snap_type::bottom_left, margin_);
 
 		lecui::widgets::label_builder status(gpu_pane.get());
 		status()
@@ -786,8 +786,8 @@ bool main_form::on_layout(std::string& error) {
 			.text("Resolution")
 			.color_text(caption_color_)
 			.font_size(caption_font_size_)
-			.rect(gpu_name_caption().rect())
-			.rect().snap_to(status().rect(), snap_type::bottom, margin_);
+			.rect(status_caption().rect())
+			.rect().right(gpu_name_caption().rect().right()).snap_to(status_caption().rect(), snap_type::right, margin_);
 
 		lecui::widgets::label_builder resolution(gpu_pane.get());
 		resolution()
@@ -796,15 +796,23 @@ bool main_form::on_layout(std::string& error) {
 			.rect(resolution_caption().rect())
 			.rect().height(detail_height).snap_to(resolution_caption().rect(), snap_type::bottom, 0.f);
 
+		// add dedicated video memory
+		lecui::widgets::label_builder dedicated_ram(gpu_pane.get());
+		dedicated_ram()
+			.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
+			.font_size(highlight_font_size_)
+			.rect(status().rect())
+			.rect().width(gpu_name_caption().rect().width()).height(highlight_height).snap_to(status().rect(), snap_type::bottom_left, margin_);
+
 		// add refresh rate and memory
 		lecui::widgets::label_builder additional(gpu_pane.get());
 		additional().text(std::to_string(gpu.refresh_rate) + "Hz " +
 			"<span style = 'font-size: 8.0pt;'>refresh rate</span>, " +
-			leccore::format_size(gpu.ram) + " " +
+			leccore::format_size(gpu.total_graphics_memory) + " " +
 			"<span style = 'font-size: 8.0pt;'>graphics memory</span>")
 			.font_size(highlight_font_size_)
-			.rect(resolution().rect())
-			.rect().height(highlight_height).snap_to(resolution().rect(), snap_type::bottom, margin_);
+			.rect(status().rect())
+			.rect().width(dedicated_ram().rect().width()).height(highlight_height).snap_to(dedicated_ram().rect(), snap_type::bottom_left, margin_);
 
 		gpu_number++;
 	}
