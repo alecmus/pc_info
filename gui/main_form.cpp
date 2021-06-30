@@ -323,11 +323,13 @@ bool main_form::on_initialize(std::string& error) {
 	}
 
 	// size and stuff
-	ctrls_.allow_resize(false);
-	apprnc_.theme(setting_darktheme_ ? lecui::themes::dark : lecui::themes::light);
-	apprnc_.set_icons(ico_resource, ico_resource);
+	ctrls_
+		.allow_resize(false)
+		.start_hidden(system_tray_mode_);
+	apprnc_
+		.set_icons(ico_resource, ico_resource)
+		.theme(setting_darktheme_ ? lecui::themes::dark : lecui::themes::light);
 	dim_.set_size({ 1120, 570 });
-	ctrls_.start_hidden(system_tray_mode_);
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
