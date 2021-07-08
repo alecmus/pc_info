@@ -35,8 +35,8 @@ void main_form::settings() {
 
 	class settings_form : public form {
 		lecui::controls ctrls_{ *this };
-		lecui::page_management page_man_{ *this };
-		lecui::widget_management widget_man_{ *this };
+		lecui::page_manager page_man_{ *this };
+		lecui::widget_manager widget_man_{ *this };
 		lecui::appearance apprnc_{ *this };
 		lecui::dimensions dim_{ *this };
 		leccore::settings& settings_;

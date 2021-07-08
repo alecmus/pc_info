@@ -35,10 +35,10 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/utilities/timer.h>
 #include <liblec/lecui/utilities/splash.h>
 #include <liblec/lecui/utilities/tray_icon.h>
 #include <liblec/lecui/menus/form_menu.h>
-#include <liblec/lecui/timer.h>
 #include <liblec/leccore/pc_info.h>
 #include <liblec/leccore/web_update.h>
 #include <liblec/leccore/settings.h>
@@ -99,11 +99,11 @@ class main_form : public lecui::form {
 	bool about_open_ = false;
 
 	lecui::controls ctrls_{ *this };
-	lecui::page_management page_man_{ *this };
+	lecui::page_manager page_man_{ *this };
 	lecui::appearance apprnc_{ *this };
 	lecui::dimensions dim_{ *this };
-	lecui::instance_management instance_man_{ *this, instance_guid_ };
-	lecui::timer_management timer_man_{ *this };
+	lecui::instance_manager instance_man_{ *this, instance_guid_ };
+	lecui::timer_manager timer_man_{ *this };
 	lecui::splash splash_{ *this };
 	lecui::form_menu form_menu_{ *this };
 	lecui::tray_icon tray_icon_{ *this };
