@@ -48,73 +48,73 @@ using snap_type = lecui::rect::snap_type;
 
 // the main form
 class main_form : public lecui::form {
-	const std::string instance_guid_ = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
-	const std::string install_guid_32_ = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
-	const std::string install_guid_64_ = "{5F794184-4C64-402C-AE99-E88BBF681851}";
-	const std::string update_xml_url_ = "https://raw.githubusercontent.com/alecmus/pc_info/master/latest_update.xml";
+	const std::string _instance_guid = "{F7660410-F00A-4BD0-B4B5-2A76F29D03E0}";
+	const std::string _install_guid_32 = "{4366AB0F-A68F-4388-B4FA-2BE684F86FC4}";
+	const std::string _install_guid_64 = "{5F794184-4C64-402C-AE99-E88BBF681851}";
+	const std::string _update_xml_url = "https://raw.githubusercontent.com/alecmus/pc_info/master/latest_update.xml";
 
-	static const float margin_;
-	static const float title_font_size_;
-	static const float highlight_font_size_;
-	static const float detail_font_size_;
-	static const float caption_font_size_;
-	static const std::string sample_text_;
-	static const std::string font_;
-	static const lecui::color caption_color_;
-	static const lecui::color ok_color_;
-	static const lecui::color not_ok_color_;
-	static const unsigned long refresh_interval_;
+	static const float _margin;
+	static const float _title_font_size;
+	static const float _highlight_font_size;
+	static const float _detail_font_size;
+	static const float _caption_font_size;
+	static const std::string _sample_text;
+	static const std::string _font;
+	static const lecui::color _caption_color;
+	static const lecui::color _ok_color;
+	static const lecui::color _not_ok_color;
+	static const unsigned long _refresh_interval;
 
-	bool restart_now_ = false;
+	bool _restart_now = false;
 
 	// 1. If application is installed and running from an install directory this will be true.
 	// 2. If application is installed and not running from an install directory this will also
 	// be true unless there is a .portable file in the same directory.
 	// 3. If application is not installed then portable mode will be used whether or not a .portable
 	// file exists in the same directory.
-	bool installed_;
-	bool real_portable_mode_;
-	bool system_tray_mode_;
-	std::string install_location_32_, install_location_64_;
-	leccore::settings& settings_;
-	leccore::registry_settings reg_settings_{ leccore::registry::scope::current_user };
-	leccore::ini_settings ini_settings_{ "pc_info.ini" };
-	bool setting_darktheme_ = false;
-	bool setting_milliunits_ = true;
-	bool setting_milliunits_old_ = setting_milliunits_;
-	bool setting_autocheck_updates_ = true;
-	leccore::check_update check_update_{ update_xml_url_ };
-	leccore::check_update::update_info update_info_;
-	bool setting_autodownload_updates_ = false;
-	bool update_check_initiated_manually_ = false;
-	leccore::download_update download_update_;
-	std::string update_directory_;
-	bool setting_autostart_ = false;
+	bool _installed;
+	bool _real_portable_mode;
+	bool _system_tray_mode;
+	std::string _install_location_32, _install_location_64;
+	leccore::settings& _settings;
+	leccore::registry_settings _reg_settings{ leccore::registry::scope::current_user };
+	leccore::ini_settings _ini_settings{ "pc_info.ini" };
+	bool _setting_darktheme = false;
+	bool _setting_milliunits = true;
+	bool _setting_milliunits_old = _setting_milliunits;
+	bool _setting_autocheck_updates = true;
+	leccore::check_update _check_update{ _update_xml_url };
+	leccore::check_update::update_info _update_info;
+	bool _setting_autodownload_updates = false;
+	bool _update_check_initiated_manually = false;
+	leccore::download_update _download_update;
+	std::string _update_directory;
+	bool _setting_autostart = false;
 
-	const bool cleanup_mode_;
-	const bool update_mode_;
-	const bool recent_update_mode_;
+	const bool _cleanup_mode;
+	const bool _update_mode;
+	const bool _recent_update_mode;
 
-	bool settings_open_ = false;
-	bool about_open_ = false;
+	bool _settings_open = false;
+	bool _about_open = false;
 
-	lecui::controls ctrls_{ *this };
-	lecui::page_manager page_man_{ *this };
-	lecui::appearance apprnc_{ *this };
-	lecui::dimensions dim_{ *this };
-	lecui::instance_manager instance_man_{ *this, instance_guid_ };
-	lecui::timer_manager timer_man_{ *this };
-	lecui::splash splash_{ *this };
-	lecui::form_menu form_menu_{ *this };
-	lecui::tray_icon tray_icon_{ *this };
+	lecui::controls _ctrls{ *this };
+	lecui::page_manager _page_man{ *this };
+	lecui::appearance _apprnc{ *this };
+	lecui::dimensions _dim{ *this };
+	lecui::instance_manager _instance_man{ *this, _instance_guid };
+	lecui::timer_manager _timer_man{ *this };
+	lecui::splash _splash{ *this };
+	lecui::form_menu _form_menu{ *this };
+	lecui::tray_icon _tray_icon{ *this };
 
-	leccore::pc_info pc_info_;
-	leccore::pc_info::pc_details pc_details_;
-	std::vector<leccore::pc_info::cpu_info> cpus_;
-	std::vector<leccore::pc_info::gpu_info> gpus_;
-	leccore::pc_info::ram_info ram_;
-	std::vector<leccore::pc_info::drive_info> drives_;
-	leccore::pc_info::power_info power_;
+	leccore::pc_info _pc_info;
+	leccore::pc_info::pc_details _pc_details;
+	std::vector<leccore::pc_info::cpu_info> _cpus;
+	std::vector<leccore::pc_info::gpu_info> _gpus;
+	leccore::pc_info::ram_info _ram;
+	std::vector<leccore::pc_info::drive_info> _drives;
+	leccore::pc_info::power_info _power;
 
 	float title_height;
 	float highlight_height;
@@ -141,21 +141,21 @@ public:
 	main_form(const std::string& caption);
 	~main_form();
 	bool restart_now() {
-		return restart_now_;
+		return _restart_now;
 	}
 };
 
 // helper class for managing asynchronous access to a method
 // sets the param to true for as long as the object is within scope
 class manage_async_access {
-	bool& param_;
+	bool& _param;
 
 public:
 	manage_async_access(bool& param) :
-		param_(param) {
+		_param(param) {
 		param = true;
 	}
-	~manage_async_access() { param_ = false; }
+	~manage_async_access() { _param = false; }
 
 private:
 	manage_async_access() = delete;

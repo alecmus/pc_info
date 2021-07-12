@@ -38,34 +38,34 @@
 #define architecture	"32bit"
 #endif
 
-const float main_form::margin_ = 10.f;
-const float main_form::title_font_size_ = 12.f;
-const float main_form::highlight_font_size_ = 14.f;
-const float main_form::detail_font_size_ = 10.f;
-const float main_form::caption_font_size_ = 8.f;
-const std::string main_form::sample_text_ = "<u><strong>Aq</strong></u>";
-const std::string main_form::font_ = "Segoe UI";
-const lecui::color main_form::caption_color_{ 100, 100, 100, 255 };
-const lecui::color main_form::ok_color_{ 0, 150, 0, 255 };
-const lecui::color main_form::not_ok_color_{ 200, 0, 0, 255 };
-const unsigned long main_form::refresh_interval_ = 3000;
+const float main_form::_margin = 10.f;
+const float main_form::_title_font_size = 12.f;
+const float main_form::_highlight_font_size = 14.f;
+const float main_form::_detail_font_size = 10.f;
+const float main_form::_caption_font_size = 8.f;
+const std::string main_form::_sample_text = "<u><strong>Aq</strong></u>";
+const std::string main_form::_font = "Segoe UI";
+const lecui::color main_form::_caption_color{ 100, 100, 100, 255 };
+const lecui::color main_form::_ok_color{ 0, 150, 0, 255 };
+const lecui::color main_form::_not_ok_color{ 200, 0, 0, 255 };
+const unsigned long main_form::_refresh_interval = 3000;
 
 bool main_form::on_initialize(std::string& error) {
-	if (!cleanup_mode_ && !update_mode_ && !system_tray_mode_) {
+	if (!_cleanup_mode && !_update_mode && !_system_tray_mode) {
 		// display splash screen
 		if (get_dpi_scale() < 2.f)
-			splash_.display(splash_image_128, false, error);
+			_splash.display(splash_image_128, false, error);
 		else
-			splash_.display(splash_image_256, false, error);
+			_splash.display(splash_image_256, false, error);
 	}
 
-	if (cleanup_mode_) {
+	if (_cleanup_mode) {
 		if (prompt("Would you like to delete the app settings?")) {
 			// cleanup application settings
-			if (!settings_.delete_recursive("", error))
+			if (!_settings.delete_recursive("", error))
 				return false;
 
-			if (installed_) {
+			if (_installed) {
 				// cleanup company settings (will delete the company subkey if no
 				// other apps have placed subkeys under it
 				leccore::registry reg(leccore::registry::scope::current_user);
@@ -79,10 +79,10 @@ bool main_form::on_initialize(std::string& error) {
 	else {
 		// check if there is an update ready to be installed
 		std::string value;
-		if (settings_.read_value("updates", "readytoinstall", value, error)) {}
+		if (_settings.read_value("updates", "readytoinstall", value, error)) {}
 
 		// clear the registry entry
-		if (!settings_.delete_value("updates", "readytoinstall", error)) {}
+		if (!_settings.delete_value("updates", "readytoinstall", error)) {}
 
 		if (!value.empty()) {
 			try {
@@ -117,24 +117,24 @@ bool main_form::on_initialize(std::string& error) {
 					// get target directory
 					std::string target_directory;
 
-					if (installed_) {
+					if (_installed) {
 #ifdef _WIN64
-						target_directory = install_location_64_;
+						target_directory = _install_location_64;
 #else
-						target_directory = install_location_32_;
+						target_directory = _install_location_32;
 #endif
 					}
 					else {
-						if (real_portable_mode_) {
+						if (_real_portable_mode) {
 							try { target_directory = std::filesystem::current_path().string() + "\\"; }
 							catch (const std::exception&) {}
 						}
 					}
 
 					if (!target_directory.empty()) {
-						if (settings_.write_value("updates", "rawfiles", unzipped_folder, error) &&
-							settings_.write_value("updates", "target", target_directory, error)) {
-							if (real_portable_mode_) {
+						if (_settings.write_value("updates", "rawfiles", unzipped_folder, error) &&
+							_settings.write_value("updates", "target", target_directory, error)) {
+							if (_real_portable_mode) {
 								try {
 									// copy the .config file to the unzipped folder
 									std::filesystem::path p("pc_info.ini");
@@ -171,12 +171,12 @@ bool main_form::on_initialize(std::string& error) {
 			}
 		}
 		else
-			if (update_mode_) {
+			if (_update_mode) {
 				// get the location of the raw files
-				if (settings_.read_value("updates", "rawfiles", value, error) && !value.empty()) {
+				if (_settings.read_value("updates", "rawfiles", value, error) && !value.empty()) {
 					const std::string raw_files_directory(value);
 
-					if (settings_.read_value("updates", "target", value, error)) {
+					if (_settings.read_value("updates", "target", value, error)) {
 						std::string target(value);
 						if (!target.empty()) {
 							try {
@@ -214,27 +214,27 @@ bool main_form::on_initialize(std::string& error) {
 				}
 			}
 			else
-				if (recent_update_mode_) {
+				if (_recent_update_mode) {
 					// check if the updates_rawfiles and updates_target settings are set, and eliminated them if so then notify user of successful update
 					std::string updates_rawfiles;
-					if (!settings_.read_value("updates", "rawfiles", updates_rawfiles, error) && !value.empty()) {}
+					if (!_settings.read_value("updates", "rawfiles", updates_rawfiles, error) && !value.empty()) {}
 
 					std::string updates_target;
-					if (!settings_.read_value("updates", "target", updates_target, error)) {}
+					if (!_settings.read_value("updates", "target", updates_target, error)) {}
 
 					if (!updates_rawfiles.empty() || !updates_target.empty()) {
-						if (!settings_.delete_value("updates", "rawfiles", error)) {}
-						if (!settings_.delete_value("updates", "target", error)) {}
+						if (!_settings.delete_value("updates", "rawfiles", error)) {}
+						if (!_settings.delete_value("updates", "target", error)) {}
 
-						if (installed_) {
+						if (_installed) {
 							// update inno setup version number
 							leccore::registry reg(leccore::registry::scope::current_user);
 #ifdef _WIN64
-							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
+							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + _install_guid_64 + "_is1",
 								"DisplayVersion", std::string(appversion), error)) {
 							}
 #else
-							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
+							if (!reg.do_write("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + _install_guid_32 + "_is1",
 								"DisplayVersion", std::string(appversion), error)) {
 							}
 #endif
@@ -244,73 +244,73 @@ bool main_form::on_initialize(std::string& error) {
 						message("App updated successfully to version " + std::string(appversion));
 
 						std::string updates_tempdirectory;
-						if (!settings_.read_value("updates", "tempdirectory", updates_tempdirectory, error)) {}
+						if (!_settings.read_value("updates", "tempdirectory", updates_tempdirectory, error)) {}
 						else {
 							// delete updates temp directory
 							if (!leccore::file::remove_directory(updates_tempdirectory, error)) {}
 						}
-						if (!settings_.delete_value("updates", "tempdirectory", error)) {}
+						if (!_settings.delete_value("updates", "tempdirectory", error)) {}
 					}
 				}
 	}
 
 	// read application settings
 	std::string value;
-	if (!settings_.read_value("", "darktheme", value, error))
+	if (!_settings.read_value("", "darktheme", value, error))
 		return false;
 	else
 		// default to "off"
-		setting_darktheme_ = value == "on";
+		_setting_darktheme = value == "on";
 
-	if (!settings_.read_value("", "milliunits", value, error))
+	if (!_settings.read_value("", "milliunits", value, error))
 		return false;
 	else
 		// default to "yes"
-		setting_milliunits_ = value != "no";
+		_setting_milliunits = value != "no";
 
-	if (!settings_.read_value("updates", "autocheck", value, error))
+	if (!_settings.read_value("updates", "autocheck", value, error))
 		return false;
 	else {
 		// default to yes
-		setting_autocheck_updates_ = value != "no";
+		_setting_autocheck_updates = value != "no";
 
-		if (setting_autocheck_updates_) {
-			if (!settings_.read_value("updates", "did_run_once", value, error))
+		if (_setting_autocheck_updates) {
+			if (!_settings.read_value("updates", "did_run_once", value, error))
 				return false;
 			else {
 				if (value != "yes") {
 					// do nothing ... for better first time impression
-					if (!settings_.write_value("updates", "did_run_once", "yes", error)) {}
+					if (!_settings.write_value("updates", "did_run_once", "yes", error)) {}
 				}
 				else {
 					// start checking for updates
-					check_update_.start();
+					_check_update.start();
 
 					// start timer to keep progress of the update check
-					timer_man_.add("update_check", 1500, [&]() { on_update_check(); });
+					_timer_man.add("update_check", 1500, [&]() { on_update_check(); });
 				}
 			}
 		}
 	}
 
-	if (!settings_.read_value("updates", "autodownload", value, error))
+	if (!_settings.read_value("updates", "autodownload", value, error))
 		return false;
 	else
 		// default to yes
-		setting_autodownload_updates_ = value != "no";
+		_setting_autodownload_updates = value != "no";
 
-	if (!settings_.read_value("", "autostart", value, error))
+	if (!_settings.read_value("", "autostart", value, error))
 		return false;
 	else
 		// default to no
-		setting_autostart_ = value == "yes";
+		_setting_autostart = value == "yes";
 
-	if (setting_autostart_) {
+	if (_setting_autostart) {
 		std::string command;
 #ifdef _WIN64
-		command = "\"" + install_location_64_ + "pc_info64.exe\"";
+		command = "\"" + _install_location_64 + "pc_info64.exe\"";
 #else
-		command = "\"" + install_location_32_ + "pc_info32.exe\"";
+		command = "\"" + _install_location_32 + "pc_info32.exe\"";
 #endif
 		command += " /systemtray";
 
@@ -323,19 +323,19 @@ bool main_form::on_initialize(std::string& error) {
 	}
 
 	// size and stuff
-	ctrls_
+	_ctrls
 		.allow_resize(false)
-		.start_hidden(system_tray_mode_);
-	apprnc_
+		.start_hidden(_system_tray_mode);
+	_apprnc
 		.set_icons(ico_resource, ico_resource)
-		.theme(setting_darktheme_ ? lecui::themes::dark : lecui::themes::light);
-	dim_.set_size({ 1120, 570 });
+		.theme(_setting_darktheme ? lecui::themes::dark : lecui::themes::light);
+	_dim.set_size({ 1120, 570 });
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
 
 	// add form menu
-	form_menu_.add("• • •", "Settings and more", {
+	_form_menu.add("• • •", "Settings and more", {
 		{ "Settings", [this]() { settings(); } },
 		{ "Updates", [this]() { updates(); } },
 		{ "About", [this]() { about(); } },
@@ -344,51 +344,51 @@ bool main_form::on_initialize(std::string& error) {
 		}, error);
 
 	// read pc, power, cpu, gpu, memory and drive info
-	pc_info_.pc(pc_details_, error);
-	pc_info_.power(power_, error);
-	pc_info_.cpu(cpus_, error);
-	pc_info_.gpu(gpus_, error);
-	pc_info_.ram(ram_, error);
-	pc_info_.drives(drives_, error);
+	_pc_info.pc(_pc_details, error);
+	_pc_info.power(_power, error);
+	_pc_info.cpu(_cpus, error);
+	_pc_info.gpu(_gpus, error);
+	_pc_info.ram(_ram, error);
+	_pc_info.drives(_drives, error);
 
 	return true;
 }
 
 void main_form::updates() {
-	if (check_update_.checking() || timer_man_.running("update_check"))
+	if (_check_update.checking() || _timer_man.running("update_check"))
 		return;
 
-	if (download_update_.downloading() || timer_man_.running("update_download"))
+	if (_download_update.downloading() || _timer_man.running("update_download"))
 		return;
 
 	std::string error, value;
-	if (!settings_.read_value("updates", "readytoinstall", value, error)) {}
+	if (!_settings.read_value("updates", "readytoinstall", value, error)) {}
 
 	if (!value.empty()) {
 		// file integrity confirmed ... install update
 		if (prompt("An update has already been downloaded and is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
-			restart_now_ = true;
+			_restart_now = true;
 			close();
 		}
 		return;
 	}
 
 	message("We will check for updates in the background and notify you if any are found.");
-	update_check_initiated_manually_ = true;
+	_update_check_initiated_manually = true;
 
 	// start checking for updates
-	check_update_.start();
+	_check_update.start();
 
 	// start timer to keep progress of the update check
-	timer_man_.add("update_check", 1500, [&]() { on_update_check(); });
+	_timer_man.add("update_check", 1500, [&]() { on_update_check(); });
 }
 
 void main_form::on_start() {
 	start_refresh_timer();
 
-	if (installed_) {
+	if (_installed) {
 		std::string error;
-		if (!tray_icon_.add(ico_resource, std::string(appname) + " " +
+		if (!_tray_icon.add(ico_resource, std::string(appname) + " " +
 			std::string(appversion) + " (" + std::string(architecture) + ")",
 			{
 			{ "<strong>Show PC Info</strong>", [this]() { restore(); } },
@@ -403,53 +403,53 @@ void main_form::on_start() {
 		}
 	}
 
-	splash_.remove();
+	_splash.remove();
 }
 
 void main_form::start_refresh_timer() {
-	timer_man_.add("refresh", refresh_interval_, [&]() { on_refresh(); });
+	_timer_man.add("refresh", _refresh_interval, [&]() { on_refresh(); });
 }
 
 void main_form::stop_refresh_timer() {
-	timer_man_.stop("refresh");
+	_timer_man.stop("refresh");
 }
 
 bool main_form::on_layout(std::string& error) {
 	// add home page
-	auto& home = page_man_.add("home");
+	auto& home = _page_man.add("home");
 
 	// compute label heights
 	const lecui::rect page_rect = { 0.f, home.size().width, 0.f, home.size().height };
-	title_height = dim_.measure_label(sample_text_, font_, title_font_size_, true, false, page_rect).height();
-	highlight_height = dim_.measure_label(sample_text_, font_, highlight_font_size_, true, false, page_rect).height();
-	detail_height = dim_.measure_label(sample_text_, font_, detail_font_size_, true, false, page_rect).height();
-	caption_height = dim_.measure_label(sample_text_, font_, caption_font_size_, true, false, page_rect).height();
+	title_height = _dim.measure_label(_sample_text, _font, _title_font_size, true, false, page_rect).height();
+	highlight_height = _dim.measure_label(_sample_text, _font, _highlight_font_size, true, false, page_rect).height();
+	detail_height = _dim.measure_label(_sample_text, _font, _detail_font_size, true, false, page_rect).height();
+	caption_height = _dim.measure_label(_sample_text, _font, _caption_font_size, true, false, page_rect).height();
 
 	//////////////////////////////////////////////////
 	// 1. Add pane for pc details
 	lecui::containers::pane_builder pc_details_pane(home, "pc_details_pane");
-	pc_details_pane().rect({ margin_, margin_ + 200.f, margin_, home.size().height - margin_ });
+	pc_details_pane().rect({ _margin, _margin + 200.f, _margin, home.size().height - _margin });
 
 	// add pc details title
 	lecui::widgets::label_builder pc_details_title(pc_details_pane.get());
 	pc_details_title()
 		.rect({ 0.f, pc_details_pane.get().size().width, 0.f, title_height })
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.text("<strong>PC DETAILS</strong>");
 
 	// add pc name
 	lecui::widgets::label_builder pc_name_caption(pc_details_pane.get());
 	pc_name_caption()
 		.text("Name")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_details_title().rect())
-		.rect().height(caption_height).snap_to(pc_details_title().rect(), snap_type::bottom, margin_);
+		.rect().height(caption_height).snap_to(pc_details_title().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder pc_name(pc_details_pane.get());
 	pc_name()
-		.text(pc_details_.name)
-		.font_size(highlight_font_size_)
+		.text(_pc_details.name)
+		.font_size(_highlight_font_size)
 		.rect(pc_details_title().rect())
 		.rect().height(highlight_height).snap_to(pc_name_caption().rect(), snap_type::bottom, 0.f);
 
@@ -457,15 +457,15 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder manufacturer_caption(pc_details_pane.get());
 	manufacturer_caption()
 		.text("Manufacturer")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_name_caption().rect())
-		.rect().snap_to(pc_name().rect(), snap_type::bottom, margin_);
+		.rect().snap_to(pc_name().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder manufacturer(pc_details_pane.get());
 	manufacturer()
-		.text(pc_details_.manufacturer)
-		.font_size(detail_font_size_)
+		.text(_pc_details.manufacturer)
+		.font_size(_detail_font_size)
 		.rect(manufacturer_caption().rect())
 		.rect().height(detail_height).snap_to(manufacturer_caption().rect(), snap_type::bottom, 0.f);
 
@@ -473,15 +473,15 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder model_caption(pc_details_pane.get());
 	model_caption()
 		.text("Model")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_name_caption().rect())
-		.rect().snap_to(manufacturer().rect(), snap_type::bottom, margin_);
+		.rect().snap_to(manufacturer().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder model(pc_details_pane.get());
 	model()
-		.text(pc_details_.model)
-		.font_size(detail_font_size_)
+		.text(_pc_details.model)
+		.font_size(_detail_font_size)
 		.rect(manufacturer().rect())
 		.rect().snap_to(model_caption().rect(), snap_type::bottom, 0.f);
 
@@ -489,15 +489,15 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder type_caption(pc_details_pane.get());
 	type_caption()
 		.text("System type")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_name_caption().rect())
-		.rect().snap_to(model().rect(), snap_type::bottom, margin_);
+		.rect().snap_to(model().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder type(pc_details_pane.get());
 	type()
-		.text(pc_details_.system_type)
-		.font_size(detail_font_size_)
+		.text(_pc_details.system_type)
+		.font_size(_detail_font_size)
 		.rect(model().rect())
 		.rect().snap_to(type_caption().rect(), snap_type::bottom, 0.f);
 
@@ -505,15 +505,15 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder bios_sn_caption(pc_details_pane.get());
 	bios_sn_caption()
 		.text("BIOS Serial Number")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_name_caption().rect())
-		.rect().snap_to(type().rect(), snap_type::bottom, margin_);
+		.rect().snap_to(type().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder bios_sn(pc_details_pane.get());
 	bios_sn()
-		.text(pc_details_.bios_serial_number)
-		.font_size(detail_font_size_)
+		.text(_pc_details.bios_serial_number)
+		.font_size(_detail_font_size)
 		.rect(type().rect())
 		.rect().snap_to(bios_sn_caption().rect(), snap_type::bottom, 0.f);
 
@@ -521,16 +521,16 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder board_sn_caption(pc_details_pane.get());
 	board_sn_caption()
 		.text("Motherboard Serial Number")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(pc_name_caption().rect())
-		.rect().snap_to(bios_sn().rect(), snap_type::bottom, margin_);
+		.rect().snap_to(bios_sn().rect(), snap_type::bottom, _margin);
 	
 
 	lecui::widgets::label_builder board_sn(pc_details_pane.get());
 	board_sn()
-		.text(pc_details_.motherboard_serial_number)
-		.font_size(detail_font_size_)
+		.text(_pc_details.motherboard_serial_number)
+		.font_size(_detail_font_size)
 		.rect(bios_sn().rect())
 		.rect().snap_to(board_sn_caption().rect(), snap_type::bottom, 0.f);
 
@@ -538,39 +538,39 @@ bool main_form::on_layout(std::string& error) {
 	if (true) {
 		lecui::widgets::label_builder cpu_summary(pc_details_pane.get());
 		cpu_summary()
-			.text(std::to_string(cpus_.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(cpus_.size() == 1 ? " CPU" : " CPUs") + "</span>")
-			.font_size(highlight_font_size_)
+			.text(std::to_string(_cpus.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_cpus.size() == 1 ? " CPU" : " CPUs") + "</span>")
+			.font_size(_highlight_font_size)
 			.rect(pc_name().rect())
-			.rect().height(highlight_height).snap_to(board_sn().rect(), snap_type::bottom, 2 * margin_);
+			.rect().height(highlight_height).snap_to(board_sn().rect(), snap_type::bottom, 2 * _margin);
 		
 		lecui::widgets::label_builder gpu_summary(pc_details_pane.get());
 		gpu_summary()
-			.text(std::to_string(gpus_.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(gpus_.size() == 1 ? " GPU" : " GPUs") + "</span>")
-			.font_size(highlight_font_size_)
+			.text(std::to_string(_gpus.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_gpus.size() == 1 ? " GPU" : " GPUs") + "</span>")
+			.font_size(_highlight_font_size)
 			.rect(pc_name().rect())
 			.rect().height(highlight_height).snap_to(cpu_summary().rect(), snap_type::bottom, 0.f);
 
 		lecui::widgets::label_builder ram_summary(pc_details_pane.get());
 		ram_summary()
-			.text(std::to_string(ram_.ram_chips.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(ram_.ram_chips.size() == 1 ?
+			.text(std::to_string(_ram.ram_chips.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_ram.ram_chips.size() == 1 ?
 				" RAM chip" : " RAM chips") + "</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(pc_name().rect())
 			.rect().height(highlight_height).snap_to(gpu_summary().rect(), snap_type::bottom, 0.f);
 
 		lecui::widgets::label_builder drive_summary(pc_details_pane.get(), "drive_summary");
 		drive_summary()
-			.text(std::to_string(drives_.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(drives_.size() == 1 ?
+			.text(std::to_string(_drives.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_drives.size() == 1 ?
 				" drive" : " drives") + "</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(pc_name().rect())
 			.rect().height(highlight_height).snap_to(ram_summary().rect(), snap_type::bottom, 0.f);
 
 		lecui::widgets::label_builder battery_summary(pc_details_pane.get(), "battery_summary");
 		battery_summary()
-			.text(std::to_string(power_.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(power_.batteries.size() == 1 ?
+			.text(std::to_string(_power.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_power.batteries.size() == 1 ?
 				" battery" : " batteries") + "</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(pc_name().rect())
 			.rect().height(highlight_height).snap_to(drive_summary().rect(), snap_type::bottom, 0.f);
 	}
@@ -581,52 +581,52 @@ bool main_form::on_layout(std::string& error) {
 	power_pane()
 		.rect(pc_details_pane().rect())
 		.rect().width(270.f);
-	power_pane().rect().snap_to(pc_details_pane().rect(), snap_type::right_top, margin_);
+	power_pane().rect().snap_to(pc_details_pane().rect(), snap_type::right_top, _margin);
 
 	// add pc details title
 	lecui::widgets::label_builder power_details_title(power_pane.get());
 	power_details_title()
 		.text("<strong>POWER DETAILS</strong>")
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.rect({ 0.f, power_pane.get().size().width, 0.f, title_height });
 
 	// add power status
 	lecui::widgets::label_builder power_status_caption(power_pane.get());
 	power_status_caption()
 		.text("Status")
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(power_details_title().rect())
-		.rect().height(caption_height).snap_to(power_details_title().rect(), snap_type::bottom, margin_);
+		.rect().height(caption_height).snap_to(power_details_title().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::label_builder power_status(power_pane.get(), "power_status");
 	power_status()
-		.text(std::string(power_.ac ? "On AC" : "On Battery") + (", <span style = 'font-size: 8.0pt;'>" + pc_info_.to_string(power_.status) + "</span>"))
-		.font_size(highlight_font_size_)
+		.text(std::string(_power.ac ? "On AC" : "On Battery") + (", <span style = 'font-size: 8.0pt;'>" + _pc_info.to_string(_power.status) + "</span>"))
+		.font_size(_highlight_font_size)
 		.rect(power_details_title().rect())
 		.rect().height(highlight_height).snap_to(power_status_caption().rect(), snap_type::bottom, 0.f);
 
 	// add power level
 	lecui::widgets::label_builder level(power_pane.get(), "level");
-	level().text((power_.level != -1 ?
-		(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) + "<span style = 'font-size: 8.0pt;'>overall power level</span>")
-		.font_size(detail_font_size_)
+	level().text((_power.level != -1 ?
+		(std::to_string(_power.level) + "% ") : std::string("<em>Unknown</em> ")) + "<span style = 'font-size: 8.0pt;'>overall power level</span>")
+		.font_size(_detail_font_size)
 		.rect(power_status_caption().rect())
-		.rect().height(detail_height).snap_to(power_status().rect(), snap_type::bottom, margin_);
+		.rect().height(detail_height).snap_to(power_status().rect(), snap_type::bottom, _margin);
 
 	lecui::widgets::progress_bar_builder level_bar(power_pane.get(), "level_bar");
 	level_bar()
-		.percentage(static_cast<float>(power_.level))
-		.rect().width(power_status().rect().width()).snap_to(level().rect(), snap_type::bottom, margin_ / 2.f);
+		.percentage(static_cast<float>(_power.level))
+		.rect().width(power_status().rect().width()).snap_to(level().rect(), snap_type::bottom, _margin / 2.f);
 
 	// add life remaining label
 	lecui::widgets::label_builder life_remaining(power_pane.get(), "life_remaining");
 	life_remaining()
-		.text(power_.lifetime_remaining.empty() ? std::string() : (power_.lifetime_remaining + " remaining"))
-		.color_text(caption_color_)
-		.font_size(caption_font_size_)
+		.text(_power.lifetime_remaining.empty() ? std::string() : (_power.lifetime_remaining + " remaining"))
+		.color_text(_caption_color)
+		.font_size(_caption_font_size)
 		.rect(level_bar().rect())
-		.rect().height(caption_height).snap_to(level_bar().rect(), snap_type::bottom, margin_ / 2.f);
+		.rect().height(caption_height).snap_to(level_bar().rect(), snap_type::bottom, _margin / 2.f);
 
 	add_battery_pane(power_pane.get(), life_remaining().rect().bottom());
 
@@ -634,14 +634,14 @@ bool main_form::on_layout(std::string& error) {
 	// 2. Add pane for cpu details
 	lecui::containers::pane_builder cpu_pane(home);
 	cpu_pane().rect()
-		.left(power_pane().rect().right() + margin_).width(300.f)
-		.top(margin_).height(240.f);
+		.left(power_pane().rect().right() + _margin).width(300.f)
+		.top(_margin).height(240.f);
 
 	// add cpu title
 	lecui::widgets::label_builder cpu_title(cpu_pane.get());
 	cpu_title()
 		.text("<strong>CPU DETAILS</strong>")
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.rect({ 0.f, cpu_pane.get().size().width, 0.f, title_height });
 
 	lecui::containers::tab_pane_builder cpu_tab_pane(cpu_pane.get());
@@ -656,21 +656,21 @@ bool main_form::on_layout(std::string& error) {
 
 	// add as many tab panes as there are cpus
 	int cpu_number = 0;
-	for (const auto& cpu : cpus_) {
+	for (const auto& cpu : _cpus) {
 		lecui::containers::tab_builder cpu_pane(cpu_tab_pane, "CPU " + std::to_string(cpu_number));
 
 		// add cpu name
 		lecui::widgets::label_builder cpu_name_caption(cpu_pane.get());
 		cpu_name_caption()
 			.text("Name")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect({ 0.f, cpu_pane.get().size().width, 0.f, caption_height });
 
 		lecui::widgets::label_builder cpu_name(cpu_pane.get());
 		cpu_name()
 			.text(cpu.name)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(cpu_name_caption().rect())
 			.rect().height(detail_height).snap_to(cpu_name_caption().rect(), snap_type::bottom, 0.f);
 
@@ -678,32 +678,32 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder status_caption(cpu_pane.get());
 		status_caption()
 			.text("Status")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(cpu_name_caption().rect())
-			.rect().snap_to(cpu_name().rect(), snap_type::bottom, margin_);
+			.rect().snap_to(cpu_name().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder status(cpu_pane.get());
 		status()
 			.text(cpu.status)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(status_caption().rect())
 			.rect().height(detail_height).snap_to(status_caption().rect(), snap_type::bottom, 0.f);
 		if (cpu.status == "OK")
-			status().color_text(ok_color_);
+			status().color_text(_ok_color);
 
 		// add base speed
 		lecui::widgets::label_builder base_speed(cpu_pane.get());
 		base_speed()
 			.text(leccore::round_off::to_string(cpu.base_speed, 2) + "GHz <span style = 'font-size: 8.0pt;'>base speed</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(status().rect())
-			.rect().height(highlight_height).snap_to(status().rect(), snap_type::bottom, margin_);
+			.rect().height(highlight_height).snap_to(status().rect(), snap_type::bottom, _margin);
 
 		// add cpu cores
 		lecui::widgets::label_builder cores(cpu_pane.get());
 		cores()
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.text(std::to_string(cpu.cores) +
 				"<span style = 'font-size: 8.0pt;'>" +
 				std::string(cpu.cores == 1 ? " core" : " cores") + "</span>, " +
@@ -711,7 +711,7 @@ bool main_form::on_layout(std::string& error) {
 				"<span style = 'font-size: 8.0pt;'>" +
 				std::string(cpu.cores == 1 ? " logical processor" : " logical processors") + "</span>")
 			.rect(base_speed().rect())
-			.rect().height(highlight_height).snap_to(base_speed().rect(), snap_type::bottom, margin_);
+			.rect().height(highlight_height).snap_to(base_speed().rect(), snap_type::bottom, _margin);
 
 		cpu_number++;
 	}
@@ -722,14 +722,14 @@ bool main_form::on_layout(std::string& error) {
 	// 3. Add pane for gpu details
 	lecui::containers::pane_builder gpu_pane(home);
 	gpu_pane().rect()
-		.left(cpu_pane().rect().right() + margin_).width(300.f)
-		.top(margin_).height(240.f);
+		.left(cpu_pane().rect().right() + _margin).width(300.f)
+		.top(_margin).height(240.f);
 
 	// add gpu title
 	lecui::widgets::label_builder gpu_title(gpu_pane.get());
 	gpu_title()
 		.text("<strong>GPU DETAILS</strong>")
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.rect({ 0.f, gpu_pane.get().size().width, 0.f, title_height });
 
 	lecui::containers::tab_pane_builder gpu_tab_pane(gpu_pane.get());
@@ -744,7 +744,7 @@ bool main_form::on_layout(std::string& error) {
 
 	// add as many tab panes as there are gpus
 	int gpu_number = 0;
-	for (const auto& gpu : gpus_) {
+	for (const auto& gpu : _gpus) {
 		lecui::containers::tab_builder gpu_pane(gpu_tab_pane,
 			"GPU " + std::to_string(gpu_number));
 
@@ -752,14 +752,14 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder gpu_name_caption(gpu_pane.get());
 		gpu_name_caption()
 			.text("Name")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect({ 0.f, gpu_pane.get().size().width, 0.f, caption_height });
 
 		lecui::widgets::label_builder gpu_name(gpu_pane.get());
 		gpu_name()
 			.text(gpu.name)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(gpu_name_caption().rect())
 			.rect().height(detail_height).snap_to(gpu_name_caption().rect(),
 				snap_type::bottom, 0.f);
@@ -768,33 +768,33 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder status_caption(gpu_pane.get());
 		status_caption()
 			.text("Status")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(gpu_name_caption().rect())
-			.rect().width(gpu_pane.get().size().width / 4.f).snap_to(gpu_name().rect(), snap_type::bottom_left, margin_);
+			.rect().width(gpu_pane.get().size().width / 4.f).snap_to(gpu_name().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder status(gpu_pane.get());
 		status()
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(status_caption().rect())
 			.rect().height(detail_height).snap_to(status_caption().rect(), snap_type::bottom, 0.f);
 		status().text() = gpu.status;
 		if (gpu.status == "OK")
-			status().color_text(ok_color_);
+			status().color_text(_ok_color);
 
 		// add gpu resolution
 		lecui::widgets::label_builder resolution_caption(gpu_pane.get());
 		resolution_caption()
 			.text("Resolution")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(status_caption().rect())
-			.rect().right(gpu_name_caption().rect().right()).snap_to(status_caption().rect(), snap_type::right, margin_);
+			.rect().right(gpu_name_caption().rect().right()).snap_to(status_caption().rect(), snap_type::right, _margin);
 
 		lecui::widgets::label_builder resolution(gpu_pane.get());
 		resolution()
 			.text(std::to_string(gpu.horizontal_resolution) + "x" + std::to_string(gpu.vertical_resolution) + " (" + gpu.resolution_name + ")")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(resolution_caption().rect())
 			.rect().height(detail_height).snap_to(resolution_caption().rect(), snap_type::bottom, 0.f);
 
@@ -802,9 +802,9 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder dedicated_ram(gpu_pane.get());
 		dedicated_ram()
 			.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(status().rect())
-			.rect().width(gpu_name_caption().rect().width()).height(highlight_height).snap_to(status().rect(), snap_type::bottom_left, margin_);
+			.rect().width(gpu_name_caption().rect().width()).height(highlight_height).snap_to(status().rect(), snap_type::bottom_left, _margin);
 
 		// add refresh rate and memory
 		lecui::widgets::label_builder additional(gpu_pane.get());
@@ -812,9 +812,9 @@ bool main_form::on_layout(std::string& error) {
 			"<span style = 'font-size: 8.0pt;'>refresh rate</span>, " +
 			leccore::format_size(gpu.total_graphics_memory) + " " +
 			"<span style = 'font-size: 8.0pt;'>graphics memory</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(status().rect())
-			.rect().width(dedicated_ram().rect().width()).height(highlight_height).snap_to(dedicated_ram().rect(), snap_type::bottom_left, margin_);
+			.rect().width(dedicated_ram().rect().width()).height(highlight_height).snap_to(dedicated_ram().rect(), snap_type::bottom_left, _margin);
 
 		gpu_number++;
 	}
@@ -827,23 +827,23 @@ bool main_form::on_layout(std::string& error) {
 	ram_pane().rect()
 		.left(cpu_pane().rect().left())
 		.width(300.f)
-		.top(cpu_pane().rect().bottom() + margin_)
+		.top(cpu_pane().rect().bottom() + _margin)
 		.height(270.f);
 
 	// add ram title
 	lecui::widgets::label_builder ram_title(ram_pane.get());
 	ram_title()
 		.text("<strong>RAM DETAILS</strong>")
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.rect({ 0.f, ram_pane.get().size().width, 0.f, title_height });
 
 	// add ram summary
 	lecui::widgets::label_builder ram_summary(ram_pane.get());
-	ram_summary().text(leccore::format_size(ram_.size) + " " +
+	ram_summary().text(leccore::format_size(_ram.size) + " " +
 		"<span style = 'font-size: 8.0pt;'>capacity</span>, " +
-		std::to_string(ram_.speed) + "MHz " +
+		std::to_string(_ram.speed) + "MHz " +
 		"<span style = 'font-size: 8.0pt;'>speed</span>")
-		.font_size(highlight_font_size_)
+		.font_size(_highlight_font_size)
 		.rect(ram_title().rect())
 		.rect().snap_to(ram_title().rect(), snap_type::bottom, 0.f).height(highlight_height);
 
@@ -859,21 +859,21 @@ bool main_form::on_layout(std::string& error) {
 
 	// add as many tab panes as there are rams
 	int ram_number = 0;
-	for (const auto& ram : ram_.ram_chips) {
+	for (const auto& ram : _ram.ram_chips) {
 		lecui::containers::tab_builder ram_pane(ram_tab_pane, "RAM " + std::to_string(ram_number));
 
 		// add ram part number
 		lecui::widgets::label_builder ram_part_number_caption(ram_pane.get());
 		ram_part_number_caption()
 			.text("Part Number")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect({ 0.f, ram_pane.get().size().width, 0.f, caption_height });
 
 		lecui::widgets::label_builder ram_part_number(ram_pane.get());
 		ram_part_number()
 			.text(ram.part_number)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(ram_part_number_caption().rect())
 			.rect().height(detail_height).snap_to(ram_part_number_caption().rect(), snap_type::bottom, 0.f);
 
@@ -881,15 +881,15 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder manufacturer_caption(ram_pane.get());
 		manufacturer_caption()
 			.text("Manufacturer")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption().rect())
-			.rect().width(ram_pane.get().size().width).snap_to(ram_part_number().rect(), snap_type::bottom, margin_);
+			.rect().width(ram_pane.get().size().width).snap_to(ram_part_number().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder manufacturer(ram_pane.get());
 		manufacturer()
 			.text(ram.manufacturer)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(manufacturer_caption().rect())
 			.rect().height(detail_height).snap_to(manufacturer_caption().rect(), snap_type::bottom, 0.f);
 
@@ -897,15 +897,15 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder type_caption(ram_pane.get());
 		type_caption()
 			.text("Type")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption().rect())
-			.rect().width(ram_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, margin_);
+			.rect().width(ram_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder type(ram_pane.get());
 		type()
 			.text(ram.type)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(type_caption().rect())
 			.rect().height(detail_height)
 			.snap_to(type_caption().rect(), snap_type::bottom, 0.f);
@@ -914,15 +914,15 @@ bool main_form::on_layout(std::string& error) {
 		lecui::widgets::label_builder form_factor_caption(ram_pane.get());
 		form_factor_caption()
 			.text("Form Factor")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(type_caption().rect())
 			.rect().snap_to(type_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder form_factor(ram_pane.get());
 		form_factor()
 			.text(ram.form_factor)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(form_factor_caption().rect())
 			.rect().height(detail_height).snap_to(form_factor_caption().rect(), snap_type::bottom, 0.f);
 
@@ -933,9 +933,9 @@ bool main_form::on_layout(std::string& error) {
 				"<span style = 'font-size: 8.0pt;'>capacity</span>, " +
 				std::to_string(ram.speed) + "MHz " +
 				"<span style = 'font-size: 8.0pt;'>speed</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(ram_part_number().rect())
-			.rect().height(highlight_height).snap_to(type().rect(), snap_type::bottom, margin_);
+			.rect().height(highlight_height).snap_to(type().rect(), snap_type::bottom, _margin);
 
 		ram_number++;
 	}
@@ -947,18 +947,18 @@ bool main_form::on_layout(std::string& error) {
 	lecui::containers::pane_builder drive_pane(home, "drive_pane");
 	drive_pane()
 		.rect(ram_pane().rect())
-		.rect().snap_to(ram_pane().rect(), snap_type::right, margin_);
+		.rect().snap_to(ram_pane().rect(), snap_type::right, _margin);
 
 	// add drive title
 	lecui::widgets::label_builder drive_title(drive_pane.get(), "drive_title");
 	drive_title().text("<strong>DRIVE DETAILS</strong>")
-		.font_size(title_font_size_)
+		.font_size(_title_font_size)
 		.rect({ 0.f, drive_pane.get().size().width, 0.f, title_height });
 
 	// add pane for drive details
 	add_drive_details_pane(drive_pane.get(), drive_title().rect().bottom());
 
-	page_man_.show("home");
+	_page_man.show("home");
 	return true;
 }
 
@@ -973,21 +973,21 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 
 	// add as many tab panes as there are batteries
 	int battery_number = 0;
-	for (const auto& battery : power_.batteries) {
+	for (const auto& battery : _power.batteries) {
 		lecui::containers::tab_builder battery_pane(battery_tab_pane, "Battery " + std::to_string(battery_number));
 
 		// add battery name
 		lecui::widgets::label_builder battery_name_caption(battery_pane.get());
 		battery_name_caption()
 			.text("Name")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect({ 0.f, battery_pane.get().size().width, 0.f, caption_height });
 
 		lecui::widgets::label_builder battery_name(battery_pane.get());
 		battery_name()
 			.text(battery.name)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(battery_name_caption().rect())
 			.rect().height(detail_height).snap_to(battery_name_caption().rect(), snap_type::bottom, 0.f);
 
@@ -995,15 +995,15 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder manufacturer_caption(battery_pane.get());
 		manufacturer_caption()
 			.text("Manufacturer")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(battery_name_caption().rect())
-			.rect().width(battery_pane.get().size().width).snap_to(battery_name().rect(), snap_type::bottom, margin_);
+			.rect().width(battery_pane.get().size().width).snap_to(battery_name().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder manufacturer(battery_pane.get());
 		manufacturer()
 			.text(battery.manufacturer)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(manufacturer_caption().rect())
 			.rect().height(detail_height).snap_to(manufacturer_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1011,16 +1011,16 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder designed_capacity_caption(battery_pane.get());
 		designed_capacity_caption()
 			.text("Designed Capacity")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(manufacturer_caption().rect())
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, margin_);
+			.rect().width(battery_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder designed_capacity(battery_pane.get(), "designed_capacity");
-		designed_capacity().text(setting_milliunits_ ?
+		designed_capacity().text(_setting_milliunits ?
 			std::to_string(battery.designed_capacity) + "mWh" :
 			leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(designed_capacity_caption().rect())
 			.rect().height(detail_height).snap_to(designed_capacity_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1028,17 +1028,17 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder fully_charged_capacity_caption(battery_pane.get());
 		fully_charged_capacity_caption()
 			.text("Fully Charged Capacity")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(designed_capacity_caption().rect())
 			.rect().snap_to(designed_capacity_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder fully_charged_capacity(battery_pane.get(), "fully_charged_capacity");
 		fully_charged_capacity()
-			.text(setting_milliunits_ ?
+			.text(_setting_milliunits ?
 				std::to_string(battery.fully_charged_capacity) + "mWh" :
 				leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(fully_charged_capacity_caption().rect())
 			.rect().height(detail_height).snap_to(fully_charged_capacity_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1046,27 +1046,27 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::progress_indicator_builder health(battery_pane.get(), "health");
 		health()
 			.percentage(static_cast<float>(battery.health))
-			.rect().snap_to(designed_capacity().rect(), snap_type::bottom_left, margin_);
+			.rect().snap_to(designed_capacity().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder health_caption(battery_pane.get());
-		health_caption().text("BATTERY HEALTH").center_v(true).color_text(caption_color_).font_size(caption_font_size_)
+		health_caption().text("BATTERY HEALTH").center_v(true).color_text(_caption_color).font_size(_caption_font_size)
 			.rect(health().rect())
-			.rect().right(battery_name().rect().right()).snap_to(health().rect(), snap_type::right, margin_);
+			.rect().right(battery_name().rect().right()).snap_to(health().rect(), snap_type::right, _margin);
 
 		// add battery current capacity
 		lecui::widgets::label_builder current_capacity_caption(battery_pane.get());
 		current_capacity_caption()
 			.text("Current Capacity")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(health().rect(), snap_type::bottom_left, margin_);
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect().width(battery_pane.get().size().width / 2.f).snap_to(health().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder current_capacity(battery_pane.get(), "current_capacity");
 		current_capacity()
-			.text(setting_milliunits_ ?
+			.text(_setting_milliunits ?
 				std::to_string(battery.current_capacity) + "mWh" :
 				leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(current_capacity_caption().rect())
 			.rect().height(detail_height).snap_to(current_capacity_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1074,15 +1074,15 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder charge_level_caption(battery_pane.get());
 		charge_level_caption()
 			.text("Charge Level")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(current_capacity_caption().rect())
 			.rect().snap_to(current_capacity_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder charge_level(battery_pane.get(), "charge_level");
 		charge_level()
 			.text(leccore::round_off::to_string(battery.level, 1) + "%")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(charge_level_caption().rect())
 			.rect().height(detail_height).snap_to(charge_level_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1090,17 +1090,17 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder current_voltage_caption(battery_pane.get());
 		current_voltage_caption()
 			.text("Current Voltage")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(battery_name().rect())
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(current_capacity().rect(), snap_type::bottom_left, margin_);
+			.rect().width(battery_pane.get().size().width / 2.f).snap_to(current_capacity().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder current_voltage(battery_pane.get(), "current_voltage");
 		current_voltage()
-			.text(setting_milliunits_ ?
+			.text(_setting_milliunits ?
 				std::to_string(battery.current_voltage) + "mV" :
 				leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(current_voltage_caption().rect())
 			.rect().height(detail_height)
 			.snap_to(current_voltage_caption().rect(), snap_type::bottom, 0.f);
@@ -1109,17 +1109,17 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder charge_rate_caption(battery_pane.get());
 		charge_rate_caption()
 			.text("Charge Rate")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(current_voltage_caption().rect())
 			.rect().snap_to(current_voltage_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder charge_rate(battery_pane.get(), "charge_rate");
 		charge_rate()
-			.text(setting_milliunits_ ?
+			.text(_setting_milliunits ?
 				std::to_string(battery.current_charge_rate) + "mW" :
 				leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W")
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(charge_rate_caption().rect())
 			.rect().height(detail_height).snap_to(charge_rate_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1127,15 +1127,15 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 		lecui::widgets::label_builder status_caption(battery_pane.get());
 		status_caption()
 			.text("Status")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(battery_name_caption().rect())
-			.rect().width(battery_pane.get().size().width).snap_to(current_voltage().rect(), snap_type::bottom, margin_);
+			.rect().width(battery_pane.get().size().width).snap_to(current_voltage().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder status(battery_pane.get(), "status");
 		status()
-			.text(pc_info_.to_string(battery.status))
-			.font_size(detail_font_size_)
+			.text(_pc_info.to_string(battery.status))
+			.font_size(_detail_font_size)
 			.rect(status_caption().rect())
 			.rect().height(detail_height).snap_to(status_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1155,21 +1155,21 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 
 	// add as many tab panes as there are drives
 	int drive_number = 0;
-	for (const auto& drive : drives_) {
+	for (const auto& drive : _drives) {
 		lecui::containers::tab_builder drive_pane(drive_tab_pane, "Drive " + std::to_string(drive_number));
 
 		// add drive model
 		lecui::widgets::label_builder drive_model_caption(drive_pane.get());
 		drive_model_caption()
 			.text("Model")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect({ 0.f, drive_pane.get().size().width, 0.f, caption_height });
 
 		lecui::widgets::label_builder drive_model(drive_pane.get());
 		drive_model()
 			.text(drive.model)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(drive_model_caption().rect())
 			.rect().height(detail_height).snap_to(drive_model_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1177,34 +1177,34 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 		lecui::widgets::label_builder status_caption(drive_pane.get());
 		status_caption()
 			.text("Status")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(drive_model_caption().rect())
-			.rect().width(drive_pane.get().size().width / 3.f).snap_to(drive_model().rect(), snap_type::bottom_left, margin_);
+			.rect().width(drive_pane.get().size().width / 3.f).snap_to(drive_model().rect(), snap_type::bottom_left, _margin);
 		
 		lecui::widgets::label_builder status(drive_pane.get(), "status");
 		status()
 			.text(drive.status)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(status_caption().rect())
 			.rect().height(detail_height).snap_to(status_caption().rect(), snap_type::bottom, 0.f);
 
 		if (drive.status == "OK")
-			status().color_text(ok_color_);
+			status().color_text(_ok_color);
 
 		// add storage type
 		lecui::widgets::label_builder storage_type_caption(drive_pane.get());
 		storage_type_caption()
 			.text("Storage Type")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(status_caption().rect())
 			.rect().snap_to(status_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder storage_type(drive_pane.get());
 		storage_type()
 			.text(drive.storage_type)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(status().rect())
 			.rect().snap_to(status().rect(), snap_type::right, 0.f);
 
@@ -1212,15 +1212,15 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 		lecui::widgets::label_builder bus_type_caption(drive_pane.get());
 		bus_type_caption()
 			.text("Bus Type")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(storage_type_caption().rect())
 			.rect().snap_to(storage_type_caption().rect(), snap_type::right, 0.f);
 
 		lecui::widgets::label_builder bus_type(drive_pane.get());
 		bus_type()
 			.text(drive.bus_type)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(storage_type().rect())
 			.rect().snap_to(storage_type().rect(), snap_type::right, 0.f);
 
@@ -1228,15 +1228,15 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 		lecui::widgets::label_builder serial_number_caption(drive_pane.get());
 		serial_number_caption()
 			.text("Serial Number")
-			.color_text(caption_color_)
-			.font_size(caption_font_size_)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(drive_model_caption().rect())
-			.rect().snap_to(status().rect(), snap_type::bottom_left, margin_);
+			.rect().snap_to(status().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder serial_number(drive_pane.get());
 		serial_number()
 			.text(drive.serial_number)
-			.font_size(detail_font_size_)
+			.font_size(_detail_font_size)
 			.rect(serial_number_caption().rect())
 			.rect().height(detail_height).snap_to(serial_number_caption().rect(), snap_type::bottom, 0.f);
 
@@ -1244,15 +1244,15 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 		lecui::widgets::label_builder capacity(drive_pane.get());
 		capacity()
 			.text(leccore::format_size(drive.size) + " " + "<span style = 'font-size: 9.0pt;'>capacity</span>")
-			.font_size(highlight_font_size_)
+			.font_size(_highlight_font_size)
 			.rect(serial_number().rect())
-			.rect().height(highlight_height).snap_to(serial_number().rect(), snap_type::bottom, margin_);
+			.rect().height(highlight_height).snap_to(serial_number().rect(), snap_type::bottom, _margin);
 
 		// add media type
 		lecui::widgets::label_builder additional(drive_pane.get());
 		additional()
 			.text(drive.media_type)
-			.font_size(caption_font_size_)
+			.font_size(_caption_font_size)
 			.rect(capacity().rect())
 			.rect().height(caption_height).snap_to(capacity().rect(), snap_type::bottom, 0.f);
 
@@ -1267,25 +1267,25 @@ void main_form::on_refresh() {
 	bool refresh_ui = false;
 
 	std::string error;
-	std::vector<leccore::pc_info::drive_info> drives_old_ = drives_;
-	if (!pc_info_.drives(drives_, error)) {}
+	std::vector<leccore::pc_info::drive_info> _drives_old = _drives;
+	if (!_pc_info.drives(_drives, error)) {}
 
-	leccore::pc_info::power_info power_old_ = power_;
-	if (!pc_info_.power(power_, error)) {}
+	leccore::pc_info::power_info _power_old = _power;
+	if (!_pc_info.power(_power, error)) {}
 
 	try {
 		// refresh pc details
-		if (drives_old_.size() != drives_.size()) {
+		if (_drives_old.size() != _drives.size()) {
 			auto& drive_summary = lecui::widgets::label_builder::specs(*this, "home/pc_details_pane/drive_summary");
-			drive_summary.text(std::to_string(drives_.size()) + "<span style = 'font-size: 8.0pt;'>" +
-				std::string(drives_.size() == 1 ? " drive" : " drives") +
+			drive_summary.text(std::to_string(_drives.size()) + "<span style = 'font-size: 8.0pt;'>" +
+				std::string(_drives.size() == 1 ? " drive" : " drives") +
 				"</span>");
 		}
 
-		if (power_old_.batteries.size() != power_.batteries.size()) {
+		if (_power_old.batteries.size() != _power.batteries.size()) {
 			auto& battery_summary = lecui::widgets::label_builder::specs(*this, "home/pc_details_pane/battery_summary");
-			battery_summary.text(std::to_string(power_.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
-				std::string(power_.batteries.size() == 1 ? " battery" : " batteries") +
+			battery_summary.text(std::to_string(_power.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
+				std::string(_power.batteries.size() == 1 ? " battery" : " batteries") +
 				"</span>");
 		}
 	}
@@ -1293,36 +1293,36 @@ void main_form::on_refresh() {
 
 	try {
 		// refresh power details
-		if (power_old_.ac != power_.ac) {
+		if (_power_old.ac != _power.ac) {
 			auto& power_status = lecui::widgets::label_builder::specs(*this, "home/power_pane/power_status");
-			power_status.text() = power_.ac ? "On AC" : "On Battery";
+			power_status.text() = _power.ac ? "On AC" : "On Battery";
 			power_status.text() += ", ";
 			power_status.text() += ("<span style = 'font-size: 8.0pt;'>" +
-				pc_info_.to_string(power_.status) + "</span>");
+				_pc_info.to_string(_power.status) + "</span>");
 			refresh_ui = true;
 		}
 
-		if (power_old_.level != power_.level) {
+		if (_power_old.level != _power.level) {
 			auto& level = lecui::widgets::label_builder::specs(*this, "home/power_pane/level");
-			level.text((power_.level != -1 ?
-				(std::to_string(power_.level) + "% ") : std::string("<em>Unknown</em> ")) +
+			level.text((_power.level != -1 ?
+				(std::to_string(_power.level) + "% ") : std::string("<em>Unknown</em> ")) +
 				"<span style = 'font-size: 8.0pt;'>overall power level</span>");
 
 			auto& level_bar = lecui::widgets::progress_bar_builder::specs(*this, "home/power_pane/level_bar");
-			level_bar.percentage(static_cast<float>(power_.level));
+			level_bar.percentage(static_cast<float>(_power.level));
 			refresh_ui = true;
 		}
 
-		if (power_old_.lifetime_remaining != power_.lifetime_remaining) {
+		if (_power_old.lifetime_remaining != _power.lifetime_remaining) {
 			auto& life_remaining = lecui::widgets::label_builder::specs(*this, "home/power_pane/life_remaining");
-			life_remaining.text(power_.lifetime_remaining.empty() ? std::string() :
-				(power_.lifetime_remaining + " remaining"));
+			life_remaining.text(_power.lifetime_remaining.empty() ? std::string() :
+				(_power.lifetime_remaining + " remaining"));
 			refresh_ui = true;
 		}
 
-		if (power_old_.batteries.size() != power_.batteries.size()) {
+		if (_power_old.batteries.size() != _power.batteries.size()) {
 			// close old tab pane
-			page_man_.close("home/power_pane/battery_tab_pane");
+			_page_man.close("home/power_pane/battery_tab_pane");
 
 			auto& life_remaining = lecui::widgets::label_builder::specs(*this, "home/power_pane/life_remaining");
 			auto& power_pane = lecui::containers::pane_builder::get(*this, "home/power_pane");
@@ -1333,16 +1333,16 @@ void main_form::on_refresh() {
 			refresh_ui = true;
 		}
 		else {
-			for (size_t battery_number = 0; battery_number < power_.batteries.size(); battery_number++) {
-				auto& battery_old = power_old_.batteries[battery_number];
-				auto& battery = power_.batteries[battery_number];
+			for (size_t battery_number = 0; battery_number < _power.batteries.size(); battery_number++) {
+				auto& battery_old = _power_old.batteries[battery_number];
+				auto& battery = _power.batteries[battery_number];
 
 				if (battery_old != battery ||
-					setting_milliunits_old_ != setting_milliunits_) {
+					_setting_milliunits_old != _setting_milliunits) {
 					if (battery_old.current_capacity != battery.current_capacity ||
-						setting_milliunits_old_ != setting_milliunits_) {
+						_setting_milliunits_old != _setting_milliunits) {
 						auto& current_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
-						current_capacity.text(setting_milliunits_ ?
+						current_capacity.text(_setting_milliunits ?
 							std::to_string(battery.current_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh");
 					}
@@ -1354,36 +1354,36 @@ void main_form::on_refresh() {
 
 					if (battery_old.current_charge_rate != battery.current_charge_rate) {
 						auto& charge_rate = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
-						charge_rate.text(setting_milliunits_ ?
+						charge_rate.text(_setting_milliunits ?
 							std::to_string(battery.current_charge_rate) + "mW" :
 							leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W");
 					}
 
 					if (battery_old.current_voltage != battery.current_voltage ||
-						setting_milliunits_old_ != setting_milliunits_) {
+						_setting_milliunits_old != _setting_milliunits) {
 						auto& current_voltage = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
-						current_voltage.text(setting_milliunits_ ?
+						current_voltage.text(_setting_milliunits ?
 							std::to_string(battery.current_voltage) + "mV" :
 							leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V");
 					}
 
 					if (battery_old.status != battery.status) {
 						auto& status = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
-						status.text(pc_info_.to_string(battery.status));
+						status.text(_pc_info.to_string(battery.status));
 					}
 
 					if (battery_old.designed_capacity != battery.designed_capacity ||
-						setting_milliunits_old_ != setting_milliunits_) {
+						_setting_milliunits_old != _setting_milliunits) {
 						auto& designed_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
-						designed_capacity.text(setting_milliunits_ ?
+						designed_capacity.text(_setting_milliunits ?
 							std::to_string(battery.designed_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh");
 					}
 
 					if (battery_old.fully_charged_capacity != battery.fully_charged_capacity ||
-						setting_milliunits_old_ != setting_milliunits_) {
+						_setting_milliunits_old != _setting_milliunits) {
 						auto& fully_charged_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
-						fully_charged_capacity.text(setting_milliunits_ ?
+						fully_charged_capacity.text(_setting_milliunits ?
 							std::to_string(battery.fully_charged_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh");
 					}
@@ -1397,16 +1397,16 @@ void main_form::on_refresh() {
 				}
 			}
 
-			setting_milliunits_old_ = setting_milliunits_;
+			_setting_milliunits_old = _setting_milliunits;
 		}
 	}
 	catch (const std::exception) {}
 
 	try {
 		// to-do: refresh drive details
-		if (drives_old_.size() != drives_.size()) {
+		if (_drives_old.size() != _drives.size()) {
 			// close old tab pane
-			page_man_.close("home/drive_pane/drive_tab_pane");
+			_page_man.close("home/drive_pane/drive_tab_pane");
 
 			auto& drive_title = lecui::widgets::label_builder::specs(*this, "home/drive_pane/drive_title");
 			auto& drive_pane = lecui::containers::pane_builder::get(*this, "home/drive_pane");
@@ -1417,17 +1417,17 @@ void main_form::on_refresh() {
 			refresh_ui = true;
 		}
 		else {
-			for (size_t drive_number = 0; drive_number < drives_.size(); drive_number++) {
-				auto& drive_old = drives_old_[drive_number];
-				auto& drive = drives_[drive_number];
+			for (size_t drive_number = 0; drive_number < _drives.size(); drive_number++) {
+				auto& drive_old = _drives_old[drive_number];
+				auto& drive = _drives[drive_number];
 
 				if (drive_old.status != drive.status) {
 					auto& status = lecui::widgets::label_builder::specs(*this, "home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
 					status.text(drive.status);
 					if (drive.status == "OK")
-						status.color_text(ok_color_);
+						status.color_text(_ok_color);
 					else {
-						status.color_text(not_ok_color_);
+						status.color_text(_not_ok_color);
 						// to-do: handle more cases
 					}
 
@@ -1445,15 +1445,15 @@ void main_form::on_refresh() {
 }
 
 void main_form::on_update_check() {
-	if (check_update_.checking())
+	if (_check_update.checking())
 		return;
 
 	// stop the update check timer
-	timer_man_.stop("update_check");
+	_timer_man.stop("update_check");
 
 	std::string error;
-	if (!check_update_.result(update_info_, error)) {
-		if (!setting_autocheck_updates_ || update_check_initiated_manually_)
+	if (!_check_update.result(_update_info, error)) {
+		if (!_setting_autocheck_updates || _update_check_initiated_manually)
 			message("An error occurred while checking for updates:\n" + error);
 
 		return;
@@ -1461,57 +1461,57 @@ void main_form::on_update_check() {
 	
 	// update found
 	const std::string current_version(appversion);
-	const int result = leccore::compare_versions(current_version, update_info_.version);
+	const int result = leccore::compare_versions(current_version, _update_info.version);
 	if (result == -1) {
 		// newer version available
-		if (!setting_autodownload_updates_) {
+		if (!_setting_autodownload_updates) {
 			if (!prompt("<span style = 'font-size: 11.0pt;'>Update Available</span>\n\n"
 				"Your version:\n" + current_version + "\n\n"
-				"New version:\n<span style = 'color: rgb(0, 150, 0);'>" + update_info_.version + "</span>, " + update_info_.date + "\n\n"
+				"New version:\n<span style = 'color: rgb(0, 150, 0);'>" + _update_info.version + "</span>, " + _update_info.date + "\n\n"
 				"<span style = 'font-size: 11.0pt;'>Description</span>\n" +
-				update_info_.description + "\n\n"
+				_update_info.description + "\n\n"
 				"Would you like to download the update now? (" +
-				leccore::format_size(update_info_.size, 2) + ")\n\n"))
+				leccore::format_size(_update_info.size, 2) + ")\n\n"))
 				return;
 		}
 
 		// create update download folder
-		update_directory_ = leccore::user_folder::temp() + "\\" + leccore::hash_string::uuid();
+		_update_directory = leccore::user_folder::temp() + "\\" + leccore::hash_string::uuid();
 
-		if (!leccore::file::create_directory(update_directory_, error))
+		if (!leccore::file::create_directory(_update_directory, error))
 			return;	// to-do: perhaps try again one or two more times? But then again, why would this method fail?
 
 		// download update
-		download_update_.start(update_info_.download_url, update_directory_);
-		timer_man_.add("update_download", 1000, [&]() { on_update_download(); });
+		_download_update.start(_update_info.download_url, _update_directory);
+		_timer_man.add("update_download", 1000, [&]() { on_update_download(); });
 	}
 	else {
-		if (!setting_autocheck_updates_ || update_check_initiated_manually_)
+		if (!_setting_autocheck_updates || _update_check_initiated_manually)
 			message("The latest version is already installed.");
 	}
 }
 
 void main_form::on_close() {
-	if (installed_)
+	if (_installed)
 		hide();
 	else
 		close();
 }
 
 void main_form::on_update_download() {
-	if (download_update_.downloading())
+	if (_download_update.downloading())
 		return;
 
 	// stop the update download timer
-	timer_man_.stop("update_download");
+	_timer_man.stop("update_download");
 
 	auto delete_update_directory = [&]() {
 		std::string error;
-		if (!leccore::file::remove_directory(update_directory_, error)) {}
+		if (!leccore::file::remove_directory(_update_directory, error)) {}
 	};
 
 	std::string error, fullpath;
-	if (!download_update_.result(fullpath, error)) {
+	if (!_download_update.result(fullpath, error)) {
 		message("Download of update failed:\n" + error);
 		delete_update_directory();
 		return;
@@ -1539,7 +1539,7 @@ void main_form::on_update_download() {
 
 	try {
 		const auto result_hash = results.at(leccore::hash_file::algorithm::sha256);
-		if (result_hash != update_info_.hash) {
+		if (result_hash != _update_info.hash) {
 			// update file possibly corrupted
 			message("Update downloaded but files seem to be corrupt and so cannot be installed. "
 				"If the problem persists try downloading the latest version of the app manually.");
@@ -1555,16 +1555,16 @@ void main_form::on_update_download() {
 	}
 
 	// save update location
-	if (!settings_.write_value("updates", "readytoinstall", fullpath, error) ||
-		!settings_.write_value("updates", "tempdirectory", update_directory_, error)) {
+	if (!_settings.write_value("updates", "readytoinstall", fullpath, error) ||
+		!_settings.write_value("updates", "tempdirectory", _update_directory, error)) {
 		message("Update downloaded and verified but the following error occurred:\n" + error);
 		delete_update_directory();
 		return;
 	}
 
 	// file integrity confirmed ... install update
-	if (prompt("Version " + update_info_.version + " is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
-		restart_now_ = true;
+	if (prompt("Version " + _update_info.version + " is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
+		_restart_now = true;
 		close();
 	}
 }
@@ -1573,14 +1573,14 @@ bool main_form::installed() {
 	// check if application is installed
 	std::string error;
 	leccore::registry reg(leccore::registry::scope::current_user);
-	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_32_ + "_is1",
-		"InstallLocation", install_location_32_, error)) {
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + _install_guid_32 + "_is1",
+		"InstallLocation", _install_location_32, error)) {
 	}
-	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + install_guid_64_ + "_is1",
-		"InstallLocation", install_location_64_, error)) {
+	if (!reg.do_read("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + _install_guid_64 + "_is1",
+		"InstallLocation", _install_location_64, error)) {
 	}
 
-	installed_ = !install_location_32_.empty() || !install_location_64_.empty();
+	_installed = !_install_location_32.empty() || !_install_location_64.empty();
 
 	auto portable_file_exists = []()->bool {
 		try {
@@ -1592,16 +1592,16 @@ bool main_form::installed() {
 		}
 	};
 
-	if (installed_) {
+	if (_installed) {
 		// check if app is running from the install location
 		try {
 			const auto current_path = std::filesystem::current_path().string() + "\\";
 
-			if (current_path != install_location_32_ &&
-				current_path != install_location_64_) {
+			if (current_path != _install_location_32 &&
+				current_path != _install_location_64) {
 				if (portable_file_exists()) {
-					real_portable_mode_ = true;
-					installed_ = false;	// run in portable mode
+					_real_portable_mode = true;
+					_installed = false;	// run in portable mode
 				}
 			}
 		}
@@ -1609,29 +1609,29 @@ bool main_form::installed() {
 	}
 	else {
 		if (portable_file_exists())
-			real_portable_mode_ = true;
+			_real_portable_mode = true;
 	}
 
-	return installed_;
+	return _installed;
 }
 
 main_form::main_form(const std::string& caption) :
-	cleanup_mode_(leccore::commandline_arguments::contains("/cleanup")),
-	update_mode_(leccore::commandline_arguments::contains("/update")),
-	recent_update_mode_(leccore::commandline_arguments::contains("/recentupdate")),
-	system_tray_mode_(leccore::commandline_arguments::contains("/systemtray")),
-	settings_(installed() ? reg_settings_.base() : ini_settings_.base()),
+	_cleanup_mode(leccore::commandline_arguments::contains("/cleanup")),
+	_update_mode(leccore::commandline_arguments::contains("/update")),
+	_recent_update_mode(leccore::commandline_arguments::contains("/recentupdate")),
+	_system_tray_mode(leccore::commandline_arguments::contains("/systemtray")),
+	_settings(installed() ? _reg_settings.base() : _ini_settings.base()),
 	form(caption) {
-	installed_ = installed();
+	_installed = installed();
 
-	if (!installed_)
+	if (!_installed)
 		// don't allow system tray mode when running in portable mode
-		system_tray_mode_ = false;
+		_system_tray_mode = false;
 
-	reg_settings_.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
-	ini_settings_.set_ini_path("");	// use app folder for ini settings
+	_reg_settings.set_registry_path("Software\\com.github.alecmus\\" + std::string(appname));
+	_ini_settings.set_ini_path("");	// use app folder for ini settings
 
-	if (cleanup_mode_ || update_mode_ || recent_update_mode_)
+	if (_cleanup_mode || _update_mode || _recent_update_mode)
 		force_instance();
 }
 

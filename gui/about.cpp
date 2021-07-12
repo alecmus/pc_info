@@ -33,10 +33,10 @@
 void main_form::about() {
 	restore();
 
-	if (about_open_)
+	if (_about_open)
 		return;
 
-	manage_async_access a_(about_open_);
+	manage_async_access _a(_about_open);
 
 	std::string display_text =
 		"<span style = 'font-size: 9.0pt;'>" +
