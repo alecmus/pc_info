@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Third beta release. Various improvements including but not limited to the following: application installer, portable version, dark theme option, showing display resolution standard name, application settings, and built-in online update mechanism.</description>
-    <version>1.0.0 beta 3</version>
-    <date>16 Jun 2021</date>
+    <description>Various improvements including but not limited to the following: system tray icon, option to auto-start with Windows, dedicated video ram and total graphics memory, and various bug-fixes.</description>
+    <version>1.0.0 beta 4</version>
+    <date>13 Jul 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.32.zip</download_url>
-      <size>2260584</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.4/update.32.zip</download_url>
+      <size>2301645</size>
       <hash>
-        <sha256>89C004F6B1135C61170B4B4489107ED370CF48F41214B62EE6955C8BE895C745</sha256>
+        <sha256>E345F3C09D137BC47BC08C111C95C0FF472B8659F4B4DA22A09E89F26A94186B</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.3/update.64.zip</download_url>
-      <size>2894540</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.4/update.64.zip</download_url>
+      <size>2937714</size>
       <hash>
-        <sha256>5D508A1A4705BD12A0F8DF505B0C2F09506B5C93D8C745AE9DB69F69DD4B8507</sha256>
+        <sha256>843BC8883FBBE42019ED8619FE9D2E253FB7F9845AE7931BC873F5879734D2CD</sha256>
       </hash>
     </x64>
   </update>
