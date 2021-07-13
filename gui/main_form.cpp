@@ -283,11 +283,17 @@ bool main_form::on_initialize(std::string& error) {
 					if (!_settings.write_value("updates", "did_run_once", "yes", error)) {}
 				}
 				else {
-					// start checking for updates
-					_check_update.start();
+					// schedule checking for updates (5 minutes if in system tray mode, and 5 seconds otherwise)
+					_timer_man.add("start_update_check", _system_tray_mode ? 5 * 60 * 1000 : 5 * 1000, [this]() {
+						// stop the start update check timer
+						_timer_man.stop("start_update_check");
 
-					// start timer to keep progress of the update check
-					_timer_man.add("update_check", 1500, [&]() { on_update_check(); });
+						// start checking for updates
+						_check_update.start();
+
+						// start timer to keep progress of the update check (every 1.5 seconds)
+						_timer_man.add("update_check", 1500, [&]() { on_update_check(); });
+						});
 				}
 			}
 		}
