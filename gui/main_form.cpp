@@ -78,96 +78,108 @@ bool main_form::on_initialize(std::string& error) {
 	}
 	else {
 		// check if there is an update ready to be installed
-		std::string value;
+		std::string value, update_architecture;
 		if (_settings.read_value("updates", "readytoinstall", value, error)) {}
+		if (_settings.read_value("updates", "architecture", update_architecture, error)) {}
 
-		// clear the registry entry
+		// clear the registry entries
 		if (!_settings.delete_value("updates", "readytoinstall", error)) {}
+		if (!_settings.delete_value("updates", "architecture", error)) {}
 
 		if (!value.empty()) {
-			try {
-				const std::string fullpath(value);
-				std::filesystem::path file_path(fullpath);
+			// check if update architecture matches this app's architecture
+			const std::string app_architecture(architecture);
 
-				const std::string directory = file_path.parent_path().string();
-				const std::string filename = file_path.filename().string();
-				
-				// assume the zip file extracts to a directory with the same name
-				std::string unzipped_folder;
-				const auto idx = filename.find(".zip");
+			if (app_architecture == update_architecture ||
+				update_architecture.empty()	// failsafe
+				) {
+				try {
+					const std::string fullpath(value);
+					std::filesystem::path file_path(fullpath);
 
-				if (idx != std::string::npos)
-					unzipped_folder = directory + "\\" + filename.substr(0, idx);
+					const std::string directory = file_path.parent_path().string();
+					const std::string filename = file_path.filename().string();
 
-				// unzip the file into the same directory as the zip file
-				leccore::unzip unzip;
-				unzip.start(fullpath, directory);
+					// assume the zip file extracts to a directory with the same name
+					std::string unzipped_folder;
+					const auto idx = filename.find(".zip");
 
-				while (unzip.unzipping()) {
-					if (!keep_alive()) {
-						// to-do: implement stopping mechanism
-						//unzip.stop()
-						close();
-						return true;
-					}
-				}
-					
-				leccore::unzip::unzip_log log;
-				if (unzip.result(log, error) && std::filesystem::exists(unzipped_folder)) {
-					// get target directory
-					std::string target_directory;
+					if (idx != std::string::npos)
+						unzipped_folder = directory + "\\" + filename.substr(0, idx);
 
-					if (_installed) {
-#ifdef _WIN64
-						target_directory = _install_location_64;
-#else
-						target_directory = _install_location_32;
-#endif
-					}
-					else {
-						if (_real_portable_mode) {
-							try { target_directory = std::filesystem::current_path().string() + "\\"; }
-							catch (const std::exception&) {}
+					// unzip the file into the same directory as the zip file
+					leccore::unzip unzip;
+					unzip.start(fullpath, directory);
+
+					while (unzip.unzipping()) {
+						if (!keep_alive()) {
+							// to-do: implement stopping mechanism
+							//unzip.stop()
+							close();
+							return true;
 						}
 					}
 
-					if (!target_directory.empty()) {
-						if (_settings.write_value("updates", "rawfiles", unzipped_folder, error) &&
-							_settings.write_value("updates", "target", target_directory, error)) {
+					leccore::unzip::unzip_log log;
+					if (unzip.result(log, error) && std::filesystem::exists(unzipped_folder)) {
+						// get target directory
+						std::string target_directory;
+
+						if (_installed) {
+#ifdef _WIN64
+							target_directory = _install_location_64;
+#else
+							target_directory = _install_location_32;
+#endif
+						}
+						else {
 							if (_real_portable_mode) {
-								try {
-									// copy the .config file to the unzipped folder
-									std::filesystem::path p("pc_info.ini");
-									const std::string dest_file = unzipped_folder + "\\" + p.filename().string();
-									std::filesystem::copy_file(p, dest_file, std::filesystem::copy_options::overwrite_existing);
-								}
+								try { target_directory = std::filesystem::current_path().string() + "\\"; }
 								catch (const std::exception&) {}
 							}
+						}
 
-							// run downloaded app from the unzipped folder
+						if (!target_directory.empty()) {
+							if (_settings.write_value("updates", "rawfiles", unzipped_folder, error) &&
+								_settings.write_value("updates", "target", target_directory, error)) {
+								if (_real_portable_mode) {
+									try {
+										// copy the .config file to the unzipped folder
+										std::filesystem::path p("pc_info.ini");
+										const std::string dest_file = unzipped_folder + "\\" + p.filename().string();
+										std::filesystem::copy_file(p, dest_file, std::filesystem::copy_options::overwrite_existing);
+									}
+									catch (const std::exception&) {}
+								}
+
+								// run downloaded app from the unzipped folder
 #ifdef _WIN64
-							const std::string new_exe_fullpath = unzipped_folder + "\\pc_info64.exe";
+								const std::string new_exe_fullpath = unzipped_folder + "\\pc_info64.exe";
 #else
-							const std::string new_exe_fullpath = unzipped_folder + "\\pc_info32.exe";
+								const std::string new_exe_fullpath = unzipped_folder + "\\pc_info32.exe";
 #endif
-							if (create_process(new_exe_fullpath, { "/update" }, error)) {
-								close();
-								return true;
+								if (create_process(new_exe_fullpath, { "/update" }, error)) {
+									close();
+									return true;
+								}
 							}
 						}
+
+						// continue app execution normally
 					}
+					else {
+						// delete the update folder ... there many be something wrong with the update file
+						if (!leccore::file::remove_directory(directory, error)) {}
 
-					// continue app execution normally
+						// continue app execution normally
+					}
 				}
-				else {
-					// delete the update folder ... there many be something wrong with the update file
-					if (!leccore::file::remove_directory(directory, error)) {}
-
+				catch (const std::exception&) {
 					// continue app execution normally
 				}
 			}
-			catch (const std::exception&) {
-				// continue app execution normally
+			else {
+				// system architecture did not match ... continue app execution normally
 			}
 		}
 		else
@@ -1560,8 +1572,10 @@ void main_form::on_update_download() {
 		return;
 	}
 
-	// save update location
+	// save update location and update architecture
+	const std::string update_architecture(architecture);
 	if (!_settings.write_value("updates", "readytoinstall", fullpath, error) ||
+		!_settings.write_value("updates", "architecture", update_architecture, error) ||
 		!_settings.write_value("updates", "tempdirectory", _update_directory, error)) {
 		message("Update downloaded and verified but the following error occurred:\n" + error);
 		delete_update_directory();
