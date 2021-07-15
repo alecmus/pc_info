@@ -1693,7 +1693,14 @@ void main_form::on_update_download() {
 
 	// update status label
 	try {
-		lecui::widgets::label_builder::specs(*this, "home/update_status").text("v" + _update_info.version + " ready to be installed");
+		lecui::widgets::label_builder::specs(*this, "home/update_status")
+			.text("v" + _update_info.version + " ready to be installed")
+			.events().action = [this]() {
+			if (prompt("Would you like to restart the app now so the update can be applied?")) {
+				_restart_now = true;
+				close();
+			}
+		};
 		update();
 	}
 	catch (const std::exception&) {}
