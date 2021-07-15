@@ -387,7 +387,7 @@ void main_form::updates() {
 
 	if (!value.empty()) {
 		// file integrity confirmed ... install update
-		if (prompt("An update has already been downloaded and is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
+		if (prompt("An update has already been downloaded and is ready to be installed.\nWould you like to apply the update now?")) {
 			_restart_now = true;
 			close();
 		}
@@ -1696,7 +1696,7 @@ void main_form::on_update_download() {
 		lecui::widgets::label_builder::specs(*this, "home/update_status")
 			.text("v" + _update_info.version + " ready to be installed")
 			.events().action = [this]() {
-			if (prompt("Would you like to restart the app now so the update can be applied?")) {
+			if (prompt("Would you like to apply the update now?")) {
 				_restart_now = true;
 				close();
 			}
@@ -1706,7 +1706,7 @@ void main_form::on_update_download() {
 	catch (const std::exception&) {}
 
 	// file integrity confirmed ... install update
-	if (prompt("Version " + _update_info.version + " is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
+	if (prompt("Version " + _update_info.version + " is ready to be installed.\nWould you like to apply the update now?")) {
 		_restart_now = true;
 		close();
 	}
