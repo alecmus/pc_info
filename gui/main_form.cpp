@@ -300,6 +300,9 @@ bool main_form::on_initialize(std::string& error) {
 						// stop the start update check timer
 						_timer_man.stop("start_update_check");
 
+						// create update status
+						create_update_status();
+
 						// start checking for updates
 						_check_update.start();
 
@@ -391,8 +394,10 @@ void main_form::updates() {
 		return;
 	}
 
-	message("We will check for updates in the background and notify you if any are found.");
 	_update_check_initiated_manually = true;
+
+	// create update status
+	create_update_status();
 
 	// start checking for updates
 	_check_update.start();
@@ -1466,11 +1471,36 @@ void main_form::on_update_check() {
 	if (_check_update.checking())
 		return;
 
+	// update status label
+	try {
+		auto& text = lecui::widgets::label_builder::specs(*this, "home/update_status").text();
+		const size_t dot_count = std::count(text.begin(), text.end(), '.');
+
+		if (dot_count == 0)
+			text = "Checking for updates ...";
+		else
+			if (dot_count < 10)
+				text += ".";
+			else
+				text = "Checking for updates ...";
+		
+		update();
+	}
+	catch (const std::exception&) {}
+
 	// stop the update check timer
 	_timer_man.stop("update_check");
 
 	std::string error;
 	if (!_check_update.result(_update_info, error)) {
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Error while checking for updates");
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		if (!_setting_autocheck_updates || _update_check_initiated_manually)
 			message("An error occurred while checking for updates:\n" + error);
 
@@ -1482,6 +1512,14 @@ void main_form::on_update_check() {
 	const int result = leccore::compare_versions(current_version, _update_info.version);
 	if (result == -1) {
 		// newer version available
+		
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update available: " + _update_info.version);
+			update();
+		}
+		catch (const std::exception&) {}
+
 		if (!_setting_autodownload_updates) {
 			if (!prompt("<span style = 'font-size: 11.0pt;'>Update Available</span>\n\n"
 				"Your version:\n" + current_version + "\n\n"
@@ -1499,11 +1537,26 @@ void main_form::on_update_check() {
 		if (!leccore::file::create_directory(_update_directory, error))
 			return;	// to-do: perhaps try again one or two more times? But then again, why would this method fail?
 
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update ...");
+			update();
+		}
+		catch (const std::exception&) {}
+
 		// download update
 		_download_update.start(_update_info.download_url, _update_directory);
 		_timer_man.add("update_download", 1000, [&]() { on_update_download(); });
 	}
 	else {
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Latest version is already installed");
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		if (!_setting_autocheck_updates || _update_check_initiated_manually)
 			message("The latest version is already installed.");
 	}
@@ -1517,8 +1570,21 @@ void main_form::on_close() {
 }
 
 void main_form::on_update_download() {
-	if (_download_update.downloading())
+	leccore::download_update::download_info progress;
+	if (_download_update.downloading(progress)) {
+		// update status label
+		try {
+			auto& text = lecui::widgets::label_builder::specs(*this, "home/update_status").text();
+			text = "Downloading update ...";
+
+			if (progress.file_size > 0)
+				text += " " + leccore::round_off::to_string(100. * (double)progress.downloaded / progress.file_size, 0) + "%";
+
+			update();
+		}
+		catch (const std::exception&) {}
 		return;
+	}
 
 	// stop the update download timer
 	_timer_man.stop("update_download");
@@ -1530,6 +1596,14 @@ void main_form::on_update_download() {
 
 	std::string error, fullpath;
 	if (!_download_update.result(fullpath, error)) {
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update failed");
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		message("Download of update failed:\n" + error);
 		delete_update_directory();
 		return;
@@ -1544,12 +1618,21 @@ void main_form::on_update_download() {
 			// to-do: implement stopping mechanism
 			//hash.stop()
 			delete_update_directory();
+			close_update_status();
 			return;
 		}
 	}
 
 	leccore::hash_file::hash_results results;
 	if (!hash.result(results, error)) {
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update file integrity check failed");
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		message("Update downloaded but file integrity check failed:\n" + error);
 		delete_update_directory();
 		return;
@@ -1558,6 +1641,14 @@ void main_form::on_update_download() {
 	try {
 		const auto result_hash = results.at(leccore::hash_file::algorithm::sha256);
 		if (result_hash != _update_info.hash) {
+			// update status label
+			try {
+				lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update files seem to be corrupt");
+				update();
+				close_update_status();
+			}
+			catch (const std::exception&) {}
+
 			// update file possibly corrupted
 			message("Update downloaded but files seem to be corrupt and so cannot be installed. "
 				"If the problem persists try downloading the latest version of the app manually.");
@@ -1567,6 +1658,15 @@ void main_form::on_update_download() {
 	}
 	catch (const std::exception& e) {
 		error = e.what();
+
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update file integrity check failed");
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		message("Update downloaded but file integrity check failed:\n" + error);
 		delete_update_directory();
 		return;
@@ -1577,10 +1677,26 @@ void main_form::on_update_download() {
 	if (!_settings.write_value("updates", "readytoinstall", fullpath, error) ||
 		!_settings.write_value("updates", "architecture", update_architecture, error) ||
 		!_settings.write_value("updates", "tempdirectory", _update_directory, error)) {
+
+		// update status label
+		try {
+			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update failed");	// to-do: improve
+			update();
+			close_update_status();
+		}
+		catch (const std::exception&) {}
+
 		message("Update downloaded and verified but the following error occurred:\n" + error);
 		delete_update_directory();
 		return;
 	}
+
+	// update status label
+	try {
+		lecui::widgets::label_builder::specs(*this, "home/update_status").text("Version " + _update_info.version + " is ready to be installed.");
+		update();
+	}
+	catch (const std::exception&) {}
 
 	// file integrity confirmed ... install update
 	if (prompt("Version " + _update_info.version + " is ready to be installed.\nWould you like to restart the app now so the update can be applied?")) {
@@ -1633,6 +1749,62 @@ bool main_form::installed() {
 	}
 
 	return _installed;
+}
+
+void main_form::create_update_status() {
+	if (_update_details_displayed)
+		return;
+
+	_update_details_displayed = true;
+
+	try {
+		auto& home = _page_man.get(*this, "home");
+		auto& pc_details_pane_specs = lecui::containers::pane_builder::specs(*this, "home/pc_details_pane");
+
+		// add update status label
+		lecui::widgets::label_builder update_status(home, "update_status");
+		update_status()
+			.text("Checking for updates")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect().height(caption_height).width(pc_details_pane_specs.rect().width())
+			.place(pc_details_pane_specs.rect(), 50.f, 100.f);
+
+		// reduce height of pc details pane to accommodate the new update pane
+		pc_details_pane_specs.rect().bottom() = update_status().rect().top() - _margin;
+
+		// update the ui
+		update();
+	}
+	catch (const std::exception&) {
+		// this shouldn't happen, seriously ... but added nonetheless for correctness
+	}
+}
+
+void main_form::close_update_status() {
+	// set timer for closing the update status
+	_timer_man.add("update_status_timer", 3000, [this]() { on_close_update_status(); });
+}
+
+void main_form::on_close_update_status() {
+	// stop close update status timer
+	_timer_man.stop("update_status_timer");
+
+	try {
+		auto& home = _page_man.get(*this, "home");
+		auto& update_status_specs = lecui::widgets::label_builder::specs(*this, "home/update_status");
+		auto& pc_details_pane_specs = lecui::containers::pane_builder::specs(*this, "home/pc_details_pane");
+
+		// restore size of pc details pane
+		pc_details_pane_specs.rect().bottom() = update_status_specs.rect().bottom();
+
+		// close update status label
+		_widget_man.close("home/update_status");
+		update();
+	}
+	catch (const std::exception&) {}
+
+	_update_details_displayed = false;
 }
 
 main_form::main_form(const std::string& caption) :

@@ -103,6 +103,7 @@ class main_form : public lecui::form {
 	lecui::appearance _apprnc{ *this };
 	lecui::dimensions _dim{ *this };
 	lecui::instance_manager _instance_man{ *this, _instance_guid };
+	lecui::widget_manager _widget_man{ *this };
 	lecui::timer_manager _timer_man{ *this };
 	lecui::splash _splash{ *this };
 	lecui::form_menu _form_menu{ *this };
@@ -115,6 +116,8 @@ class main_form : public lecui::form {
 	leccore::pc_info::ram_info _ram;
 	std::vector<leccore::pc_info::drive_info> _drives;
 	leccore::pc_info::power_info _power;
+
+	bool _update_details_displayed = false;
 
 	float title_height;
 	float highlight_height;
@@ -136,6 +139,9 @@ class main_form : public lecui::form {
 	void on_update_check();
 	void on_update_download();
 	bool installed();
+	void create_update_status();
+	void close_update_status();
+	void on_close_update_status();
 
 public:
 	main_form(const std::string& caption);
