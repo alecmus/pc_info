@@ -1286,6 +1286,9 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 }
 
 void main_form::on_refresh() {
+	if (!visible())
+		return;
+
 	stop_refresh_timer();
 	bool refresh_ui = false;
 
