@@ -350,7 +350,7 @@ bool main_form::on_initialize(std::string& error) {
 	_apprnc
 		.set_icons(ico_resource, ico_resource)
 		.theme(_setting_darktheme ? lecui::themes::dark : lecui::themes::light);
-	_dim.set_size({ 1120, 570 });
+	_dim.set_size({ 1120.f, 570.f });
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
@@ -1302,14 +1302,14 @@ void main_form::on_refresh() {
 	try {
 		// refresh pc details
 		if (_drives_old.size() != _drives.size()) {
-			auto& drive_summary = lecui::widgets::label_builder::specs(*this, "home/pc_details_pane/drive_summary");
+			auto& drive_summary = get_label_specs("home/pc_details_pane/drive_summary");
 			drive_summary.text(std::to_string(_drives.size()) + "<span style = 'font-size: 8.0pt;'>" +
 				std::string(_drives.size() == 1 ? " drive" : " drives") +
 				"</span>");
 		}
 
 		if (_power_old.batteries.size() != _power.batteries.size()) {
-			auto& battery_summary = lecui::widgets::label_builder::specs(*this, "home/pc_details_pane/battery_summary");
+			auto& battery_summary = get_label_specs("home/pc_details_pane/battery_summary");
 			battery_summary.text(std::to_string(_power.batteries.size()) + "<span style = 'font-size: 8.0pt;'>" +
 				std::string(_power.batteries.size() == 1 ? " battery" : " batteries") +
 				"</span>");
@@ -1320,7 +1320,7 @@ void main_form::on_refresh() {
 	try {
 		// refresh power details
 		if (_power_old.ac != _power.ac) {
-			auto& power_status = lecui::widgets::label_builder::specs(*this, "home/power_pane/power_status");
+			auto& power_status = get_label_specs("home/power_pane/power_status");
 			power_status.text() = _power.ac ? "On AC" : "On Battery";
 			power_status.text() += ", ";
 			power_status.text() += ("<span style = 'font-size: 8.0pt;'>" +
@@ -1329,18 +1329,18 @@ void main_form::on_refresh() {
 		}
 
 		if (_power_old.level != _power.level) {
-			auto& level = lecui::widgets::label_builder::specs(*this, "home/power_pane/level");
+			auto& level = get_label_specs("home/power_pane/level");
 			level.text((_power.level != -1 ?
 				(std::to_string(_power.level) + "% ") : std::string("<em>Unknown</em> ")) +
 				"<span style = 'font-size: 8.0pt;'>overall power level</span>");
 
-			auto& level_bar = lecui::widgets::progress_bar_builder::specs(*this, "home/power_pane/level_bar");
+			auto& level_bar = get_progress_bar_specs("home/power_pane/level_bar");
 			level_bar.percentage(static_cast<float>(_power.level));
 			refresh_ui = true;
 		}
 
 		if (_power_old.lifetime_remaining != _power.lifetime_remaining) {
-			auto& life_remaining = lecui::widgets::label_builder::specs(*this, "home/power_pane/life_remaining");
+			auto& life_remaining = get_label_specs("home/power_pane/life_remaining");
 			life_remaining.text(_power.lifetime_remaining.empty() ? std::string() :
 				(_power.lifetime_remaining + " remaining"));
 			refresh_ui = true;
@@ -1350,8 +1350,8 @@ void main_form::on_refresh() {
 			// close old tab pane
 			_page_man.close("home/power_pane/battery_tab_pane");
 
-			auto& life_remaining = lecui::widgets::label_builder::specs(*this, "home/power_pane/life_remaining");
-			auto& power_pane = lecui::containers::pane_builder::get(*this, "home/power_pane");
+			auto& life_remaining = get_label_specs("home/power_pane/life_remaining");
+			auto& power_pane = get_pane_page("home/power_pane");
 
 			// add battery pane
 			add_battery_pane(power_pane, life_remaining.rect().bottom());
@@ -1367,19 +1367,19 @@ void main_form::on_refresh() {
 					_setting_milliunits_old != _setting_milliunits) {
 					if (battery_old.current_capacity != battery.current_capacity ||
 						_setting_milliunits_old != _setting_milliunits) {
-						auto& current_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
+						auto& current_capacity = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
 						current_capacity.text(_setting_milliunits ?
 							std::to_string(battery.current_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh");
 					}
 
 					if (battery_old.level != battery.level) {
-						auto& charge_level = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
+						auto& charge_level = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_level");
 						charge_level.text(leccore::round_off::to_string(battery.level, 1) + "%");
 					}
 
 					if (battery_old.current_charge_rate != battery.current_charge_rate) {
-						auto& charge_rate = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
+						auto& charge_rate = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/charge_rate");
 						charge_rate.text(_setting_milliunits ?
 							std::to_string(battery.current_charge_rate) + "mW" :
 							leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W");
@@ -1387,20 +1387,20 @@ void main_form::on_refresh() {
 
 					if (battery_old.current_voltage != battery.current_voltage ||
 						_setting_milliunits_old != _setting_milliunits) {
-						auto& current_voltage = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
+						auto& current_voltage = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
 						current_voltage.text(_setting_milliunits ?
 							std::to_string(battery.current_voltage) + "mV" :
 							leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V");
 					}
 
 					if (battery_old.status != battery.status) {
-						auto& status = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
+						auto& status = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/status");
 						status.text(_pc_info.to_string(battery.status));
 					}
 
 					if (battery_old.designed_capacity != battery.designed_capacity ||
 						_setting_milliunits_old != _setting_milliunits) {
-						auto& designed_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
+						auto& designed_capacity = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/designed_capacity");
 						designed_capacity.text(_setting_milliunits ?
 							std::to_string(battery.designed_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh");
@@ -1408,14 +1408,14 @@ void main_form::on_refresh() {
 
 					if (battery_old.fully_charged_capacity != battery.fully_charged_capacity ||
 						_setting_milliunits_old != _setting_milliunits) {
-						auto& fully_charged_capacity = lecui::widgets::label_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
+						auto& fully_charged_capacity = get_label_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/fully_charged_capacity");
 						fully_charged_capacity.text(_setting_milliunits ?
 							std::to_string(battery.fully_charged_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh");
 					}
 
 					if (battery_old.health != battery.health) {
-						auto& health = lecui::widgets::progress_indicator_builder::specs(*this, "home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/health");
+						auto& health = get_progress_indicator_specs("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/health");
 						health.percentage(static_cast<float>(battery.health));
 					}
 
@@ -1434,8 +1434,8 @@ void main_form::on_refresh() {
 			// close old tab pane
 			_page_man.close("home/drive_pane/drive_tab_pane");
 
-			auto& drive_title = lecui::widgets::label_builder::specs(*this, "home/drive_pane/drive_title");
-			auto& drive_pane = lecui::containers::pane_builder::get(*this, "home/drive_pane");
+			auto& drive_title = get_label_specs("home/drive_pane/drive_title");
+			auto& drive_pane = get_pane_page("home/drive_pane");
 
 			// add drive details pane
 			add_drive_details_pane(drive_pane, drive_title.rect().bottom());
@@ -1448,7 +1448,7 @@ void main_form::on_refresh() {
 				auto& drive = _drives[drive_number];
 
 				if (drive_old.status != drive.status) {
-					auto& status = lecui::widgets::label_builder::specs(*this, "home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
+					auto& status = get_label_specs("home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/status");
 					status.text(drive.status);
 					if (drive.status == "OK")
 						status.color_text(_ok_color);
@@ -1476,7 +1476,7 @@ void main_form::on_update_check() {
 
 	// update status label
 	try {
-		auto& text = lecui::widgets::label_builder::specs(*this, "home/update_status").text();
+		auto& text = get_label_specs("home/update_status").text();
 		const size_t dot_count = std::count(text.begin(), text.end(), '.');
 
 		if (dot_count == 0)
@@ -1498,7 +1498,7 @@ void main_form::on_update_check() {
 	if (!_check_update.result(_update_info, error)) {
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Error while checking for updates");
+			get_label_specs("home/update_status").text("Error while checking for updates");
 			update();
 			close_update_status();
 		}
@@ -1518,7 +1518,7 @@ void main_form::on_update_check() {
 		
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update available: " + _update_info.version);
+			get_label_specs("home/update_status").text("Update available: " + _update_info.version);
 			update();
 		}
 		catch (const std::exception&) {}
@@ -1542,7 +1542,7 @@ void main_form::on_update_check() {
 
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update ...");
+			get_label_specs("home/update_status").text("Downloading update ...");
 			update();
 		}
 		catch (const std::exception&) {}
@@ -1554,7 +1554,7 @@ void main_form::on_update_check() {
 	else {
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Latest version is already installed");
+			get_label_specs("home/update_status").text("Latest version is already installed");
 			update();
 			close_update_status();
 		}
@@ -1577,7 +1577,7 @@ void main_form::on_update_download() {
 	if (_download_update.downloading(progress)) {
 		// update status label
 		try {
-			auto& text = lecui::widgets::label_builder::specs(*this, "home/update_status").text();
+			auto& text = get_label_specs("home/update_status").text();
 			text = "Downloading update ...";
 
 			if (progress.file_size > 0)
@@ -1601,7 +1601,7 @@ void main_form::on_update_download() {
 	if (!_download_update.result(fullpath, error)) {
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update failed");
+			get_label_specs("home/update_status").text("Downloading update failed");
 			update();
 			close_update_status();
 		}
@@ -1630,7 +1630,7 @@ void main_form::on_update_download() {
 	if (!hash.result(results, error)) {
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update file integrity check failed");
+			get_label_specs("home/update_status").text("Update file integrity check failed");
 			update();
 			close_update_status();
 		}
@@ -1646,7 +1646,7 @@ void main_form::on_update_download() {
 		if (result_hash != _update_info.hash) {
 			// update status label
 			try {
-				lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update files seem to be corrupt");
+				get_label_specs("home/update_status").text("Update files seem to be corrupt");
 				update();
 				close_update_status();
 			}
@@ -1664,7 +1664,7 @@ void main_form::on_update_download() {
 
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Update file integrity check failed");
+			get_label_specs("home/update_status").text("Update file integrity check failed");
 			update();
 			close_update_status();
 		}
@@ -1683,7 +1683,7 @@ void main_form::on_update_download() {
 
 		// update status label
 		try {
-			lecui::widgets::label_builder::specs(*this, "home/update_status").text("Downloading update failed");	// to-do: improve
+			get_label_specs("home/update_status").text("Downloading update failed");	// to-do: improve
 			update();
 			close_update_status();
 		}
@@ -1696,7 +1696,7 @@ void main_form::on_update_download() {
 
 	// update status label
 	try {
-		lecui::widgets::label_builder::specs(*this, "home/update_status")
+		get_label_specs("home/update_status")
 			.text("v" + _update_info.version + " ready to be installed")
 			.events().action = [this]() {
 			if (prompt("Would you like to apply the update now?")) {
@@ -1768,8 +1768,8 @@ void main_form::create_update_status() {
 	_update_details_displayed = true;
 
 	try {
-		auto& home = _page_man.get(*this, "home");
-		auto& pc_details_pane_specs = lecui::containers::pane_builder::specs(*this, "home/pc_details_pane");
+		auto& home = get_page("home");
+		auto& pc_details_pane_specs = get_pane_specs("home/pc_details_pane");
 
 		// add update status label
 		lecui::widgets::label_builder update_status(home, "update_status");
@@ -1801,9 +1801,9 @@ void main_form::on_close_update_status() {
 	_timer_man.stop("update_status_timer");
 
 	try {
-		auto& home = _page_man.get(*this, "home");
-		auto& update_status_specs = lecui::widgets::label_builder::specs(*this, "home/update_status");
-		auto& pc_details_pane_specs = lecui::containers::pane_builder::specs(*this, "home/pc_details_pane");
+		auto& home = get_page("home");
+		auto& update_status_specs = get_label_specs("home/update_status");
+		auto& pc_details_pane_specs = get_pane_specs("home/pc_details_pane");
 
 		// restore size of pc details pane
 		pc_details_pane_specs.rect().bottom() = update_status_specs.rect().bottom();
