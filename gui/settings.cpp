@@ -93,7 +93,7 @@ void main_form::settings() {
 			_apprnc
 				.set_icons(ico_resource, ico_resource)
 				.theme(_setting_darktheme_parent ? lecui::themes::dark : lecui::themes::light);
-			_dim.set_size({ 300, 270 });
+			_dim.set_size(lecui::size().width(300.f).height(270.f));
 
 			return true;
 		}
@@ -106,7 +106,7 @@ void main_form::settings() {
 			lecui::containers::tab_pane_builder settings_pane(home, "settings");
 			settings_pane().rect()
 				.left(_margin).top(_margin)
-				.width(home.size().width - 2.f * _margin).height(home.size().height - 2.f * _margin);
+				.width(home.size().get_width() - 2.f * _margin).height(home.size().get_height() - 2.f * _margin);
 			settings_pane().color_tabs_border().alpha(0);
 			settings_pane().color_tabs().alpha(0);
 			
@@ -117,7 +117,7 @@ void main_form::settings() {
 			lecui::widgets::label_builder darktheme_caption(general_tab.get());
 			darktheme_caption().text("Dark theme");
 			darktheme_caption().rect()
-				.width(general_tab.get().size().width)
+				.width(general_tab.get().size().get_width())
 				.height(20.f);
 
 			lecui::widgets::toggle_builder darktheme(general_tab.get());
@@ -161,7 +161,9 @@ void main_form::settings() {
 			lecui::widgets::label_builder autocheck_updates_caption(updates_tab.get());
 			autocheck_updates_caption()
 				.text("Auto-check")
-				.rect().width(updates_tab.get().size().width).height(20.f);
+				.rect()
+				.width(updates_tab.get().size().get_width())
+				.height(20.f);
 
 			lecui::widgets::toggle_builder autocheck_updates(updates_tab.get());
 			autocheck_updates()

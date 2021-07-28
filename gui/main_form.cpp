@@ -45,9 +45,9 @@ const float main_form::_detail_font_size = 10.f;
 const float main_form::_caption_font_size = 8.f;
 const std::string main_form::_sample_text = "<u><strong>Aq</strong></u>";
 const std::string main_form::_font = "Segoe UI";
-const lecui::color main_form::_caption_color{ 100, 100, 100, 255 };
-const lecui::color main_form::_ok_color{ 0, 150, 0, 255 };
-const lecui::color main_form::_not_ok_color{ 200, 0, 0, 255 };
+const lecui::color main_form::_caption_color{ lecui::color().red(100).green(100).blue(100) };
+const lecui::color main_form::_ok_color{ lecui::color().red(0).green(150).blue(0) };
+const lecui::color main_form::_not_ok_color{ lecui::color().red(200).green(0).blue(0) };
 const unsigned long main_form::_refresh_interval = 3000;
 
 bool main_form::on_initialize(std::string& error) {
@@ -350,7 +350,7 @@ bool main_form::on_initialize(std::string& error) {
 	_apprnc
 		.set_icons(ico_resource, ico_resource)
 		.theme(_setting_darktheme ? lecui::themes::dark : lecui::themes::light);
-	_dim.set_size({ 1120.f, 570.f });
+	_dim.set_size(lecui::size().width(1120.f).height(570.f));
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
@@ -442,7 +442,7 @@ bool main_form::on_layout(std::string& error) {
 	auto& home = _page_man.add("home");
 
 	// compute label heights
-	const lecui::rect page_rect = { 0.f, home.size().width, 0.f, home.size().height };
+	const lecui::rect page_rect = { 0.f, home.size().get_width(), 0.f, home.size().get_height() };
 	title_height = _dim.measure_label(_sample_text, _font, _title_font_size, true, false, page_rect).height();
 	highlight_height = _dim.measure_label(_sample_text, _font, _highlight_font_size, true, false, page_rect).height();
 	detail_height = _dim.measure_label(_sample_text, _font, _detail_font_size, true, false, page_rect).height();
@@ -451,12 +451,12 @@ bool main_form::on_layout(std::string& error) {
 	//////////////////////////////////////////////////
 	// 1. Add pane for pc details
 	lecui::containers::pane_builder pc_details_pane(home, "pc_details_pane");
-	pc_details_pane().rect({ _margin, _margin + 200.f, _margin, home.size().height - _margin });
+	pc_details_pane().rect({ _margin, _margin + 200.f, _margin, home.size().get_height() - _margin });
 
 	// add pc details title
 	lecui::widgets::label_builder pc_details_title(pc_details_pane.get());
 	pc_details_title()
-		.rect({ 0.f, pc_details_pane.get().size().width, 0.f, title_height })
+		.rect({ 0.f, pc_details_pane.get().size().get_width(), 0.f, title_height })
 		.font_size(_title_font_size)
 		.text("<strong>PC DETAILS</strong>");
 
@@ -611,7 +611,7 @@ bool main_form::on_layout(std::string& error) {
 	power_details_title()
 		.text("<strong>POWER DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, power_pane.get().size().width, 0.f, title_height });
+		.rect({ 0.f, power_pane.get().size().get_width(), 0.f, title_height });
 
 	// add power status
 	lecui::widgets::label_builder power_status_caption(power_pane.get());
@@ -665,15 +665,15 @@ bool main_form::on_layout(std::string& error) {
 	cpu_title()
 		.text("<strong>CPU DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, cpu_pane.get().size().width, 0.f, title_height });
+		.rect({ 0.f, cpu_pane.get().size().get_width(), 0.f, title_height });
 
 	lecui::containers::tab_pane_builder cpu_tab_pane(cpu_pane.get());
 	cpu_tab_pane().tab_side(lecui::containers::tab_pane_specs::side::top);
 	cpu_tab_pane().rect()
 		.left(0.f)
-		.right(cpu_pane.get().size().width)
+		.right(cpu_pane.get().size().get_width())
 		.top(cpu_title().rect().bottom())
-		.bottom(cpu_pane.get().size().height);
+		.bottom(cpu_pane.get().size().get_height());
 	cpu_tab_pane().color_tabs().alpha(0);
 	cpu_tab_pane().color_tabs_border().alpha(0);
 
@@ -688,7 +688,7 @@ bool main_form::on_layout(std::string& error) {
 			.text("Name")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect({ 0.f, cpu_pane.get().size().width, 0.f, caption_height });
+			.rect({ 0.f, cpu_pane.get().size().get_width(), 0.f, caption_height });
 
 		lecui::widgets::label_builder cpu_name(cpu_pane.get());
 		cpu_name()
@@ -753,15 +753,15 @@ bool main_form::on_layout(std::string& error) {
 	gpu_title()
 		.text("<strong>GPU DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, gpu_pane.get().size().width, 0.f, title_height });
+		.rect({ 0.f, gpu_pane.get().size().get_width(), 0.f, title_height });
 
 	lecui::containers::tab_pane_builder gpu_tab_pane(gpu_pane.get());
 	gpu_tab_pane().tab_side(lecui::containers::tab_pane_specs::side::top);
 	gpu_tab_pane().rect()
 		.left(0.f)
-		.right(gpu_pane.get().size().width)
+		.right(gpu_pane.get().size().get_width())
 		.top(gpu_title().rect().bottom())
-		.bottom(gpu_pane.get().size().height);
+		.bottom(gpu_pane.get().size().get_height());
 	gpu_tab_pane().color_tabs().alpha(0);
 	gpu_tab_pane().color_tabs_border().alpha(0);
 
@@ -777,7 +777,7 @@ bool main_form::on_layout(std::string& error) {
 			.text("Name")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect({ 0.f, gpu_pane.get().size().width, 0.f, caption_height });
+			.rect({ 0.f, gpu_pane.get().size().get_width(), 0.f, caption_height });
 
 		lecui::widgets::label_builder gpu_name(gpu_pane.get());
 		gpu_name()
@@ -794,7 +794,7 @@ bool main_form::on_layout(std::string& error) {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(gpu_name_caption().rect())
-			.rect().width(gpu_pane.get().size().width / 4.f).snap_to(gpu_name().rect(), snap_type::bottom_left, _margin);
+			.rect().width(gpu_pane.get().size().get_width() / 4.f).snap_to(gpu_name().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder status(gpu_pane.get());
 		status()
@@ -858,7 +858,7 @@ bool main_form::on_layout(std::string& error) {
 	ram_title()
 		.text("<strong>RAM DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, ram_pane.get().size().width, 0.f, title_height });
+		.rect({ 0.f, ram_pane.get().size().get_width(), 0.f, title_height });
 
 	// add ram summary
 	lecui::widgets::label_builder ram_summary(ram_pane.get());
@@ -874,9 +874,9 @@ bool main_form::on_layout(std::string& error) {
 	ram_tab_pane().tab_side(lecui::containers::tab_pane_specs::side::top);
 	ram_tab_pane().rect()
 		.left(0.f)
-		.right(ram_pane.get().size().width)
+		.right(ram_pane.get().size().get_width())
 		.top(ram_summary().rect().bottom())
-		.bottom(ram_pane.get().size().height);
+		.bottom(ram_pane.get().size().get_height());
 	ram_tab_pane().color_tabs().alpha(0);
 	ram_tab_pane().color_tabs_border().alpha(0);
 
@@ -891,7 +891,7 @@ bool main_form::on_layout(std::string& error) {
 			.text("Part Number")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect({ 0.f, ram_pane.get().size().width, 0.f, caption_height });
+			.rect({ 0.f, ram_pane.get().size().get_width(), 0.f, caption_height });
 
 		lecui::widgets::label_builder ram_part_number(ram_pane.get());
 		ram_part_number()
@@ -907,7 +907,7 @@ bool main_form::on_layout(std::string& error) {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption().rect())
-			.rect().width(ram_pane.get().size().width).snap_to(ram_part_number().rect(), snap_type::bottom, _margin);
+			.rect().width(ram_pane.get().size().get_width()).snap_to(ram_part_number().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder manufacturer(ram_pane.get());
 		manufacturer()
@@ -923,7 +923,7 @@ bool main_form::on_layout(std::string& error) {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption().rect())
-			.rect().width(ram_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
+			.rect().width(ram_pane.get().size().get_width() / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder type(ram_pane.get());
 		type()
@@ -976,7 +976,7 @@ bool main_form::on_layout(std::string& error) {
 	lecui::widgets::label_builder drive_title(drive_pane.get(), "drive_title");
 	drive_title().text("<strong>DRIVE DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, drive_pane.get().size().width, 0.f, title_height });
+		.rect({ 0.f, drive_pane.get().size().get_width(), 0.f, title_height });
 
 	// add pane for drive details
 	add_drive_details_pane(drive_pane.get(), drive_title().rect().bottom());
@@ -990,7 +990,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 	lecui::containers::tab_pane_builder battery_tab_pane(power_pane, "battery_tab_pane");
 	battery_tab_pane()
 		.tab_side(lecui::containers::tab_pane_specs::side::top)
-		.rect({ 0.f, power_pane.size().width, top, power_pane.size().height });
+		.rect({ 0.f, power_pane.size().get_width(), top, power_pane.size().get_height() });
 	battery_tab_pane().color_tabs().alpha(0);
 	battery_tab_pane().color_tabs_border().alpha(0);
 
@@ -1005,7 +1005,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.text("Name")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect({ 0.f, battery_pane.get().size().width, 0.f, caption_height });
+			.rect({ 0.f, battery_pane.get().size().get_width(), 0.f, caption_height });
 
 		lecui::widgets::label_builder battery_name(battery_pane.get());
 		battery_name()
@@ -1021,7 +1021,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(battery_name_caption().rect())
-			.rect().width(battery_pane.get().size().width).snap_to(battery_name().rect(), snap_type::bottom, _margin);
+			.rect().width(battery_pane.get().size().get_width()).snap_to(battery_name().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder manufacturer(battery_pane.get());
 		manufacturer()
@@ -1037,7 +1037,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(manufacturer_caption().rect())
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
+			.rect().width(battery_pane.get().size().get_width() / 2.f).snap_to(manufacturer().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder designed_capacity(battery_pane.get(), "designed_capacity");
 		designed_capacity().text(_setting_milliunits ?
@@ -1082,7 +1082,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.text("Current Capacity")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(health().rect(), snap_type::bottom_left, _margin);
+			.rect().width(battery_pane.get().size().get_width() / 2.f).snap_to(health().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder current_capacity(battery_pane.get(), "current_capacity");
 		current_capacity()
@@ -1116,7 +1116,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(battery_name().rect())
-			.rect().width(battery_pane.get().size().width / 2.f).snap_to(current_capacity().rect(), snap_type::bottom_left, _margin);
+			.rect().width(battery_pane.get().size().get_width() / 2.f).snap_to(current_capacity().rect(), snap_type::bottom_left, _margin);
 
 		lecui::widgets::label_builder current_voltage(battery_pane.get(), "current_voltage");
 		current_voltage()
@@ -1153,7 +1153,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(battery_name_caption().rect())
-			.rect().width(battery_pane.get().size().width).snap_to(current_voltage().rect(), snap_type::bottom, _margin);
+			.rect().width(battery_pane.get().size().get_width()).snap_to(current_voltage().rect(), snap_type::bottom, _margin);
 
 		lecui::widgets::label_builder status(battery_pane.get(), "status");
 		status()
@@ -1171,7 +1171,7 @@ void main_form::add_battery_pane(lecui::containers::page& power_pane, const floa
 void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, const float top) {
 	lecui::containers::tab_pane_builder drive_tab_pane(drive_pane, "drive_tab_pane");
 	drive_tab_pane()
-		.rect({ 0.f, drive_pane.size().width, top, drive_pane.size().height })
+		.rect({ 0.f, drive_pane.size().get_width(), top, drive_pane.size().get_height() })
 		.tab_side(lecui::containers::tab_pane_specs::side::top);
 	drive_tab_pane().color_tabs().alpha(0);
 	drive_tab_pane().color_tabs_border().alpha(0);
@@ -1187,7 +1187,7 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 			.text("Model")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect({ 0.f, drive_pane.get().size().width, 0.f, caption_height });
+			.rect({ 0.f, drive_pane.get().size().get_width(), 0.f, caption_height });
 
 		lecui::widgets::label_builder drive_model(drive_pane.get());
 		drive_model()
@@ -1203,7 +1203,7 @@ void main_form::add_drive_details_pane(lecui::containers::page& drive_pane, cons
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(drive_model_caption().rect())
-			.rect().width(drive_pane.get().size().width / 3.f).snap_to(drive_model().rect(), snap_type::bottom_left, _margin);
+			.rect().width(drive_pane.get().size().get_width() / 3.f).snap_to(drive_model().rect(), snap_type::bottom_left, _margin);
 		
 		lecui::widgets::label_builder status(drive_pane.get(), "status");
 		status()
