@@ -26,25 +26,31 @@
 
 #include "version_info.h"
 #include "resource.h"
-#include <liblec/lecui/containers/page.h>
-#include <liblec/lecui/containers/pane.h>
-#include <liblec/lecui/containers/tab_pane.h>
-#include <liblec/lecui/appearance.h>
-#include <liblec/lecui/controls.h>
+
+// lecui
 #include <liblec/lecui/instance.h>
-#include <liblec/lecui/widgets/label.h>
-#include <liblec/lecui/widgets/progress_bar.h>
-#include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/controls.h>
+#include <liblec/lecui/appearance.h>
 #include <liblec/lecui/utilities/timer.h>
 #include <liblec/lecui/utilities/splash.h>
-#include <liblec/lecui/utilities/tray_icon.h>
 #include <liblec/lecui/menus/form_menu.h>
-#include <liblec/leccore/pc_info.h>
-#include <liblec/leccore/web_update.h>
+#include <liblec/lecui/utilities/tray_icon.h>
+#include <liblec/lecui/widgets/widget.h>
+#include <liblec/lecui/containers/page.h>
+
+// leccore
 #include <liblec/leccore/settings.h>
+#include <liblec/leccore/web_update.h>
+#include <liblec/leccore/pc_info.h>
 
 using namespace liblec;
 using snap_type = lecui::rect::snap_type;
+
+#ifdef _WIN64
+#define architecture	"64bit"
+#else
+#define architecture	"32bit"
+#endif
 
 // the main form
 class main_form : public lecui::form {

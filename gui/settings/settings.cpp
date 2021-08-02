@@ -22,8 +22,10 @@
 ** SOFTWARE.
 */
 
-#include "../gui.h"
+#include "../../gui.h"
+#include <liblec/lecui/containers/tab_pane.h>
 #include <liblec/lecui/widgets/toggle.h>
+#include <liblec/lecui/widgets/label.h>
 
 void main_form::settings() {
 	restore();

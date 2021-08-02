@@ -22,7 +22,7 @@
 ** SOFTWARE.
 */
 
-#include "../gui.h"
+#include "../../gui.h"
 
 #ifdef _WIN64
 #define architecture	"64bit"

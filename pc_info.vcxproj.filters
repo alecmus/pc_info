@@ -17,22 +17,37 @@
     <Filter Include="pc_info\gui">
       <UniqueIdentifier>{4bd299d2-f110-4ec5-8b5d-49d526e1212b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pc_info\gui\main_form">
+      <UniqueIdentifier>{2c9e958c-1559-4e5f-91f4-3e7a2b10e758}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pc_info\gui\settings">
+      <UniqueIdentifier>{8238b150-9864-4f68-b759-768408392355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pc_info\gui\about">
+      <UniqueIdentifier>{d903f4fa-f22f-480b-bb8f-2f1b20a5b18d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>pc_info</Filter>
     </ClCompile>
-    <ClCompile Include="gui\main_form.cpp">
-      <Filter>pc_info\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="gui\about.cpp">
-      <Filter>pc_info\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="gui\settings.cpp">
-      <Filter>pc_info\gui</Filter>
-    </ClCompile>
     <ClCompile Include="create_process.cpp">
       <Filter>pc_info</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\main_form\on_initialize.cpp">
+      <Filter>pc_info\gui\main_form</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\main_form\on_layout.cpp">
+      <Filter>pc_info\gui\main_form</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\main_form\main_form.cpp">
+      <Filter>pc_info\gui\main_form</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\settings\settings.cpp">
+      <Filter>pc_info\gui\settings</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\about\about.cpp">
+      <Filter>pc_info\gui\about</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
