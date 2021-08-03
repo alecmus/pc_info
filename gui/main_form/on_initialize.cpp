@@ -321,6 +321,14 @@ bool main_form::on_initialize(std::string& error) {
 		if (!reg.do_delete("Software\\Microsoft\\Windows\\CurrentVersion\\Run", "pc_info", error)) {}
 	}
 
+	// read pc, power, cpu, gpu, memory and drive info
+	_pc_info.pc(_pc_details, error);
+	_pc_info.power(_power, error);
+	_pc_info.cpu(_cpus, error);
+	_pc_info.gpu(_gpus, error);
+	_pc_info.ram(_ram, error);
+	_pc_info.drives(_drives, error);
+
 	// size and stuff
 	_ctrls
 		.allow_resize(false)
@@ -328,7 +336,13 @@ bool main_form::on_initialize(std::string& error) {
 	_apprnc
 		.set_icons(ico_resource, ico_resource)
 		.theme(_setting_darktheme ? lecui::themes::dark : lecui::themes::light);
-	_dim.set_size(lecui::size().width(1120.f).height(570.f));
+
+	float form_width = 1120.f;
+
+	if (_power.batteries.empty())
+		form_width -= (270.f + _margin);
+
+	_dim.set_size(lecui::size().width(form_width).height(570.f));
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
@@ -341,14 +355,6 @@ bool main_form::on_initialize(std::string& error) {
 		{ "" },
 		{ "Exit", [this]() { close(); } }
 		}, error);
-
-	// read pc, power, cpu, gpu, memory and drive info
-	_pc_info.pc(_pc_details, error);
-	_pc_info.power(_power, error);
-	_pc_info.cpu(_cpus, error);
-	_pc_info.gpu(_gpus, error);
-	_pc_info.ram(_ram, error);
-	_pc_info.drives(_drives, error);
 
 	return true;
 }

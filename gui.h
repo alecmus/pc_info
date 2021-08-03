@@ -139,8 +139,24 @@ class main_form : public lecui::form {
 	void settings();
 	void updates();
 	bool on_layout(std::string& error) override;
-	void add_battery_pane(lecui::containers::page& power_pane, const float top);
-	void add_drive_details_pane(lecui::containers::page& drive_pane, const float top);
+
+	void add_pc_details_pane();
+
+	void add_power_pane();
+	void add_battery_pane();
+
+	void add_cpu_pane();
+	void add_cpu_tab_pane();
+
+	void add_gpu_pane();
+	void add_gpu_tab_pane();
+
+	void add_ram_pane();
+	void add_ram_tab_pane();
+
+	void add_drive_pane();
+	void add_drive_tab_pane();
+
 	void on_refresh();
 	void on_update_check();
 	void on_update_download();
