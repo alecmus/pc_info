@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Various improvements including but not limited to the following: system tray icon, option to auto-start with Windows, dedicated video ram and total graphics memory, and various bug-fixes.</description>
-    <version>1.0.0 beta 4</version>
-    <date>13 Jul 2021</date>
+    <description>Various improvements including but not limited to the following: added update status label, resource usage improvements, power details pane now removed if system has no battery.</description>
+    <version>1.0.0 beta 5</version>
+    <date>10 Aug 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.4/update.32.zip</download_url>
-      <size>2301645</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.5/update.32.zip</download_url>
+      <size>2314046</size>
       <hash>
-        <sha256>E345F3C09D137BC47BC08C111C95C0FF472B8659F4B4DA22A09E89F26A94186B</sha256>
+        <sha256>16E2B1470D583475A1A0498AF058CC4A794E015225CBB2BE634B3086534EF1C0</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.4/update.64.zip</download_url>
-      <size>2937714</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.5/update.64.zip</download_url>
+      <size>2945987</size>
       <hash>
-        <sha256>843BC8883FBBE42019ED8619FE9D2E253FB7F9845AE7931BC873F5879734D2CD</sha256>
+        <sha256>FE42927A8A6F3B66A9B1298D0CD9CAD1D2013E712EFD74C397AC70EA4A5CA6F5</sha256>
       </hash>
     </x64>
   </update>
