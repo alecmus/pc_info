@@ -91,7 +91,12 @@ void main_form::on_start() {
 		if (!_tray_icon.add(ico_resource, std::string(appname) + " " +
 			std::string(appversion) + " (" + std::string(architecture) + ")",
 			{
-			{ "<strong>Show PC Info</strong>", [this]() { restore(); } },
+			{ "<strong>Show PC Info</strong>", [this]() {
+				if (minimized())
+					restore();
+				else
+					show();
+			} },
 			{ "" },
 			{ "Settings", [this]() { settings(); } },
 			{ "Updates", [this]() { updates(); } },

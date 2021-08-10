@@ -77,7 +77,11 @@ void main_form::add_pc_details_pane() {
 	auto& home = get_page("home");
 
 	auto& pc_details_pane = lecui::containers::pane::add(home, "pc_details_pane");
-	pc_details_pane.rect({ _margin, _margin + 200.f, _margin, home.size().get_height() - _margin });
+	pc_details_pane.rect(lecui::rect()
+		.left(_margin)
+		.right(_margin + 200.f)
+		.top(_margin)
+		.bottom(home.size().get_height() - _margin));
 
 	// add pc details title
 	auto& pc_details_title = lecui::widgets::label::add(pc_details_pane);
@@ -174,7 +178,6 @@ void main_form::add_pc_details_pane() {
 		.font_size(_caption_font_size)
 		.rect(pc_name_caption.rect())
 		.rect().snap_to(bios_sn.rect(), snap_type::bottom, _margin);
-
 
 	auto& board_sn = lecui::widgets::label::add(pc_details_pane);
 	board_sn

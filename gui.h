@@ -140,6 +140,7 @@ class main_form : public lecui::form {
 	void updates();
 	bool on_layout(std::string& error) override;
 
+	
 	void add_pc_details_pane();
 
 	void add_power_pane();

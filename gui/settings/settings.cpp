@@ -28,7 +28,10 @@
 #include <liblec/lecui/widgets/label.h>
 
 void main_form::settings() {
-	restore();
+	if (minimized())
+		restore();
+	else
+		show();
 
 	if (_settings_open)
 		return;
@@ -326,7 +329,7 @@ void main_form::settings() {
 		_setting_autocheck_updates, _setting_autodownload_updates,
 		_setting_autostart, _install_location_64, _install_location_32, _installed);
 	std::string error;
-	if (!fm.show(error))
+	if (!fm.create(error))
 		message(error);
 
 	if (fm.restart_now()) {

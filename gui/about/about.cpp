@@ -31,7 +31,10 @@
 #endif
 
 void main_form::about() {
-	restore();
+	if (minimized())
+		restore();
+	else
+		show();
 
 	if (_about_open)
 		return;
