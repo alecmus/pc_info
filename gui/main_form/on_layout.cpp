@@ -386,7 +386,8 @@ void main_form::add_battery_pane() {
 
 		auto& current_capacity = lecui::widgets::label::add(battery_pane, "current_capacity");
 		current_capacity
-			.text(_setting_milliunits ?
+			.text(battery.current_capacity == -1 ? "Unknown" :
+				_setting_milliunits ?
 				std::to_string(battery.current_capacity) + "mWh" :
 				leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh")
 			.font_size(_detail_font_size)
@@ -420,7 +421,8 @@ void main_form::add_battery_pane() {
 
 		auto& current_voltage = lecui::widgets::label::add(battery_pane, "current_voltage");
 		current_voltage
-			.text(_setting_milliunits ?
+			.text(battery.current_voltage == -1 ? "Unknown" :
+				_setting_milliunits ?
 				std::to_string(battery.current_voltage) + "mV" :
 				leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V")
 			.font_size(_detail_font_size)

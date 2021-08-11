@@ -231,7 +231,8 @@ void main_form::on_refresh() {
 					if (battery_old.current_capacity != battery.current_capacity ||
 						_setting_milliunits_old != _setting_milliunits) {
 						auto& current_capacity = get_label("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_capacity");
-						current_capacity.text(_setting_milliunits ?
+						current_capacity.text(battery.current_capacity == -1 ? "Unknown" :
+							_setting_milliunits ?
 							std::to_string(battery.current_capacity) + "mWh" :
 							leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh");
 					}
@@ -251,7 +252,8 @@ void main_form::on_refresh() {
 					if (battery_old.current_voltage != battery.current_voltage ||
 						_setting_milliunits_old != _setting_milliunits) {
 						auto& current_voltage = get_label("home/power_pane/battery_tab_pane/Battery " + std::to_string(battery_number) + "/current_voltage");
-						current_voltage.text(_setting_milliunits ?
+						current_voltage.text(battery.current_voltage == -1 ? "Unknown" :
+							_setting_milliunits ?
 							std::to_string(battery.current_voltage) + "mV" :
 							leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V");
 					}
