@@ -24,12 +24,6 @@
 
 #include "../../gui.h"
 
-#ifdef _WIN64
-#define architecture	"64bit"
-#else
-#define architecture	"32bit"
-#endif
-
 void main_form::about() {
 	if (minimized())
 		restore();
