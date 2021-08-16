@@ -56,6 +56,9 @@ void main_form::updates() {
 	if (_check_update.checking() || _timer_man.running("update_check"))
 		return;
 
+	if (_timer_man.running("start_update_check"))
+		_timer_man.stop("start_update_check");
+
 	if (_download_update.downloading() || _timer_man.running("update_download"))
 		return;
 

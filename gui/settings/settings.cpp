@@ -149,7 +149,7 @@ void main_form::settings() {
 				.rect().snap_to(milliunits_caption.rect(), snap_type::bottom, 0.f);
 			milliunits.events().toggle = [&](bool on) { on_milliunits(on); };
 
-			// add auto start with windows checkbox
+			// add auto start with windows toggle button
 			auto& autostart_label = lecui::widgets::label::add(general_tab);
 			autostart_label
 				.text("Start automatically with Windows")
@@ -203,7 +203,7 @@ void main_form::settings() {
 
 		void on_start() override {
 			std::string error;
-			// disable autodownload_updates toggle button is autocheck_updates is off
+			// disable autodownload_updates toggle button if autocheck_updates is off
 			if (_setting_autocheck_updates)
 				_widget_man.enable("home/settings/Updates/autodownload_updates", error);
 			else
@@ -252,7 +252,7 @@ void main_form::settings() {
 			else
 				_setting_autocheck_updates = on;
 
-			// disable autodownload_updates toggle button is autocheck_updates is off
+			// disable autodownload_updates toggle button if autocheck_updates is off
 			if (_setting_autocheck_updates)
 				_widget_man.enable("home/settings/Updates/autodownload_updates", error);
 			else
