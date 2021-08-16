@@ -95,8 +95,10 @@ void main_form::settings() {
 			_ctrls
 				.allow_resize(false)
 				.allow_minimize(false);
+
 			_apprnc
-				.set_icons(ico_resource, ico_resource)
+				.main_icon(ico_resource)
+				.mini_icon(ico_resource)
 				.theme(_setting_darktheme_parent ? lecui::themes::dark : lecui::themes::light);
 			_dim.set_size(lecui::size().width(300.f).height(270.f));
 

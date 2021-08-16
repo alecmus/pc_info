@@ -334,7 +334,8 @@ bool main_form::on_initialize(std::string& error) {
 		.allow_resize(false)
 		.start_hidden(_system_tray_mode);
 	_apprnc
-		.set_icons(ico_resource, ico_resource)
+		.main_icon(ico_resource)
+		.mini_icon(ico_resource)
 		.theme(_setting_darktheme ? lecui::themes::dark : lecui::themes::light);
 
 	float form_width = 1120.f;
