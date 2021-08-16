@@ -23,10 +23,10 @@
 */
 
 #include "../../gui.h"
-#include "../../create_process.h"
 #include <filesystem>
 #include <liblec/leccore/zip.h>
 #include <liblec/leccore/file.h>
+#include <liblec/leccore/system.h>
 
 bool main_form::on_initialize(std::string& error) {
 	if (!_cleanup_mode && !_update_mode && !_system_tray_mode) {
@@ -136,7 +136,7 @@ bool main_form::on_initialize(std::string& error) {
 #else
 								const std::string new_exe_fullpath = unzipped_folder + "\\pc_info32.exe";
 #endif
-								if (create_process(new_exe_fullpath, { "/update" }, error)) {
+								if (leccore::shell::create_process(new_exe_fullpath, { "/update" }, error)) {
 									close();
 									return true;
 								}
@@ -183,7 +183,7 @@ bool main_form::on_initialize(std::string& error) {
 #else
 								const std::string updated_exe_fullpath = target + "\\pc_info32.exe";
 #endif
-								if (create_process(updated_exe_fullpath, { "/recentupdate" }, error)) {}
+								if (leccore::shell::create_process(updated_exe_fullpath, { "/recentupdate" }, error)) {}
 
 								close();
 								return true;

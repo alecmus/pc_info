@@ -31,9 +31,6 @@
     <ClCompile Include="main.cpp">
       <Filter>pc_info</Filter>
     </ClCompile>
-    <ClCompile Include="create_process.cpp">
-      <Filter>pc_info</Filter>
-    </ClCompile>
     <ClCompile Include="gui\main_form\on_initialize.cpp">
       <Filter>pc_info\gui\main_form</Filter>
     </ClCompile>
@@ -58,9 +55,6 @@
       <Filter>pc_info</Filter>
     </ClInclude>
     <ClInclude Include="gui.h">
-      <Filter>pc_info</Filter>
-    </ClInclude>
-    <ClInclude Include="create_process.h">
       <Filter>pc_info</Filter>
     </ClInclude>
   </ItemGroup>
