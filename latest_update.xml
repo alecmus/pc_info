@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Various improvements including but not limited to the following: added update status label, resource usage improvements, power details pane now removed if system has no battery.</description>
-    <version>1.0.0 beta 5</version>
-    <date>10 Aug 2021</date>
+    <description>Various improvements including but not limited to the following: various bug fixes.</description>
+    <version>1.0.0 beta 6</version>
+    <date>17 Aug 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.5/update.32.zip</download_url>
-      <size>2314046</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.6/update.32.zip</download_url>
+      <size>2321933</size>
       <hash>
-        <sha256>16E2B1470D583475A1A0498AF058CC4A794E015225CBB2BE634B3086534EF1C0</sha256>
+        <sha256>93A1D139E87AFE44786AF8236639969226BFC801BAA9B91DDFE23D1EFFFAC75D</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.5/update.64.zip</download_url>
-      <size>2945987</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.6/update.64.zip</download_url>
+      <size>2954743</size>
       <hash>
-        <sha256>FE42927A8A6F3B66A9B1298D0CD9CAD1D2013E712EFD74C397AC70EA4A5CA6F5</sha256>
+        <sha256>FAC5384AF5907FBA0E77D2BE20F14497691A3201B5BEB8D7E3B8F12CD0B7AA6C</sha256>
       </hash>
     </x64>
   </update>
