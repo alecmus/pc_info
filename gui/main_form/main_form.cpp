@@ -682,11 +682,11 @@ void main_form::on_close_update_status() {
 	_update_details_displayed = false;
 }
 
-main_form::main_form(const std::string& caption) :
-	_cleanup_mode(leccore::commandline_arguments::contains("/cleanup")),
-	_update_mode(leccore::commandline_arguments::contains("/update")),
-	_recent_update_mode(leccore::commandline_arguments::contains("/recentupdate")),
-	_system_tray_mode(leccore::commandline_arguments::contains("/systemtray")),
+main_form::main_form(const std::string& caption, bool restarted) :
+	_cleanup_mode(restarted ? false : leccore::commandline_arguments::contains("/cleanup")),
+	_update_mode(restarted ? false : leccore::commandline_arguments::contains("/update")),
+	_recent_update_mode(restarted ? false : leccore::commandline_arguments::contains("/recentupdate")),
+	_system_tray_mode(restarted ? false : leccore::commandline_arguments::contains("/systemtray")),
 	_settings(installed() ? _reg_settings.base() : _ini_settings.base()),
 	form(caption) {
 	_installed = installed();

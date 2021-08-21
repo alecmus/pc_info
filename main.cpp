@@ -46,7 +46,7 @@ int main() {
 
 	do {
 		std::string error;
-		main_form fm(appname);
+		main_form fm(appname, restart);
 		if (!fm.create(error)) {
 			fm.message(error);
 			return 1;

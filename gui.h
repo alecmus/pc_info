@@ -167,7 +167,7 @@ class main_form : public lecui::form {
 	void on_close_update_status();
 
 public:
-	main_form(const std::string& caption);
+	main_form(const std::string& caption, bool restarted);
 	~main_form();
 	bool restart_now() {
 		return _restart_now;
