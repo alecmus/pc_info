@@ -32,6 +32,7 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/widgets/table_view.h>
 
 bool main_form::on_layout(std::string& error) {
 	// add home page
@@ -53,19 +54,23 @@ bool main_form::on_layout(std::string& error) {
 		add_battery_pane();
 	}
 
-	// 2. Add cpu details
+	// 3. Add cpu details
 	add_cpu_pane();
 	add_cpu_tab_pane();
 
-	// 3. Add gpu details
+	// 4. Add gpu details
 	add_gpu_pane();
 	add_gpu_tab_pane();
 
-	// 4. Add ram details
+	// 5. Add monitor details
+	add_monitor_pane();
+	add_monitor_tab_pane();
+
+	// 6. Add ram details
 	add_ram_pane();
 	add_ram_tab_pane();
 
-	// 5. Add drive details
+	// 7. Add drive details
 	add_drive_pane();
 	add_drive_tab_pane();
 
@@ -201,13 +206,20 @@ void main_form::add_pc_details_pane() {
 		.rect(pc_name.rect())
 		.rect().height(highlight_height).snap_to(cpu_summary.rect(), snap_type::bottom, 0.f);
 
+	auto& monitor_summary = lecui::widgets::label::add(pc_details_pane, "monitor_summary");
+	monitor_summary
+		.text(std::to_string(_monitors.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_monitors.size() == 1 ? " monitor" : " monitors") + "</span>")
+		.font_size(_highlight_font_size)
+		.rect(pc_name.rect())
+		.rect().height(highlight_height).snap_to(gpu_summary.rect(), snap_type::bottom, 0.f);
+
 	auto& ram_summary = lecui::widgets::label::add(pc_details_pane);
 	ram_summary
 		.text(std::to_string(_ram.ram_chips.size()) + "<span style = 'font-size: 8.0pt;'>" + std::string(_ram.ram_chips.size() == 1 ?
 			" RAM chip" : " RAM chips") + "</span>")
 		.font_size(_highlight_font_size)
 		.rect(pc_name.rect())
-		.rect().height(highlight_height).snap_to(gpu_summary.rect(), snap_type::bottom, 0.f);
+		.rect().height(highlight_height).snap_to(monitor_summary.rect(), snap_type::bottom, 0.f);
 
 	auto& drive_summary = lecui::widgets::label::add(pc_details_pane, "drive_summary");
 	drive_summary
@@ -487,7 +499,7 @@ void main_form::add_cpu_pane() {
 	auto& cpu_pane = lecui::containers::pane::add(home, "cpu_pane");
 	cpu_pane.rect()
 		.left(right + _margin).width(300.f)
-		.top(_margin).height(240.f);
+		.top(_margin).height(200.f);
 
 	// add cpu title
 	auto& cpu_title = lecui::widgets::label::add(cpu_pane, "cpu_title");
@@ -538,7 +550,7 @@ void main_form::add_cpu_tab_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(cpu_name_caption.rect())
-			.rect().snap_to(cpu_name.rect(), snap_type::bottom, _margin);
+			.rect().width(cpu_pane.size().get_width() / 4.f).snap_to(cpu_name.rect(), snap_type::bottom_left, _margin);
 
 		auto& status = lecui::widgets::label::add(cpu_pane);
 		status
@@ -546,6 +558,7 @@ void main_form::add_cpu_tab_pane() {
 			.font_size(_detail_font_size)
 			.rect(status_caption.rect())
 			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
+		
 		if (cpu.status == "OK")
 			status.color_text(_ok_color);
 
@@ -555,7 +568,7 @@ void main_form::add_cpu_tab_pane() {
 			.text(leccore::round_off::to_string(cpu.base_speed, 2) + "GHz <span style = 'font-size: 8.0pt;'>base speed</span>")
 			.font_size(_highlight_font_size)
 			.rect(status.rect())
-			.rect().height(highlight_height).snap_to(status.rect(), snap_type::bottom, _margin);
+			.rect().width(3.f * cpu_pane.size().get_width() / 4.f).height(highlight_height).snap_to(status.rect(), snap_type::right_bottom, 0.f);
 
 		// add cpu cores
 		auto& cores = lecui::widgets::label::add(cpu_pane);
@@ -567,8 +580,8 @@ void main_form::add_cpu_tab_pane() {
 				std::to_string(cpu.logical_processors) +
 				"<span style = 'font-size: 8.0pt;'>" +
 				std::string(cpu.cores == 1 ? " logical processor" : " logical processors") + "</span>")
-			.rect(base_speed.rect())
-			.rect().height(highlight_height).snap_to(base_speed.rect(), snap_type::bottom, _margin);
+			.rect(cpu_name_caption.rect())
+			.rect().height(highlight_height).snap_to(status.rect(), snap_type::bottom_right, _margin);
 
 		cpu_number++;
 	}
@@ -582,8 +595,10 @@ void main_form::add_gpu_pane() {
 
 	auto& gpu_pane = lecui::containers::pane::add(home, "gpu_pane");
 	gpu_pane.rect()
-		.left(cpu_pane.rect().right() + _margin).width(300.f)
-		.top(_margin).height(240.f);
+		.left(cpu_pane.rect().left())
+		.width(300.f)
+		.top(cpu_pane.rect().bottom() + _margin)
+		.height(200.f);
 
 	// add gpu title
 	auto& gpu_title = lecui::widgets::label::add(gpu_pane, "gpu_title");
@@ -640,28 +655,13 @@ void main_form::add_gpu_tab_pane() {
 
 		auto& status = lecui::widgets::label::add(gpu_pane);
 		status
+			.text(gpu.status)
 			.font_size(_detail_font_size)
 			.rect(status_caption.rect())
 			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
-		status.text() = gpu.status;
+
 		if (gpu.status == "OK")
 			status.color_text(_ok_color);
-
-		// add gpu resolution
-		auto& resolution_caption = lecui::widgets::label::add(gpu_pane);
-		resolution_caption
-			.text("Resolution")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(status_caption.rect())
-			.rect().right(gpu_name_caption.rect().right()).snap_to(status_caption.rect(), snap_type::right, _margin);
-
-		auto& resolution = lecui::widgets::label::add(gpu_pane);
-		resolution
-			.text(std::to_string(gpu.horizontal_resolution) + "x" + std::to_string(gpu.vertical_resolution) + " (" + gpu.resolution_name + ")")
-			.font_size(_detail_font_size)
-			.rect(resolution_caption.rect())
-			.rect().height(detail_height).snap_to(resolution_caption.rect(), snap_type::bottom, 0.f);
 
 		// add dedicated video memory
 		auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
@@ -669,7 +669,35 @@ void main_form::add_gpu_tab_pane() {
 			.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
 			.font_size(_highlight_font_size)
 			.rect(status.rect())
-			.rect().width(gpu_name_caption.rect().width()).height(highlight_height).snap_to(status.rect(), snap_type::bottom_left, _margin);
+			.rect().width(3.f * gpu_pane.size().get_width() / 4.f).height(highlight_height).snap_to(status.rect(), snap_type::right_bottom, 0.f);
+
+		if (false) {
+			// add gpu status
+			auto& status_caption = lecui::widgets::label::add(gpu_pane);
+			status_caption
+				.text("Status")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect(gpu_name_caption.rect())
+				.rect().width(gpu_pane.size().get_width() / 4.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
+
+			auto& status = lecui::widgets::label::add(gpu_pane);
+			status
+				.font_size(_detail_font_size)
+				.rect(status_caption.rect())
+				.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
+			status.text() = gpu.status;
+			if (gpu.status == "OK")
+				status.color_text(_ok_color);
+
+			// add dedicated video memory
+			auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
+			dedicated_ram
+				.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
+				.font_size(_highlight_font_size)
+				.rect(status.rect())
+				.rect().width(gpu_name_caption.rect().width()).height(highlight_height).snap_to(status.rect(), snap_type::bottom_left, _margin);
+		}
 
 		// add refresh rate and memory
 		auto& additional = lecui::widgets::label::add(gpu_pane);
@@ -678,13 +706,113 @@ void main_form::add_gpu_tab_pane() {
 			leccore::format_size(gpu.total_graphics_memory) + " " +
 			"<span style = 'font-size: 8.0pt;'>graphics memory</span>")
 			.font_size(_highlight_font_size)
-			.rect(status.rect())
-			.rect().width(dedicated_ram.rect().width()).height(highlight_height).snap_to(dedicated_ram.rect(), snap_type::bottom_left, _margin);
+			.rect(gpu_name.rect())
+			.rect().height(highlight_height).snap_to(status.rect(), snap_type::bottom_left, _margin);
 
 		gpu_number++;
 	}
 
 	gpu_tab_pane.selected("GPU 0");
+}
+
+void main_form::add_monitor_pane() {
+	auto& home = get_page("home");
+	auto& gpu_pane = get_pane("home/gpu_pane");
+
+	auto& monitor_pane = lecui::containers::pane::add(home, "monitor_pane");
+	monitor_pane.rect()
+		.left(gpu_pane.rect().left())
+		.right(gpu_pane.rect().right())
+		.top(gpu_pane.rect().bottom() + _margin)
+		.height(165.f);
+
+	// add monitor title
+	auto& monitor_title = lecui::widgets::label::add(monitor_pane, "monitor_title");
+	monitor_title
+		.text("<strong>MONITOR DETAILS</strong>")
+		.font_size(_title_font_size)
+		.rect({ 0.f, monitor_pane.size().get_width(), 0.f, title_height });
+}
+
+void main_form::add_monitor_tab_pane() {
+	auto& monitor_pane = get_pane("home/monitor_pane");
+	auto& monitor_title = get_label("home/monitor_pane/monitor_title");
+
+	auto& monitor_tab_pane = lecui::containers::tab_pane::add(monitor_pane, "monitor_tab_pane");
+	monitor_tab_pane.tab_side(lecui::containers::tab_pane::side::top);
+	monitor_tab_pane.rect()
+		.left(0.f)
+		.right(monitor_pane.size().get_width())
+		.top(monitor_title.rect().bottom())
+		.bottom(monitor_pane.size().get_height());
+	monitor_tab_pane.color_tabs().alpha(0);
+	monitor_tab_pane.color_tabs_border().alpha(0);
+
+	// add as many tab panes as there are monitors
+	int monitor_number = 0;
+	for (const auto& monitor : _monitors) {
+		auto& monitor_pane = lecui::containers::tab::add(monitor_tab_pane, "Monitor " + std::to_string(monitor_number));
+
+		// add monitor name
+		auto& monitor_name_caption = lecui::widgets::label::add(monitor_pane);
+		monitor_name_caption
+			.text("Name")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect({ 0.f, monitor_pane.size().get_width(), 0.f, caption_height });
+
+		auto& monitor_name = lecui::widgets::label::add(monitor_pane);
+		monitor_name
+			.text(monitor.manufacturer + monitor.product_code_id)
+			.font_size(_detail_font_size)
+			.rect(monitor_name_caption.rect())
+			.rect().height(detail_height).snap_to(monitor_name_caption.rect(), snap_type::bottom, 0.f);
+
+		// get highest supported mode
+		leccore::pc_info::video_mode highest_mode = {};
+
+		for (auto& mode : monitor.supported_modes) {
+			if (highest_mode.horizontal_resolution < mode.horizontal_resolution)
+				highest_mode = mode;
+		}
+
+		// add screen size
+		auto& status_caption = lecui::widgets::label::add(monitor_pane);
+		status_caption
+			.text("Size")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(monitor_name_caption.rect())
+			.rect().width(monitor_pane.size().get_width() / 4.f).snap_to(monitor_name.rect(), snap_type::bottom_left, _margin);
+
+		auto& status = lecui::widgets::label::add(monitor_pane);
+		status
+			.font_size(_detail_font_size)
+			.rect(status_caption.rect())
+			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
+		status.text() = (leccore::round_off::to_string(highest_mode.physical_size, 1) +
+			" <span style = 'font-size: 8.0pt;'>inches</span>");
+
+		// add resolution
+		auto& resolution_caption = lecui::widgets::label::add(monitor_pane);
+		resolution_caption
+			.text("Highest Resolution")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(status_caption.rect())
+			.rect().right(monitor_name_caption.rect().right()).snap_to(status_caption.rect(), snap_type::right, _margin);
+
+		auto& resolution = lecui::widgets::label::add(monitor_pane);
+		resolution
+			.text(std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")")
+			.font_size(_detail_font_size)
+			.rect(resolution_caption.rect())
+			.rect().height(detail_height).snap_to(resolution_caption.rect(), snap_type::bottom, 0.f);
+
+		monitor_number++;
+	}
+
+	monitor_tab_pane.selected("Monitor 0");
 }
 
 void main_form::add_ram_pane() {
@@ -693,10 +821,8 @@ void main_form::add_ram_pane() {
 
 	auto& ram_pane = lecui::containers::pane::add(home, "ram_pane");
 	ram_pane.rect()
-		.left(cpu_pane.rect().left())
-		.width(300.f)
-		.top(cpu_pane.rect().bottom() + _margin)
-		.height(270.f);
+		.left(cpu_pane.rect().right() + _margin).width(300.f)
+		.top(_margin).height(295.f);
 
 	// add ram title
 	auto& ram_title = lecui::widgets::label::add(ram_pane);
@@ -713,7 +839,7 @@ void main_form::add_ram_pane() {
 		"<span style = 'font-size: 8.0pt;'>speed</span>")
 		.font_size(_highlight_font_size)
 		.rect(ram_title.rect())
-		.rect().snap_to(ram_title.rect(), snap_type::bottom, 0.f).height(highlight_height);
+		.rect().snap_to(ram_title.rect(), snap_type::bottom, _margin).height(highlight_height);
 }
 
 void main_form::add_ram_tab_pane() {
@@ -725,7 +851,7 @@ void main_form::add_ram_tab_pane() {
 	ram_tab_pane.rect()
 		.left(0.f)
 		.right(ram_pane.size().get_width())
-		.top(ram_summary.rect().bottom())
+		.top(ram_summary.rect().bottom() + _margin)
 		.bottom(ram_pane.size().get_height());
 	ram_tab_pane.color_tabs().alpha(0);
 	ram_tab_pane.color_tabs_border().alpha(0);
@@ -750,6 +876,25 @@ void main_form::add_ram_tab_pane() {
 			.rect(ram_part_number_caption.rect())
 			.rect().height(detail_height).snap_to(ram_part_number_caption.rect(), snap_type::bottom, 0.f);
 
+		// add ram chip status
+		auto& status_caption = lecui::widgets::label::add(ram_pane);
+		status_caption
+			.text("Status")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(ram_part_number_caption.rect())
+			.rect().snap_to(ram_part_number.rect(), snap_type::bottom_left, _margin);
+
+		auto& status = lecui::widgets::label::add(ram_pane);
+		status
+			.text(ram.status)
+			.font_size(_detail_font_size)
+			.rect(status_caption.rect())
+			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
+
+		if (ram.status == "OK")
+			status.color_text(_ok_color);
+
 		// add ram manufacturer
 		auto& manufacturer_caption = lecui::widgets::label::add(ram_pane);
 		manufacturer_caption
@@ -757,7 +902,7 @@ void main_form::add_ram_tab_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption.rect())
-			.rect().width(ram_pane.size().get_width()).snap_to(ram_part_number.rect(), snap_type::bottom, _margin);
+			.rect().width(ram_pane.size().get_width() / 3.f).snap_to(status.rect(), snap_type::bottom_left, _margin);
 
 		auto& manufacturer = lecui::widgets::label::add(ram_pane);
 		manufacturer
@@ -772,8 +917,8 @@ void main_form::add_ram_tab_pane() {
 			.text("Type")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(ram_part_number_caption.rect())
-			.rect().width(ram_pane.size().get_width() / 2.f).snap_to(manufacturer.rect(), snap_type::bottom_left, _margin);
+			.rect(manufacturer_caption.rect())
+			.rect().snap_to(manufacturer_caption.rect(), snap_type::right, 0.f);
 
 		auto& type = lecui::widgets::label::add(ram_pane);
 		type
@@ -823,7 +968,7 @@ void main_form::add_drive_pane() {
 	auto& drive_pane = lecui::containers::pane::add(home, "drive_pane");
 	drive_pane
 		.rect(ram_pane.rect())
-		.rect().snap_to(ram_pane.rect(), snap_type::right, _margin);
+		.rect().height(280.f).snap_to(ram_pane.rect(), snap_type::bottom, _margin);
 
 	// add drive title
 	auto& drive_title = lecui::widgets::label::add(drive_pane, "drive_title");

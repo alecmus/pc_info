@@ -326,6 +326,7 @@ bool main_form::on_initialize(std::string& error) {
 	_pc_info.power(_power, error);
 	_pc_info.cpu(_cpus, error);
 	_pc_info.gpu(_gpus, error);
+	_pc_info.monitor(_monitors, error);
 	_pc_info.ram(_ram, error);
 	_pc_info.drives(_drives, error);
 
@@ -343,7 +344,7 @@ bool main_form::on_initialize(std::string& error) {
 	if (_power.batteries.empty())
 		form_width -= (270.f + _margin);
 
-	_dim.set_size(lecui::size().width(form_width).height(570.f));
+	_dim.set_size(lecui::size().width(form_width).height(635.f));
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");

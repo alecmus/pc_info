@@ -130,6 +130,9 @@ void main_form::on_refresh() {
 	bool refresh_ui = false;
 
 	std::string error;
+	std::vector<leccore::pc_info::monitor_info> _monitors_old = _monitors;
+	if (!_pc_info.monitor(_monitors, error)) {}
+
 	std::vector<leccore::pc_info::drive_info> _drives_old = _drives;
 	if (!_pc_info.drives(_drives, error)) {}
 
@@ -138,6 +141,13 @@ void main_form::on_refresh() {
 
 	try {
 		// refresh pc details
+		if (_monitors_old.size() != _monitors.size()) {
+			auto& monitor_summary = get_label("home/pc_details_pane/monitor_summary");
+			monitor_summary.text(std::to_string(_monitors.size()) + "<span style = 'font-size: 8.0pt;'>" +
+				std::string(_monitors.size() == 1 ? " monitor" : " monitors") +
+				"</span>");
+		}
+
 		if (_drives_old.size() != _drives.size()) {
 			auto& drive_summary = get_label("home/pc_details_pane/drive_summary");
 			drive_summary.text(std::to_string(_drives.size()) + "<span style = 'font-size: 8.0pt;'>" +
@@ -292,6 +302,20 @@ void main_form::on_refresh() {
 			}
 
 			_setting_milliunits_old = _setting_milliunits;
+		}
+	}
+	catch (const std::exception) {}
+
+	try {
+		// to-do: refresh monitor details
+		if (_monitors_old.size() != _monitors.size()) {
+			// close old monitor tab pane
+			_page_man.close("home/monitor_pane/monitor_tab_pane");
+
+			// add new monitor tab pane
+			add_monitor_tab_pane();
+
+			refresh_ui = true;
 		}
 	}
 	catch (const std::exception) {}

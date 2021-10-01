@@ -119,6 +119,7 @@ class main_form : public lecui::form {
 	leccore::pc_info::pc_details _pc_details;
 	std::vector<leccore::pc_info::cpu_info> _cpus;
 	std::vector<leccore::pc_info::gpu_info> _gpus;
+	std::vector<leccore::pc_info::monitor_info> _monitors;
 	leccore::pc_info::ram_info _ram;
 	std::vector<leccore::pc_info::drive_info> _drives;
 	leccore::pc_info::power_info _power;
@@ -154,6 +155,9 @@ class main_form : public lecui::form {
 
 	void add_ram_pane();
 	void add_ram_tab_pane();
+
+	void add_monitor_pane();
+	void add_monitor_tab_pane();
 
 	void add_drive_pane();
 	void add_drive_tab_pane();
