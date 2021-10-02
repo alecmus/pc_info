@@ -351,6 +351,20 @@ void main_form::add_battery_pane() {
 			.points({ { 0.f, 0.f }, { seperator_1.rect().width(), 0.f } })
 			.thickness(0.25f);
 
+		// add battery health
+		auto& health_caption = lecui::widgets::label::add(battery_pane);
+		health_caption.text("BATTERY HEALTH").center_v(true).center_h(true).color_text(_caption_color).font_size(_caption_font_size)
+			.rect(battery_name_caption.rect())
+			.rect().snap_to(seperator_1.rect(), snap_type::bottom, _margin);
+
+		auto& health = lecui::widgets::progress_indicator::add(battery_pane, "health");
+		health
+			.percentage(static_cast<float>(battery.health))
+			.rect().snap_to(health_caption.rect(), snap_type::bottom, _margin);
+
+		lecui::rect ref = seperator_1.rect();
+		ref.snap_to(health.rect(), snap_type::bottom, 0.f);
+
 		// add battery designed capacity
 		auto& designed_capacity_caption = lecui::widgets::label::add(battery_pane);
 		designed_capacity_caption
@@ -358,7 +372,7 @@ void main_form::add_battery_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(manufacturer_caption.rect())
-			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(seperator_1.rect(), snap_type::bottom_left, _margin);
+			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(ref, snap_type::bottom_left, _margin);
 
 		auto& designed_capacity = lecui::widgets::label::add(battery_pane, "designed_capacity");
 		designed_capacity.text(_setting_milliunits ?
@@ -386,22 +400,11 @@ void main_form::add_battery_pane() {
 			.rect(fully_charged_capacity_caption.rect())
 			.rect().height(detail_height).snap_to(fully_charged_capacity_caption.rect(), snap_type::bottom, 0.f);
 
-		// add battery health
-		auto& health = lecui::widgets::progress_indicator::add(battery_pane, "health");
-		health
-			.percentage(static_cast<float>(battery.health))
-			.rect().snap_to(designed_capacity.rect(), snap_type::bottom_left, _margin);
-
-		auto& health_caption = lecui::widgets::label::add(battery_pane);
-		health_caption.text("BATTERY HEALTH").center_v(true).color_text(_caption_color).font_size(_caption_font_size)
-			.rect(health.rect())
-			.rect().right(battery_name.rect().right()).snap_to(health.rect(), snap_type::right, _margin);
-
 		// add seperator 2
 		auto& seperator_2 = lecui::widgets::line::add(battery_pane);
 		seperator_2
 			.rect(manufacturer_caption.rect())
-			.rect().height(1.f).snap_to(health.rect(), snap_type::bottom_left, _margin);
+			.rect().height(1.f).snap_to(designed_capacity.rect(), snap_type::bottom_left, _margin);
 		seperator_2
 			.points({ { 0.f, 0.f }, { seperator_2.rect().width(), 0.f } })
 			.thickness(0.25f);
