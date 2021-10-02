@@ -32,7 +32,7 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
-#include <liblec/lecui/widgets/table_view.h>
+#include <liblec/lecui/widgets/line.h>
 
 bool main_form::on_layout(std::string& error) {
 	// add home page
@@ -342,6 +342,15 @@ void main_form::add_battery_pane() {
 			.rect(manufacturer_caption.rect())
 			.rect().height(detail_height).snap_to(manufacturer_caption.rect(), snap_type::bottom, 0.f);
 
+		// add seperator 1
+		auto& seperator_1 = lecui::widgets::line::add(battery_pane);
+		seperator_1
+			.rect(manufacturer_caption.rect())
+			.rect().height(1.f).snap_to(manufacturer.rect(), snap_type::bottom, 2.f * _margin);
+		seperator_1
+			.points({ { 0.f, 0.f }, { seperator_1.rect().width(), 0.f } })
+			.thickness(0.25f);
+
 		// add battery designed capacity
 		auto& designed_capacity_caption = lecui::widgets::label::add(battery_pane);
 		designed_capacity_caption
@@ -349,7 +358,7 @@ void main_form::add_battery_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(manufacturer_caption.rect())
-			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(manufacturer.rect(), snap_type::bottom_left, _margin);
+			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(seperator_1.rect(), snap_type::bottom_left, _margin);
 
 		auto& designed_capacity = lecui::widgets::label::add(battery_pane, "designed_capacity");
 		designed_capacity.text(_setting_milliunits ?
@@ -388,6 +397,15 @@ void main_form::add_battery_pane() {
 			.rect(health.rect())
 			.rect().right(battery_name.rect().right()).snap_to(health.rect(), snap_type::right, _margin);
 
+		// add seperator 2
+		auto& seperator_2 = lecui::widgets::line::add(battery_pane);
+		seperator_2
+			.rect(manufacturer_caption.rect())
+			.rect().height(1.f).snap_to(health.rect(), snap_type::bottom_left, _margin);
+		seperator_2
+			.points({ { 0.f, 0.f }, { seperator_2.rect().width(), 0.f } })
+			.thickness(0.25f);
+
 		// add battery current capacity
 		auto& current_capacity_caption = lecui::widgets::label::add(battery_pane);
 		current_capacity_caption
@@ -397,7 +415,7 @@ void main_form::add_battery_pane() {
 			.rect()
 			.width(battery_pane.size().get_width() / 2.f)
 			.height(caption_height)
-			.snap_to(health.rect(), snap_type::bottom_left, _margin);
+			.snap_to(seperator_2.rect(), snap_type::bottom_left, 2.f * _margin);
 
 		auto& current_capacity = lecui::widgets::label::add(battery_pane, "current_capacity");
 		current_capacity
