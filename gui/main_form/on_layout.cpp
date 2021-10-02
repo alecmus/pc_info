@@ -394,7 +394,10 @@ void main_form::add_battery_pane() {
 			.text("Current Capacity")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(health.rect(), snap_type::bottom_left, _margin);
+			.rect()
+			.width(battery_pane.size().get_width() / 2.f)
+			.height(caption_height)
+			.snap_to(health.rect(), snap_type::bottom_left, _margin);
 
 		auto& current_capacity = lecui::widgets::label::add(battery_pane, "current_capacity");
 		current_capacity
@@ -428,7 +431,7 @@ void main_form::add_battery_pane() {
 			.text("Current Voltage")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(battery_name.rect())
+			.rect(battery_name_caption.rect())
 			.rect().width(battery_pane.size().get_width() / 2.f).snap_to(current_capacity.rect(), snap_type::bottom_left, _margin);
 
 		auto& current_voltage = lecui::widgets::label::add(battery_pane, "current_voltage");
