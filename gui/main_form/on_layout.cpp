@@ -900,25 +900,6 @@ void main_form::add_ram_tab_pane() {
 			.rect(ram_part_number_caption.rect())
 			.rect().height(detail_height).snap_to(ram_part_number_caption.rect(), snap_type::bottom, 0.f);
 
-		// add ram chip status
-		auto& status_caption = lecui::widgets::label::add(ram_pane);
-		status_caption
-			.text("Status")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(ram_part_number_caption.rect())
-			.rect().snap_to(ram_part_number.rect(), snap_type::bottom_left, _margin);
-
-		auto& status = lecui::widgets::label::add(ram_pane);
-		status
-			.text(ram.status)
-			.font_size(_detail_font_size)
-			.rect(status_caption.rect())
-			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
-
-		if (ram.status == "OK")
-			status.color_text(_ok_color);
-
 		// add ram manufacturer
 		auto& manufacturer_caption = lecui::widgets::label::add(ram_pane);
 		manufacturer_caption
@@ -926,7 +907,7 @@ void main_form::add_ram_tab_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(ram_part_number_caption.rect())
-			.rect().width(ram_pane.size().get_width() / 3.f).snap_to(status.rect(), snap_type::bottom_left, _margin);
+			.rect().width(ram_pane.size().get_width()).snap_to(ram_part_number.rect(), snap_type::bottom, _margin);
 
 		auto& manufacturer = lecui::widgets::label::add(ram_pane);
 		manufacturer
@@ -935,14 +916,33 @@ void main_form::add_ram_tab_pane() {
 			.rect(manufacturer_caption.rect())
 			.rect().height(detail_height).snap_to(manufacturer_caption.rect(), snap_type::bottom, 0.f);
 
+		// add ram chip status
+		auto& status_caption = lecui::widgets::label::add(ram_pane);
+		status_caption
+			.text("Status")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(ram_part_number_caption.rect())
+			.rect().width(ram_pane.size().get_width() / 3.f).snap_to(manufacturer.rect(), snap_type::bottom_left, _margin);
+
+		auto& status = lecui::widgets::label::add(ram_pane);
+		status
+			.text(ram.status)
+			.font_size(_detail_font_size)
+			.rect(status_caption.rect())
+			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom_left, 0.f);
+
+		if (ram.status == "OK")
+			status.color_text(_ok_color);
+
 		// add ram type
 		auto& type_caption = lecui::widgets::label::add(ram_pane);
 		type_caption
 			.text("Type")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(manufacturer_caption.rect())
-			.rect().snap_to(manufacturer_caption.rect(), snap_type::right, 0.f);
+			.rect(status_caption.rect())
+			.rect().snap_to(status_caption.rect(), snap_type::right, 0.f);
 
 		auto& type = lecui::widgets::label::add(ram_pane);
 		type
