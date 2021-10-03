@@ -141,7 +141,6 @@ class main_form : public lecui::form {
 	void updates();
 	bool on_layout(std::string& error) override;
 
-	
 	void add_pc_details_pane();
 
 	void add_power_pane();
@@ -150,14 +149,12 @@ class main_form : public lecui::form {
 	void add_cpu_pane();
 	void add_cpu_tab_pane();
 
-	void add_gpu_pane();
+	void add_graphics_pane();
 	void add_gpu_tab_pane();
+	void add_monitor_tab_pane();
 
 	void add_ram_pane();
 	void add_ram_tab_pane();
-
-	void add_monitor_pane();
-	void add_monitor_tab_pane();
 
 	void add_drive_pane();
 	void add_drive_tab_pane();

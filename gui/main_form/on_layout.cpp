@@ -59,11 +59,10 @@ bool main_form::on_layout(std::string& error) {
 	add_cpu_tab_pane();
 
 	// 4. Add gpu details
-	add_gpu_pane();
+	add_graphics_pane();
 	add_gpu_tab_pane();
 
 	// 5. Add monitor details
-	add_monitor_pane();
 	add_monitor_tab_pane();
 
 	// 6. Add ram details
@@ -613,40 +612,40 @@ void main_form::add_cpu_tab_pane() {
 	cpu_tab_pane.selected("CPU 0");
 }
 
-void main_form::add_gpu_pane() {
+void main_form::add_graphics_pane() {
 	auto& home = get_page("home");
 	auto& cpu_pane = get_pane("home/cpu_pane");
 
-	auto& gpu_pane = lecui::containers::pane::add(home, "gpu_pane");
-	gpu_pane.rect()
+	auto& graphics_pane = lecui::containers::pane::add(home, "graphics_pane");
+	graphics_pane.rect()
 		.left(cpu_pane.rect().left())
 		.width(300.f)
 		.top(cpu_pane.rect().bottom() + _margin)
-		.height(200.f);
+		.height(375.f);
 
-	// add gpu title
-	auto& gpu_title = lecui::widgets::label::add(gpu_pane, "gpu_title");
-	gpu_title
-		.text("<strong>GPU DETAILS</strong>")
+	// add graphics title
+	auto& graphics_title = lecui::widgets::label::add(graphics_pane, "graphics_title");
+	graphics_title
+		.text("<strong>GRAPHICS DETAILS</strong>")
 		.font_size(_title_font_size)
-		.rect({ 0.f, gpu_pane.size().get_width(), 0.f, title_height });
+		.rect({ 0.f, graphics_pane.size().get_width(), 0.f, title_height });
 }
 
 void main_form::add_gpu_tab_pane() {
-	auto& gpu_pane = get_pane("home/gpu_pane");
-	auto& gpu_title = get_label("home/gpu_pane/gpu_title");
+	auto& graphics_pane = get_pane("home/graphics_pane");
+	auto& graphics_title = get_label("home/graphics_pane/graphics_title");
 
-	auto& gpu_tab_pane = lecui::containers::tab_pane::add(gpu_pane);
+	auto& gpu_tab_pane = lecui::containers::tab_pane::add(graphics_pane, "gpu_tab_pane");
 	gpu_tab_pane.tab_side(lecui::containers::tab_pane::side::top);
 	gpu_tab_pane.rect()
 		.left(0.f)
-		.right(gpu_pane.size().get_width())
-		.top(gpu_title.rect().bottom())
-		.bottom(gpu_pane.size().get_height());
+		.right(graphics_pane.size().get_width())
+		.top(graphics_title.rect().bottom())
+		.height(160.f);
 	gpu_tab_pane.color_tabs().alpha(0);
 	gpu_tab_pane.color_tabs_border().alpha(0);
 
-	// add as many tab panes as there are gpus
+	// add as many tabs as there are gpus
 	int gpu_number = 0;
 	for (const auto& gpu : _gpus) {
 		auto& gpu_pane = lecui::containers::tab::add(gpu_tab_pane,
@@ -739,36 +738,17 @@ void main_form::add_gpu_tab_pane() {
 	gpu_tab_pane.selected("GPU 0");
 }
 
-void main_form::add_monitor_pane() {
-	auto& home = get_page("home");
-	auto& gpu_pane = get_pane("home/gpu_pane");
-
-	auto& monitor_pane = lecui::containers::pane::add(home, "monitor_pane");
-	monitor_pane.rect()
-		.left(gpu_pane.rect().left())
-		.right(gpu_pane.rect().right())
-		.top(gpu_pane.rect().bottom() + _margin)
-		.height(165.f);
-
-	// add monitor title
-	auto& monitor_title = lecui::widgets::label::add(monitor_pane, "monitor_title");
-	monitor_title
-		.text("<strong>MONITOR DETAILS</strong>")
-		.font_size(_title_font_size)
-		.rect({ 0.f, monitor_pane.size().get_width(), 0.f, title_height });
-}
-
 void main_form::add_monitor_tab_pane() {
-	auto& monitor_pane = get_pane("home/monitor_pane");
-	auto& monitor_title = get_label("home/monitor_pane/monitor_title");
+	auto& graphics_pane = get_pane("home/graphics_pane");
+	auto& gpu_tab_pane = get_tab_pane("home/graphics_pane/gpu_tab_pane");
 
-	auto& monitor_tab_pane = lecui::containers::tab_pane::add(monitor_pane, "monitor_tab_pane");
+	auto& monitor_tab_pane = lecui::containers::tab_pane::add(graphics_pane, "monitor_tab_pane");
 	monitor_tab_pane.tab_side(lecui::containers::tab_pane::side::top);
 	monitor_tab_pane.rect()
 		.left(0.f)
-		.right(monitor_pane.size().get_width())
-		.top(monitor_title.rect().bottom())
-		.bottom(monitor_pane.size().get_height());
+		.right(graphics_pane.size().get_width())
+		.top(gpu_tab_pane.rect().bottom() + _margin)
+		.bottom(graphics_pane.size().get_height());
 	monitor_tab_pane.color_tabs().alpha(0);
 	monitor_tab_pane.color_tabs_border().alpha(0);
 

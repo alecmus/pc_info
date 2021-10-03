@@ -195,8 +195,7 @@ void main_form::on_refresh() {
 
 		if (_power_old.batteries.size() != _power.batteries.size()) {
 			auto& cpu_pane = get_pane("home/cpu_pane");
-			auto& gpu_pane = get_pane("home/gpu_pane");
-			auto& monitor_pane = get_pane("home/monitor_pane");
+			auto& graphics_pane = get_pane("home/graphics_pane");
 			auto& ram_pane = get_pane("home/ram_pane");
 			auto& drive_pane = get_pane("home/drive_pane");
 
@@ -208,8 +207,7 @@ void main_form::on_refresh() {
 
 				// move panes to accomodate power pane
 				cpu_pane.rect().move(power_pane.rect().right() + _margin, cpu_pane.rect().top());
-				gpu_pane.rect().move(power_pane.rect().right() + _margin, gpu_pane.rect().top());
-				monitor_pane.rect().move(power_pane.rect().right() + _margin, monitor_pane.rect().top());
+				graphics_pane.rect().move(power_pane.rect().right() + _margin, graphics_pane.rect().top());
 				ram_pane.rect().move(cpu_pane.rect().right() + _margin, ram_pane.rect().top());
 				drive_pane.rect().move(ram_pane.rect().left(), drive_pane.rect().top());
 			}
@@ -221,8 +219,7 @@ void main_form::on_refresh() {
 
 					// move panes since power pane has been removed
 					cpu_pane.rect().move(pc_details_pane.rect().right() + _margin, cpu_pane.rect().top());
-					gpu_pane.rect().move(pc_details_pane.rect().right() + _margin, gpu_pane.rect().top());
-					monitor_pane.rect().move(pc_details_pane.rect().right() + _margin, monitor_pane.rect().top());
+					graphics_pane.rect().move(pc_details_pane.rect().right() + _margin, graphics_pane.rect().top());
 					ram_pane.rect().move(cpu_pane.rect().right() + _margin, ram_pane.rect().top());
 					drive_pane.rect().move(ram_pane.rect().left(), drive_pane.rect().top());
 				}
@@ -313,7 +310,7 @@ void main_form::on_refresh() {
 		// to-do: refresh monitor details
 		if (_monitors_old.size() != _monitors.size()) {
 			// close old monitor tab pane
-			_page_man.close("home/monitor_pane/monitor_tab_pane");
+			_page_man.close("home/graphics_pane/monitor_tab_pane");
 
 			// add new monitor tab pane
 			add_monitor_tab_pane();
