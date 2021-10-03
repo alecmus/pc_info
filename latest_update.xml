@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Various improvements including but not limited to the following: added monitors pane.</description>
-    <version>1.0.0 beta 7</version>
-    <date>02 Oct 2021</date>
+    <description>Various improvements including but not limited to the following: combined GPU and monitor tab panes into a single graphics pane.</description>
+    <version>1.0.0 beta 8</version>
+    <date>03 Oct 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.7/update.32.zip</download_url>
-      <size>2333869</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.8/update.32.zip</download_url>
+      <size>2333610</size>
       <hash>
-        <sha256>FFE08C22B4DF6FF2AA94D527AA510B8BE47915D659947F1D60C9A129D93EE207</sha256>
+        <sha256>2A5DD0560A61D7231DA79626F3A63AA5A5C45FC85178D0F34240C63ED5557E9B</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.7/update.64.zip</download_url>
-      <size>2968549</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.8/update.64.zip</download_url>
+      <size>2968493</size>
       <hash>
-        <sha256>7DF228FFA8A507DF565166D134A4DA3863D2E2124BC89C6D160969251C1ABF39</sha256>
+        <sha256>640ECDC92771E7A67DE2E8E2945823E4DF3E660AB054292F07DB023DF0004E26</sha256>
       </hash>
     </x64>
   </update>
