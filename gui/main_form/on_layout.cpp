@@ -244,7 +244,7 @@ void main_form::add_power_pane() {
 	auto& power_pane = lecui::containers::pane::add(home, "power_pane");
 	power_pane
 		.rect(pc_details_pane.rect())
-		.rect().width(270.f);
+		.rect().width(270.f).height(550.f);
 	power_pane.rect().snap_to(pc_details_pane.rect(), snap_type::right_top, _margin);
 
 	// add pc details title
@@ -345,7 +345,7 @@ void main_form::add_battery_pane() {
 		auto& seperator_1 = lecui::widgets::line::add(battery_pane);
 		seperator_1
 			.rect(manufacturer_caption.rect())
-			.rect().height(1.f).snap_to(manufacturer.rect(), snap_type::bottom, 2.f * _margin);
+			.rect().height(1.f).snap_to(manufacturer.rect(), snap_type::bottom, 1.f * _margin);
 		seperator_1
 			.points({ { 0.f, 0.f }, { seperator_1.rect().width(), 0.f } })
 			.thickness(0.25f);
@@ -417,7 +417,7 @@ void main_form::add_battery_pane() {
 			.rect()
 			.width(battery_pane.size().get_width() / 2.f)
 			.height(caption_height)
-			.snap_to(seperator_2.rect(), snap_type::bottom_left, 2.f * _margin);
+			.snap_to(seperator_2.rect(), snap_type::bottom_left, 1.f * _margin);
 
 		auto& current_capacity = lecui::widgets::label::add(battery_pane, "current_capacity");
 		current_capacity
@@ -621,7 +621,7 @@ void main_form::add_graphics_pane() {
 		.left(cpu_pane.rect().left())
 		.width(300.f)
 		.top(cpu_pane.rect().bottom() + _margin)
-		.height(375.f);
+		.height(340.f);
 
 	// add graphics title
 	auto& graphics_title = lecui::widgets::label::add(graphics_pane, "graphics_title");
@@ -826,7 +826,7 @@ void main_form::add_ram_pane() {
 	auto& ram_pane = lecui::containers::pane::add(home, "ram_pane");
 	ram_pane.rect()
 		.left(cpu_pane.rect().right() + _margin).width(300.f)
-		.top(_margin).height(295.f);
+		.top(_margin).height(285.f);
 
 	// add ram title
 	auto& ram_title = lecui::widgets::label::add(ram_pane);
@@ -972,7 +972,7 @@ void main_form::add_drive_pane() {
 	auto& drive_pane = lecui::containers::pane::add(home, "drive_pane");
 	drive_pane
 		.rect(ram_pane.rect())
-		.rect().height(280.f).snap_to(ram_pane.rect(), snap_type::bottom, _margin);
+		.rect().height(255.f).snap_to(ram_pane.rect(), snap_type::bottom, _margin);
 
 	// add drive title
 	auto& drive_title = lecui::widgets::label::add(drive_pane, "drive_title");

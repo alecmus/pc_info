@@ -344,7 +344,7 @@ bool main_form::on_initialize(std::string& error) {
 	if (_power.batteries.empty())
 		form_width -= (270.f + _margin);
 
-	_dim.set_size(lecui::size().width(form_width).height(635.f));
+	_dim.set_size(lecui::size().width(form_width).height(600.f));
 
 	// add form caption handler
 	form::on_caption([this]() { about(); }, "View info about this app");
