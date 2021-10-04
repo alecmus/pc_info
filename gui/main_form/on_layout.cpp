@@ -766,47 +766,31 @@ void main_form::add_monitor_tab_pane() {
 				highest_mode = mode;
 		}
 
-		// add highest resolution
-		auto& highest_resolution_caption = lecui::widgets::label::add(monitor_pane);
-		highest_resolution_caption
-			.text("Highest Screen Resolution")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(monitor_name_caption.rect())
-			.rect().snap_to(monitor_name.rect(), snap_type::bottom_left, _margin);
-
-		auto& highest_resolution = lecui::widgets::label::add(monitor_pane);
-		highest_resolution
-			.text(std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")")
-			.font_size(_detail_font_size)
-			.rect(highest_resolution_caption.rect())
-			.rect().height(detail_height).snap_to(highest_resolution_caption.rect(), snap_type::bottom, 0.f);
-
 		// add screen size
-		auto& status_caption = lecui::widgets::label::add(monitor_pane);
-		status_caption
+		auto& size_caption = lecui::widgets::label::add(monitor_pane);
+		size_caption
 			.text("Size")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(highest_resolution_caption.rect())
-			.rect().width(monitor_pane.size().get_width() / 3.f).snap_to(highest_resolution.rect(), snap_type::bottom_left, _margin);
+			.rect(monitor_name_caption.rect())
+			.rect().width(monitor_pane.size().get_width() / 3.f).snap_to(monitor_name.rect(), snap_type::bottom_left, _margin);
 
-		auto& status = lecui::widgets::label::add(monitor_pane);
-		status
+		auto& size = lecui::widgets::label::add(monitor_pane);
+		size
 			.font_size(_detail_font_size)
-			.rect(status_caption.rect())
-			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
-		status.text() = (leccore::round_off::to_string(highest_mode.physical_size, 1) +
+			.rect(size_caption.rect())
+			.rect().height(detail_height).snap_to(size_caption.rect(), snap_type::bottom, 0.f);
+		size.text() = (leccore::round_off::to_string(highest_mode.physical_size, 1) +
 			" <span style = 'font-size: 8.0pt;'>inches</span>");
 
 		// add highest refresh rate
 		auto& highest_refresh_rate_caption = lecui::widgets::label::add(monitor_pane);
 		highest_refresh_rate_caption
-			.text("Highest Refresh Rate")
+			.text("Max Refresh")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(status_caption.rect())
-			.rect().right(monitor_name_caption.rect().right()).snap_to(status_caption.rect(), snap_type::right, _margin);
+			.rect(size_caption.rect())
+			.rect().snap_to(size_caption.rect(), snap_type::right, 0.f);
 
 		auto& highest_refresh_rate = lecui::widgets::label::add(monitor_pane);
 		highest_refresh_rate
@@ -814,6 +798,38 @@ void main_form::add_monitor_tab_pane() {
 			.font_size(_detail_font_size)
 			.rect(highest_refresh_rate_caption.rect())
 			.rect().height(detail_height).snap_to(highest_refresh_rate_caption.rect(), snap_type::bottom, 0.f);
+
+		// add highest pixel clock rate
+		auto& highest_pixel_clock_rate_caption = lecui::widgets::label::add(monitor_pane);
+		highest_pixel_clock_rate_caption
+			.text("Max Pixel Clock")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(highest_refresh_rate_caption.rect())
+			.rect().snap_to(highest_refresh_rate_caption.rect(), snap_type::right, 0.f);
+
+		auto& highest_pixel_clock_rate = lecui::widgets::label::add(monitor_pane);
+		highest_pixel_clock_rate
+			.text(leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 2) + " MHz")
+			.font_size(_detail_font_size)
+			.rect(highest_pixel_clock_rate_caption.rect())
+			.rect().height(detail_height).snap_to(highest_pixel_clock_rate_caption.rect(), snap_type::bottom, 0.f);
+
+		// add highest resolution
+		auto& highest_resolution_caption = lecui::widgets::label::add(monitor_pane);
+		highest_resolution_caption
+			.text("Max Screen Resolution")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(monitor_name_caption.rect())
+			.rect().snap_to(size.rect(), snap_type::bottom_left, _margin);
+
+		auto& highest_resolution = lecui::widgets::label::add(monitor_pane);
+		highest_resolution
+			.text(std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")")
+			.font_size(_detail_font_size)
+			.rect(highest_resolution_caption.rect())
+			.rect().height(detail_height).snap_to(highest_resolution_caption.rect(), snap_type::bottom, 0.f);
 
 		monitor_number++;
 	}
