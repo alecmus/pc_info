@@ -786,7 +786,7 @@ void main_form::add_monitor_tab_pane() {
 		// add highest refresh rate
 		auto& highest_refresh_rate_caption = lecui::widgets::label::add(monitor_pane);
 		highest_refresh_rate_caption
-			.text("Max Refresh")
+			.text("Max. Refresh")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(size_caption.rect())
@@ -802,7 +802,7 @@ void main_form::add_monitor_tab_pane() {
 		// add highest pixel clock rate
 		auto& highest_pixel_clock_rate_caption = lecui::widgets::label::add(monitor_pane);
 		highest_pixel_clock_rate_caption
-			.text("Max Pixel Clock")
+			.text("Max. Pixel Clock")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(highest_refresh_rate_caption.rect())
@@ -818,7 +818,7 @@ void main_form::add_monitor_tab_pane() {
 		// add highest resolution
 		auto& highest_resolution_caption = lecui::widgets::label::add(monitor_pane);
 		highest_resolution_caption
-			.text("Max Screen Resolution")
+			.text("Max. Screen Resolution")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(monitor_name_caption.rect())
