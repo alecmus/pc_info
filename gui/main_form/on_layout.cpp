@@ -810,7 +810,7 @@ void main_form::add_monitor_tab_pane() {
 
 		auto& highest_pixel_clock_rate = lecui::widgets::label::add(monitor_pane);
 		highest_pixel_clock_rate
-			.text(leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 2) + " MHz")
+			.text(leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 1) + " MHz")
 			.font_size(_detail_font_size)
 			.rect(highest_pixel_clock_rate_caption.rect())
 			.rect().height(detail_height).snap_to(highest_pixel_clock_rate_caption.rect(), snap_type::bottom, 0.f);
