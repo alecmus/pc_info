@@ -641,7 +641,7 @@ void main_form::add_gpu_tab_pane() {
 		.left(0.f)
 		.right(graphics_pane.size().get_width())
 		.top(graphics_title.rect().bottom())
-		.height(160.f);
+		.height(125.f);
 	gpu_tab_pane.color_tabs().alpha(0);
 	gpu_tab_pane.color_tabs_border().alpha(0);
 
@@ -674,9 +674,9 @@ void main_form::add_gpu_tab_pane() {
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(gpu_name_caption.rect())
-			.rect().width(gpu_pane.size().get_width() / 4.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
+			.rect().width(gpu_pane.size().get_width() / 5.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
 
-		auto& status = lecui::widgets::label::add(gpu_pane);
+		auto& status = lecui::widgets::label::add(gpu_pane, "status");
 		status
 			.text(gpu.status)
 			.font_size(_detail_font_size)
@@ -687,50 +687,36 @@ void main_form::add_gpu_tab_pane() {
 			status.color_text(_ok_color);
 
 		// add dedicated video memory
+		auto& dedicated_ram_caption = lecui::widgets::label::add(gpu_pane);
+		dedicated_ram_caption
+			.text("Dedicated Memory")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(status_caption.rect())
+			.rect().width(2.f * status_caption.rect().width()).snap_to(status_caption.rect(), snap_type::right, 0.f);
+
 		auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
 		dedicated_ram
-			.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
-			.font_size(_highlight_font_size)
-			.rect(status.rect())
-			.rect().width(3.f * gpu_pane.size().get_width() / 4.f).height(highlight_height).snap_to(status.rect(), snap_type::right_bottom, 0.f);
+			.text(leccore::format_size(gpu.dedicated_vram))
+			.font_size(_detail_font_size)
+			.rect(dedicated_ram_caption.rect())
+			.rect().height(status.rect().height()).width(2.f * status_caption.rect().width()).snap_to(status.rect(), snap_type::right, 0.f);
 
-		if (false) {
-			// add gpu status
-			auto& status_caption = lecui::widgets::label::add(gpu_pane);
-			status_caption
-				.text("Status")
-				.color_text(_caption_color)
-				.font_size(_caption_font_size)
-				.rect(gpu_name_caption.rect())
-				.rect().width(gpu_pane.size().get_width() / 4.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
+		// add total available graphics memory
+		auto& total_graphics_memory_caption = lecui::widgets::label::add(gpu_pane);
+		total_graphics_memory_caption
+			.text("Total Available")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(dedicated_ram_caption.rect())
+			.rect().snap_to(dedicated_ram_caption.rect(), snap_type::right, 0.f);
 
-			auto& status = lecui::widgets::label::add(gpu_pane);
-			status
-				.font_size(_detail_font_size)
-				.rect(status_caption.rect())
-				.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
-			status.text() = gpu.status;
-			if (gpu.status == "OK")
-				status.color_text(_ok_color);
-
-			// add dedicated video memory
-			auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
-			dedicated_ram
-				.text(leccore::format_size(gpu.dedicated_vram) + "<span style = 'font-size: 8.0pt;'> dedicated video memory</span>")
-				.font_size(_highlight_font_size)
-				.rect(status.rect())
-				.rect().width(gpu_name_caption.rect().width()).height(highlight_height).snap_to(status.rect(), snap_type::bottom_left, _margin);
-		}
-
-		// add refresh rate and memory
-		auto& additional = lecui::widgets::label::add(gpu_pane);
-		additional.text(std::to_string(gpu.refresh_rate) + "Hz " +
-			"<span style = 'font-size: 8.0pt;'>refresh rate</span>, " +
-			leccore::format_size(gpu.total_graphics_memory) + " " +
-			"<span style = 'font-size: 8.0pt;'>graphics memory</span>")
-			.font_size(_highlight_font_size)
-			.rect(gpu_name.rect())
-			.rect().height(highlight_height).snap_to(status.rect(), snap_type::bottom_left, _margin);
+		auto& total_graphics_memory = lecui::widgets::label::add(gpu_pane);
+		total_graphics_memory
+			.text(leccore::format_size(gpu.total_graphics_memory))
+			.font_size(_detail_font_size)
+			.rect(dedicated_ram.rect())
+			.rect().snap_to(dedicated_ram.rect(), snap_type::right, 0.f);
 
 		gpu_number++;
 	}
@@ -780,14 +766,30 @@ void main_form::add_monitor_tab_pane() {
 				highest_mode = mode;
 		}
 
+		// add highest resolution
+		auto& highest_resolution_caption = lecui::widgets::label::add(monitor_pane);
+		highest_resolution_caption
+			.text("Highest Screen Resolution")
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
+			.rect(monitor_name_caption.rect())
+			.rect().snap_to(monitor_name.rect(), snap_type::bottom_left, _margin);
+
+		auto& highest_resolution = lecui::widgets::label::add(monitor_pane);
+		highest_resolution
+			.text(std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")")
+			.font_size(_detail_font_size)
+			.rect(highest_resolution_caption.rect())
+			.rect().height(detail_height).snap_to(highest_resolution_caption.rect(), snap_type::bottom, 0.f);
+
 		// add screen size
 		auto& status_caption = lecui::widgets::label::add(monitor_pane);
 		status_caption
 			.text("Size")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
-			.rect(monitor_name_caption.rect())
-			.rect().width(monitor_pane.size().get_width() / 4.f).snap_to(monitor_name.rect(), snap_type::bottom_left, _margin);
+			.rect(highest_resolution_caption.rect())
+			.rect().width(monitor_pane.size().get_width() / 3.f).snap_to(highest_resolution.rect(), snap_type::bottom_left, _margin);
 
 		auto& status = lecui::widgets::label::add(monitor_pane);
 		status
@@ -797,21 +799,21 @@ void main_form::add_monitor_tab_pane() {
 		status.text() = (leccore::round_off::to_string(highest_mode.physical_size, 1) +
 			" <span style = 'font-size: 8.0pt;'>inches</span>");
 
-		// add resolution
-		auto& resolution_caption = lecui::widgets::label::add(monitor_pane);
-		resolution_caption
-			.text("Highest Resolution")
+		// add highest refresh rate
+		auto& highest_refresh_rate_caption = lecui::widgets::label::add(monitor_pane);
+		highest_refresh_rate_caption
+			.text("Highest Refresh Rate")
 			.color_text(_caption_color)
 			.font_size(_caption_font_size)
 			.rect(status_caption.rect())
 			.rect().right(monitor_name_caption.rect().right()).snap_to(status_caption.rect(), snap_type::right, _margin);
 
-		auto& resolution = lecui::widgets::label::add(monitor_pane);
-		resolution
-			.text(std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")")
+		auto& highest_refresh_rate = lecui::widgets::label::add(monitor_pane);
+		highest_refresh_rate
+			.text(leccore::round_off::to_string(highest_mode.refresh_rate, 1) + " Hz")
 			.font_size(_detail_font_size)
-			.rect(resolution_caption.rect())
-			.rect().height(detail_height).snap_to(resolution_caption.rect(), snap_type::bottom, 0.f);
+			.rect(highest_refresh_rate_caption.rect())
+			.rect().height(detail_height).snap_to(highest_refresh_rate_caption.rect(), snap_type::bottom, 0.f);
 
 		monitor_number++;
 	}
@@ -838,7 +840,7 @@ void main_form::add_ram_pane() {
 	// add ram summary
 	auto& ram_summary = lecui::widgets::label::add(ram_pane, "ram_summary");
 	ram_summary.text(leccore::format_size(_ram.size) + " " +
-		"<span style = 'font-size: 8.0pt;'>capacity</span>, " +
+		"<span style = 'font-size: 8.0pt;'>total capacity</span>, " +
 		std::to_string(_ram.speed) + "MHz " +
 		"<span style = 'font-size: 8.0pt;'>speed</span>")
 		.font_size(_highlight_font_size)
