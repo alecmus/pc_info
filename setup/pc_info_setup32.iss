@@ -23,7 +23,7 @@
 ;
 
 #define MainExe "..\..\bin\pc_info32.exe"
-#define RedistPath "..\..\files\redist\vs2019\vc\x86\"
+#define RedistPath "..\..\files\redist\vs2022\vc\x86\"
 #define Architecture "32"
 #define ModulesPath "..\..\bin\"
 #define OutputPath ModulesPath
