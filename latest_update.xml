@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Various improvements including but not limited to the following: moved refresh rate from GPU pane to monitor pane, added pixel clock rate to monitor pane.</description>
-    <version>1.0.0 beta 9</version>
-    <date>04 Oct 2021</date>
+    <description>Bug-fix: drive storage type and bus type now displaying on first run after a boot.</description>
+    <version>1.0.0 beta 10</version>
+    <date>06 Dec 2021</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.9/update.32.zip</download_url>
-      <size>2333661</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.10/update.32.zip</download_url>
+      <size>2333509</size>
       <hash>
-        <sha256>3796A5DB27C98B4EE691FD1ACCAEFAC39B4A8A278A4771828D092E6ACD008707</sha256>
+        <sha256>5CCF1B5452F9F499442EB57E2ADF4CFBA928DDD47F04FC8961D683590A8B805A</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.9/update.64.zip</download_url>
-      <size>2969597</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.10/update.64.zip</download_url>
+      <size>2980510</size>
       <hash>
-        <sha256>421EE76505EAE91222503101ED16E6AD1C82C973788BCC4BECF5349A57A19CCA</sha256>
+        <sha256>488AC90DE61A544552CF73CA1FE1AB9DB80192A041F764D03F32FE9522B33710</sha256>
       </hash>
     </x64>
   </update>
