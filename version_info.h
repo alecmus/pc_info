@@ -31,9 +31,9 @@
 #define appcompany		"Alec Musasa"
 #define appfilename		"pc_info.exe"
 
-#define appversion		"1.0.0 beta 9"
+#define appversion		"1.0.0 beta 10"
 #define appmajor		1
 #define appminor		0
 #define apprevision		0
 
-#define appdate			"04 Oct 2021"
+#define appdate			"06 Dec 2021"

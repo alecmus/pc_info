@@ -348,6 +348,20 @@ void main_form::on_refresh() {
 
 					refresh_ui = true;
 				}
+
+				if (drive_old.storage_type.empty()) {
+					auto& storage_type = get_label("home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/storage_type");
+					storage_type.text(drive.storage_type);
+
+					refresh_ui = true;
+				}
+
+				if (drive_old.bus_type.empty()) {
+					auto& bus_type = get_label("home/drive_pane/drive_tab_pane/Drive " + std::to_string(drive_number) + "/bus_type");
+					bus_type.text(drive.bus_type);
+
+					refresh_ui = true;
+				}
 			}
 		}
 	}

@@ -1058,7 +1058,7 @@ void main_form::add_drive_tab_pane() {
 			.rect(status_caption.rect())
 			.rect().snap_to(status_caption.rect(), snap_type::right, 0.f);
 
-		auto& storage_type = lecui::widgets::label::add(drive_pane);
+		auto& storage_type = lecui::widgets::label::add(drive_pane, "storage_type");
 		storage_type
 			.text(drive.storage_type)
 			.font_size(_detail_font_size)
@@ -1074,7 +1074,7 @@ void main_form::add_drive_tab_pane() {
 			.rect(storage_type_caption.rect())
 			.rect().snap_to(storage_type_caption.rect(), snap_type::right, 0.f);
 
-		auto& bus_type = lecui::widgets::label::add(drive_pane);
+		auto& bus_type = lecui::widgets::label::add(drive_pane, "bus_type");
 		bus_type
 			.text(drive.bus_type)
 			.font_size(_detail_font_size)
