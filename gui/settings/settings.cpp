@@ -99,6 +99,7 @@ void main_form::settings() {
 			_apprnc
 				.main_icon(ico_resource)
 				.mini_icon(ico_resource)
+				.caption_icon(get_dpi_scale() < 2.f ? icon_png_32 : icon_png_64)
 				.theme(_setting_darktheme_parent ? lecui::themes::dark : lecui::themes::light);
 			_dim.set_size(lecui::size().width(300.f).height(270.f));
 
