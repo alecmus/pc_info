@@ -40,10 +40,10 @@ bool main_form::on_layout(std::string& error) {
 
 	// compute label heights
 	const lecui::rect page_rect = { 0.f, home.size().get_width(), 0.f, home.size().get_height() };
-	title_height = _dim.measure_label(_sample_text, _font, _title_font_size, true, false, page_rect).height();
-	highlight_height = _dim.measure_label(_sample_text, _font, _highlight_font_size, true, false, page_rect).height();
-	detail_height = _dim.measure_label(_sample_text, _font, _detail_font_size, true, false, page_rect).height();
-	caption_height = _dim.measure_label(_sample_text, _font, _caption_font_size, true, false, page_rect).height();
+	title_height = _dim.measure_label(_sample_text, _font, _title_font_size, lecui::text_alignment::center, lecui::paragraph_alignment::top, page_rect).height();
+	highlight_height = _dim.measure_label(_sample_text, _font, _highlight_font_size, lecui::text_alignment::center, lecui::paragraph_alignment::top, page_rect).height();
+	detail_height = _dim.measure_label(_sample_text, _font, _detail_font_size, lecui::text_alignment::center, lecui::paragraph_alignment::top, page_rect).height();
+	caption_height = _dim.measure_label(_sample_text, _font, _caption_font_size, lecui::text_alignment::center, lecui::paragraph_alignment::top, page_rect).height();
 
 	// 1. Add pc details
 	add_pc_details_pane();
@@ -352,7 +352,12 @@ void main_form::add_battery_pane() {
 
 		// add battery health
 		auto& health_caption = lecui::widgets::label::add(battery_pane);
-		health_caption.text("BATTERY HEALTH").center_v(true).center_h(true).color_text(_caption_color).font_size(_caption_font_size)
+		health_caption
+			.text("BATTERY HEALTH")
+			.alignment(lecui::text_alignment::center)
+			.paragraph_alignment(lecui::paragraph_alignment::middle)
+			.color_text(_caption_color)
+			.font_size(_caption_font_size)
 			.rect(battery_name_caption.rect())
 			.rect().snap_to(seperator_1.rect(), snap_type::bottom, _margin);
 
