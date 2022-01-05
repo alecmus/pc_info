@@ -22,7 +22,7 @@ View essential pc specs in a snap
   <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/y/alecmus/pc_info">
 </p>
 
-<img src="https://github.com/alecmus/files/blob/master/liblec/lecui/screenshots/pc_info/pc_info_01.png?raw=true" alt="screenshot" width="1120"/>
+<img src="https://github.com/alecmus/files/blob/master/liblec/lecui/screenshots/pc_info/pc_info_03.png?raw=true" alt="screenshot" width="808"/>
 
 ## About
 A simple tool for viewing essential pc specs. The application displays the most essential specifications of a pc in a simple and straightforward layout.
