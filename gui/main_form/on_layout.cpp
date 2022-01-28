@@ -113,8 +113,11 @@ void main_form::add_pc_details_pane() {
 	};
 
 	background.events().mouse_leave = [&]() {
-		auto& copy = get_image_view("home/pc_details_pane/copy");
-		copy.opacity(0.f);
+		try {
+			auto& copy = get_image_view("home/pc_details_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
 	};
 
 	// add pc details title
@@ -348,8 +351,11 @@ void main_form::add_power_pane() {
 	};
 
 	background.events().mouse_leave = [&]() {
-		auto& copy = get_image_view("home/power_pane/copy");
-		copy.opacity(0.f);
+		try {
+			auto& copy = get_image_view("home/power_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
 	};
 
 	// add pc details title
