@@ -327,6 +327,31 @@ void main_form::add_power_pane() {
 		.rect().width(270.f).height(550.f);
 	power_pane.rect().snap_to(pc_details_pane.rect(), snap_type::right_top, _margin);
 
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(power_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(power_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/power_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/power_pane/copy");
+		copy.opacity(0.f);
+	};
+
 	// add pc details title
 	auto& power_details_title = lecui::widgets::label::add(power_pane);
 	power_details_title
@@ -371,6 +396,87 @@ void main_form::add_power_pane() {
 		.font_size(_caption_font_size)
 		.rect(level_bar.rect())
 		.rect().height(caption_height).snap_to(level_bar.rect(), snap_type::bottom, _margin / 2.f);
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(power_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy Power Details")
+		.rect()
+		.left(power_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/power_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/power_pane/copy");
+		copy.opacity(50.f);
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "POWER DETAILS\n\n";
+		text += "Status:\t\t\t\t";
+		text += std::string(_power.ac ? "On AC" : "On Battery") + ", " + _pc_info.to_string(_power.status) + "\n";
+		text += "Level:\t\t\t\t" + (_power.level != -1 ?
+			(std::to_string(_power.level) + "% ") : "Unknown ") + "overall power level\n";
+		text += "Time remaining:\t\t\t" + (_power.lifetime_remaining.empty() ? std::string() : (_power.lifetime_remaining + " remaining")) + "\n";
+
+		int battery_number = 0;
+		for (const auto& battery : _power.batteries) {
+			text += "\nBattery " + std::to_string(battery_number);
+			text += "\n-----------\n";
+
+			text += "Name:\t\t\t\t";
+			text += battery.name + "\n";
+			text += "Manufacturer:\t\t\t";
+			text += battery.manufacturer + "\n";
+			text += "Battery Health:\t\t\t";
+			text += leccore::round_off::to_string(battery.health, 0) + "%\n";
+			text += "Designed Capacity:\t\t";
+			text += (_setting_milliunits ?
+				std::to_string(battery.designed_capacity) + "mWh" :
+				leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh") + "\n";
+			text += "Fully Charged Capacity:\t\t";
+			text += (_setting_milliunits ?
+				std::to_string(battery.fully_charged_capacity) + "mWh" :
+				leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh") + "\n";
+			text += "Current Capacity:\t\t";
+			text += (_setting_milliunits ?
+				std::to_string(battery.current_capacity) + "mWh" :
+				leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh") + "\n";
+			text += "Charge Level:\t\t\t";
+			text += (leccore::round_off::to_string(battery.level, 1) + "%") + "\n";
+			text += "Current Voltage:\t\t";
+			text += (battery.current_voltage == -1 ? "Unknown" :
+				_setting_milliunits ?
+				std::to_string(battery.current_voltage) + "mV" :
+				leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V") + "\n";
+			text += "Charge Rate:\t\t\t";
+			text += (_setting_milliunits ?
+				std::to_string(battery.current_charge_rate) + "mW" :
+				leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W") + "\n";
+			text += "Status:\t\t\t\t";
+			text += _pc_info.to_string(battery.status) + "\n";
+		}
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_battery_pane() {
