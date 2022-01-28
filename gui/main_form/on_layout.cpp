@@ -1245,6 +1245,34 @@ void main_form::add_ram_pane() {
 		.left(cpu_pane.rect().right() + _margin).width(300.f)
 		.top(_margin).height(285.f);
 
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(ram_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(ram_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/ram_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		try {
+			auto& copy = get_image_view("home/ram_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
+	};
+
 	// add ram title
 	auto& ram_title = lecui::widgets::label::add(ram_pane);
 	ram_title
@@ -1261,6 +1289,71 @@ void main_form::add_ram_pane() {
 		.font_size(_highlight_font_size)
 		.rect(ram_title.rect())
 		.rect().snap_to(ram_title.rect(), snap_type::bottom, _margin).height(highlight_height);
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(ram_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy RAM Details")
+		.rect()
+		.left(ram_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/ram_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/ram_pane/copy");
+		copy.opacity(50.f);
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "RAM DETAILS\n\n";
+		text += "Total Capacity:\t\t\t";
+		text += leccore::format_size(_ram.size) + "\n";
+		text += "Speed:\t\t\t\t";
+		text += std::to_string(_ram.speed) + "MHz" + "\n";
+
+		int ram_number = 0;
+		for (const auto& ram : _ram.ram_chips) {
+			text += "\nRAM " + std::to_string(ram_number);
+			text += "\n-----------\n";
+
+			text += "Part Number:\t\t\t";
+			text += ram.part_number + "\n";
+			text += "Manufacturer:\t\t\t";
+			text += ram.manufacturer + "\n";
+			text += "Status:\t\t\t\t";
+			text += ram.status + "\n";
+			text += "Type:\t\t\t\t";
+			text += ram.type + "\n";
+			text += "Form Factor:\t\t\t";
+			text += ram.form_factor + "\n";
+			text += "Capacity:\t\t\t";
+			text += leccore::format_size(ram.capacity) + "\n";
+			text += "Speed:\t\t\t\t";
+			text += std::to_string(ram.speed) + "MHz" + "\n";
+
+			ram_number++;
+		}
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_ram_tab_pane() {
