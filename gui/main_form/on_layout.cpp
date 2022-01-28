@@ -721,12 +721,96 @@ void main_form::add_cpu_pane() {
 		.left(right + _margin).width(300.f)
 		.top(_margin).height(200.f);
 
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(cpu_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(cpu_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/cpu_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		try {
+			auto& copy = get_image_view("home/cpu_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
+	};
+
 	// add cpu title
 	auto& cpu_title = lecui::widgets::label::add(cpu_pane, "cpu_title");
 	cpu_title
 		.text("<strong>CPU DETAILS</strong>")
 		.font_size(_title_font_size)
 		.rect({ 0.f, cpu_pane.size().get_width(), 0.f, title_height });
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(cpu_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy CPU Details")
+		.rect()
+		.left(cpu_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/cpu_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/cpu_pane/copy");
+		copy.opacity(50.f);
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "CPU DETAILS\n";
+		
+		int cpu_number = 0;
+		for (const auto& cpu : _cpus) {
+			text += "\nCPU " + std::to_string(cpu_number);
+			text += "\n-----------\n";
+
+			text += "Name:\t\t\t\t";
+			text += cpu.name + "\n";
+			text += "Status:\t\t\t\t";
+			text += cpu.status + "\n";
+			text += "Base Speed:\t\t\t";
+			text += leccore::round_off::to_string(cpu.base_speed, 2) + "GHz" + "\n";
+			text += "Cores:\t\t\t\t";
+			text += (std::to_string(cpu.cores) +
+				std::string(cpu.cores == 1 ? " core" : " cores") + ", " +
+				std::to_string(cpu.logical_processors) +
+				std::string(cpu.cores == 1 ? " logical processor" : " logical processors")) + "\n";
+		}
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_cpu_tab_pane() {
