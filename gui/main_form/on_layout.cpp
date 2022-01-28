@@ -477,6 +477,8 @@ void main_form::add_power_pane() {
 				leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W") + "\n";
 			text += "Status:\t\t\t\t";
 			text += _pc_info.to_string(battery.status) + "\n";
+
+			battery_number++;
 		}
 
 		std::string error;
@@ -808,6 +810,8 @@ void main_form::add_cpu_pane() {
 				std::string(cpu.cores == 1 ? " core" : " cores") + ", " +
 				std::to_string(cpu.logical_processors) +
 				std::string(cpu.cores == 1 ? " logical processor" : " logical processors")) + "\n";
+
+			cpu_number++;
 		}
 
 		std::string error;
@@ -988,6 +992,8 @@ void main_form::add_graphics_pane() {
 			text += leccore::format_size(gpu.dedicated_vram) + "\n";
 			text += "Total Available:\t\t";
 			text += leccore::format_size(gpu.total_graphics_memory) + "\n";
+
+			gpu_number++;
 		}
 
 		int monitor_number = 0;
@@ -1014,6 +1020,8 @@ void main_form::add_graphics_pane() {
 			text += (leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 1) + " MHz") + "\n";
 			text += "Max. Screen Resolution:\t\t";
 			text += (std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")") + "\n";
+
+			monitor_number++;
 		}
 
 		std::string error;
