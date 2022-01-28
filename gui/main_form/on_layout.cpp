@@ -1484,11 +1484,103 @@ void main_form::add_drive_pane() {
 		.rect(ram_pane.rect())
 		.rect().height(255.f).snap_to(ram_pane.rect(), snap_type::bottom, _margin);
 
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(drive_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(drive_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/drive_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		try {
+			auto& copy = get_image_view("home/drive_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
+	};
+
 	// add drive title
 	auto& drive_title = lecui::widgets::label::add(drive_pane, "drive_title");
 	drive_title.text("<strong>DRIVE DETAILS</strong>")
 		.font_size(_title_font_size)
 		.rect({ 0.f, drive_pane.size().get_width(), 0.f, title_height });
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(drive_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy Drive Details")
+		.rect()
+		.left(drive_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/drive_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		try {
+			auto& copy = get_image_view("home/drive_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "DRIVE DETAILS\n";
+
+		int drive_number = 0;
+		for (const auto& drive : _drives) {
+			text += "\nDrive " + std::to_string(drive_number);
+			text += "\n-----------\n";
+
+			text += "Model:\t\t\t\t";
+			text += drive.model + "\n";
+			text += "Status:\t\t\t\t";
+			text += drive.status + "\n";
+			text += "Storage Type:\t\t\t";
+			text += drive.storage_type + "\n";
+			text += "Bus Type:\t\t\t";
+			text += drive.bus_type + "\n";
+			text += "Serial Number:\t\t\t";
+			text += drive.serial_number + "\n";
+			text += "Capacity:\t\t\t";
+			text += leccore::format_size(drive.size) + "\n";
+			text += "Media Type:\t\t\t";
+			text += drive.media_type + "\n";
+
+			drive_number++;
+		}
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_drive_tab_pane() {
