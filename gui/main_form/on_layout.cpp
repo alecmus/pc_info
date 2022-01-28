@@ -781,8 +781,11 @@ void main_form::add_cpu_pane() {
 	};
 
 	copy.events().mouse_leave = [&]() {
-		auto& copy = get_image_view("home/cpu_pane/copy");
-		copy.opacity(50.f);
+		try {
+			auto& copy = get_image_view("home/cpu_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
 	};
 
 	copy.events().action = [&]() {
