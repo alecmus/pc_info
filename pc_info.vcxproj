@@ -193,6 +193,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\ico\icon.ico" />
+    <Image Include="resources\png\copy_32.png" />
+    <Image Include="resources\png\copy_64.png" />
     <Image Include="resources\png\icon_128.png" />
     <Image Include="resources\png\icon_256.png" />
     <Image Include="resources\png\icon_32.png" />

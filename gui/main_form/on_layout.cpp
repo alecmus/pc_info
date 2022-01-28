@@ -33,6 +33,11 @@
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
 #include <liblec/lecui/widgets/line.h>
+#include <liblec/lecui/widgets/image_view.h>
+#include <liblec/lecui/widgets/rectangle.h>
+
+// leccore
+#include <liblec/leccore/system.h>
 
 bool main_form::on_layout(std::string& error) {
 	// add home page
@@ -86,6 +91,31 @@ void main_form::add_pc_details_pane() {
 		.right(_margin + 200.f)
 		.top(_margin)
 		.bottom(home.size().get_height() - _margin));
+
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(pc_details_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(pc_details_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/pc_details_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/pc_details_pane/copy");
+		copy.opacity(0.f);
+	};
 
 	// add pc details title
 	auto& pc_details_title = lecui::widgets::label::add(pc_details_pane);
@@ -235,6 +265,56 @@ void main_form::add_pc_details_pane() {
 		.font_size(_highlight_font_size)
 		.rect(pc_name.rect())
 		.rect().height(highlight_height).snap_to(drive_summary.rect(), snap_type::bottom, 0.f);
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(pc_details_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy PC Details")
+		.rect()
+		.left(pc_details_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/pc_details_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/pc_details_pane/copy");
+		copy.opacity(50.f);
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "PC DETAILS\n\n";
+		text += "Name:\t\t\t\t";
+		text += _pc_details.name + "\n";
+		text += "Manufacturer:\t\t\t";
+		text += _pc_details.manufacturer + "\n";
+		text += "Model:\t\t\t\t";
+		text += _pc_details.model + "\n";
+		text += "System type:\t\t\t";
+		text += _pc_details.system_type + "\n";
+		text += "BIOS Serial Number:\t\t";
+		text += _pc_details.bios_serial_number + "\n";
+		text += "Motherboard Serial Number:\t";
+		text += _pc_details.motherboard_serial_number + "\n";
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_power_pane() {

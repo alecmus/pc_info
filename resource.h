@@ -34,3 +34,6 @@
 #define icon_png_128		114
 #define icon_png_64			115
 #define icon_png_32			116
+
+#define png_copy_32			120
+#define png_copy_64			121

@@ -35,3 +35,6 @@ icon_png_256		PNG		"resources/png/icon_256.png"
 icon_png_128		PNG		"resources/png/icon_128.png"
 icon_png_64			PNG		"resources/png/icon_64.png"
 icon_png_32			PNG		"resources/png/icon_32.png"
+
+png_copy_32			PNG		"resources/png/copy_32.png"	// Ongicon
+png_copy_64			PNG		"resources/png/copy_64.png"	// Ongicon

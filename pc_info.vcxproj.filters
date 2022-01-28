@@ -91,6 +91,12 @@
     <Image Include="resources\png\splash_256.png">
       <Filter>pc_info\resources\png</Filter>
     </Image>
+    <Image Include="resources\png\copy_32.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
+    <Image Include="resources\png\copy_64.png">
+      <Filter>pc_info\resources\png</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="latest_update.xml">

@@ -51,6 +51,9 @@ void main_form::about() {
 	display_text += "\n\n<strong>Additional credits</strong>\nMain icon designed by DinosoftLabs\nhttps://www.flaticon.com/authors/dinosoftlabs";
 	display_text += "\nfrom https://www.flaticon.com";
 
+	display_text += "\n\n<strong>Copy icons created by Ongicon\nhttps://www.flaticon.com/free-icons/copy";
+	display_text += "\nfrom https://www.flaticon.com";
+
 	display_text += "\n\nThis app is free software released under the MIT License.";
 
 	message(display_text);
