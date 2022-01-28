@@ -907,12 +907,119 @@ void main_form::add_graphics_pane() {
 		.top(cpu_pane.rect().bottom() + _margin)
 		.height(340.f);
 
+	// add rectangle for detecting when mouse is over this pane
+	auto& background = lecui::widgets::rectangle::add(graphics_pane);
+	background
+		.color_border(lecui::color().alpha(0))
+		.color_border_hot(lecui::color().alpha(0))
+		.color_fill(lecui::color().alpha(0))
+		.color_selected(lecui::color().alpha(0))
+		.color_hot(lecui::color().alpha(0))
+		.rect(lecui::rect().size(graphics_pane.size()))
+		.on_resize(lecui::resize_params().height_rate(100.f))
+		.events().action = [&]() {};
+
+	background.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/graphics_pane/copy");
+			copy.opacity(50.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	background.events().mouse_leave = [&]() {
+		try {
+			auto& copy = get_image_view("home/graphics_pane/copy");
+			copy.opacity(0.f);
+		}
+		catch (const std::exception&) {}
+	};
+
 	// add graphics title
 	auto& graphics_title = lecui::widgets::label::add(graphics_pane, "graphics_title");
 	graphics_title
 		.text("<strong>GRAPHICS DETAILS</strong>")
 		.font_size(_title_font_size)
 		.rect({ 0.f, graphics_pane.size().get_width(), 0.f, title_height });
+
+	// add copy details icon
+	auto& copy = lecui::widgets::image_view::add(graphics_pane, "copy");
+	copy
+		.png_resource(get_dpi_scale() < 2.f ? png_copy_32 : png_copy_64)
+		.tooltip("Copy Graphics Details")
+		.rect()
+		.left(graphics_pane.size().get_width() - 24.f).width(24.f)
+		.height(24.f);
+
+	copy
+		.opacity(0.f)	// invisible by default
+		.color_hot().alpha(0);
+
+	copy
+		.color_selected().alpha(0);
+
+	copy.events().mouse_enter = [&]() {
+		try {
+			auto& copy = get_image_view("home/graphics_pane/copy");
+			copy.opacity(100.f);
+		}
+		catch (const std::exception&) {}
+	};
+
+	copy.events().mouse_leave = [&]() {
+		auto& copy = get_image_view("home/graphics_pane/copy");
+		copy.opacity(50.f);
+	};
+
+	copy.events().action = [&]() {
+		std::string text;
+		text += "GRAPHICS DETAILS\n";
+
+		int gpu_number = 0;
+		for (const auto& gpu : _gpus) {
+			text += "\nGPU " + std::to_string(gpu_number);
+			text += "\n-----------\n";
+
+			text += "Name:\t\t\t\t";
+			text += gpu.name + "\n";
+			text += "Status:\t\t\t\t";
+			text += gpu.status + "\n";
+			text += "Dedicated Memory:\t\t";
+			text += leccore::format_size(gpu.dedicated_vram) + "\n";
+			text += "Total Available:\t\t";
+			text += leccore::format_size(gpu.total_graphics_memory) + "\n";
+		}
+
+		int monitor_number = 0;
+		for (const auto& monitor : _monitors) {
+			text += "\nMONITOR " + std::to_string(monitor_number);
+			text += "\n-----------\n";
+
+			// get highest supported mode
+			leccore::pc_info::video_mode highest_mode = {};
+
+			for (auto& mode : monitor.supported_modes) {
+				if (highest_mode.horizontal_resolution < mode.horizontal_resolution)
+					highest_mode = mode;
+			}
+
+			text += "Name:\t\t\t\t";
+			text += (monitor.manufacturer + monitor.product_code_id) + "\n";
+			text += "Size:\t\t\t\t";
+			text += (leccore::round_off::to_string(highest_mode.physical_size, 1) +
+				" inches") + "\n";
+			text += "Max. Refresh:\t\t\t";
+			text += (leccore::round_off::to_string(highest_mode.refresh_rate, 1) + " Hz") + "\n";
+			text += "Max. Pixel Clock:\t\t";
+			text += (leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 1) + " MHz") + "\n";
+			text += "Max. Screen Resolution:\t\t";
+			text += (std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")") + "\n";
+		}
+
+		std::string error;
+		if (!leccore::clipboard::set_text(text, error))
+			message(error);
+	};
 }
 
 void main_form::add_gpu_tab_pane() {
