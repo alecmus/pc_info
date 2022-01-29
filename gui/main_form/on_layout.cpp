@@ -92,19 +92,7 @@ void main_form::add_pc_details_pane() {
 		.top(_margin)
 		.bottom(home.size().get_height() - _margin));
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(pc_details_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(pc_details_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	pc_details_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/pc_details_pane/copy");
 			copy.opacity(50.f);
@@ -112,7 +100,7 @@ void main_form::add_pc_details_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	pc_details_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/pc_details_pane/copy");
 			copy.opacity(0.f);
@@ -330,19 +318,7 @@ void main_form::add_power_pane() {
 		.rect().width(270.f).height(550.f);
 	power_pane.rect().snap_to(pc_details_pane.rect(), snap_type::right_top, _margin);
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(power_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(power_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	power_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/power_pane/copy");
 			copy.opacity(50.f);
@@ -350,7 +326,7 @@ void main_form::add_power_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	power_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/power_pane/copy");
 			copy.opacity(0.f);
@@ -723,19 +699,7 @@ void main_form::add_cpu_pane() {
 		.left(right + _margin).width(300.f)
 		.top(_margin).height(200.f);
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(cpu_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(cpu_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	cpu_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/cpu_pane/copy");
 			copy.opacity(50.f);
@@ -743,7 +707,7 @@ void main_form::add_cpu_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	cpu_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/cpu_pane/copy");
 			copy.opacity(0.f);
@@ -911,19 +875,7 @@ void main_form::add_graphics_pane() {
 		.top(cpu_pane.rect().bottom() + _margin)
 		.height(340.f);
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(graphics_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(graphics_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	graphics_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/graphics_pane/copy");
 			copy.opacity(50.f);
@@ -931,7 +883,7 @@ void main_form::add_graphics_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	graphics_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/graphics_pane/copy");
 			copy.opacity(0.f);
@@ -1245,19 +1197,7 @@ void main_form::add_ram_pane() {
 		.left(cpu_pane.rect().right() + _margin).width(300.f)
 		.top(_margin).height(285.f);
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(ram_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(ram_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	ram_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/ram_pane/copy");
 			copy.opacity(50.f);
@@ -1265,7 +1205,7 @@ void main_form::add_ram_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	ram_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/ram_pane/copy");
 			copy.opacity(0.f);
@@ -1484,19 +1424,7 @@ void main_form::add_drive_pane() {
 		.rect(ram_pane.rect())
 		.rect().height(255.f).snap_to(ram_pane.rect(), snap_type::bottom, _margin);
 
-	// add rectangle for detecting when mouse is over this pane
-	auto& background = lecui::widgets::rectangle::add(drive_pane);
-	background
-		.color_border(lecui::color().alpha(0))
-		.color_border_hot(lecui::color().alpha(0))
-		.color_fill(lecui::color().alpha(0))
-		.color_selected(lecui::color().alpha(0))
-		.color_hot(lecui::color().alpha(0))
-		.rect(lecui::rect().size(drive_pane.size()))
-		.on_resize(lecui::resize_params().height_rate(100.f))
-		.events().action = [&]() {};
-
-	background.events().mouse_enter = [&]() {
+	drive_pane.events().mouse_enter = [&]() {
 		try {
 			auto& copy = get_image_view("home/drive_pane/copy");
 			copy.opacity(50.f);
@@ -1504,7 +1432,7 @@ void main_form::add_drive_pane() {
 		catch (const std::exception&) {}
 	};
 
-	background.events().mouse_leave = [&]() {
+	drive_pane.events().mouse_leave = [&]() {
 		try {
 			auto& copy = get_image_view("home/drive_pane/copy");
 			copy.opacity(0.f);
