@@ -139,6 +139,8 @@ class main_form : public lecui::form {
 	void about();
 	void settings();
 	void updates();
+	void copy_pc_info();
+	void export_pc_info();
 	bool on_layout(std::string& error) override;
 
 	void add_pc_details_pane();

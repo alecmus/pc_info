@@ -352,6 +352,9 @@ bool main_form::on_initialize(std::string& error) {
 
 	// add form menu
 	_form_menu.add("• • •", "Settings and more", {
+		{ "Copy all info", [this]() { copy_pc_info(); } },
+		{ "Export all info", [this]() { export_pc_info(); } },
+		{ "" },
 		{ "Settings", [this]() { settings(); } },
 		{ "Updates", [this]() { updates(); } },
 		{ "About", [this]() { about(); } },

@@ -30,6 +30,7 @@
 #include <liblec/lecui/widgets/label.h>
 #include <liblec/lecui/widgets/progress_bar.h>
 #include <liblec/lecui/widgets/progress_indicator.h>
+#include <liblec/lecui/utilities/filesystem.h>
 
 // leccore
 #include <liblec/leccore/system.h>
@@ -84,6 +85,66 @@ void main_form::updates() {
 
 	// start timer to keep progress of the update check
 	_timer_man.add("update_check", 1500, [&]() { on_update_check(); });
+}
+
+void main_form::copy_pc_info() {
+	// make text string containing full pc info
+	std::string text;
+	text += pc_details_text();
+	
+	if (!_power.batteries.empty())
+		text += power_details_text();
+
+	text += cpu_details_text();
+	text += graphics_details_text();
+	text += ram_details_text();
+	text += drive_details_text();
+
+	// set the text to the clipboard
+	std::string error;
+	if (!leccore::clipboard::set_text(text, error))
+		message(error);
+	else
+		message("This PC's info has been copied to the clipboard.");
+}
+
+void main_form::export_pc_info() {
+	// make text string containing full pc info
+	std::string text;
+	text += pc_details_text();
+
+	if (!_power.batteries.empty())
+		text += power_details_text();
+
+	text += cpu_details_text();
+	text += graphics_details_text();
+	text += ram_details_text();
+	text += drive_details_text();
+	text += "\n-------------------------------------------------------------------------------\n";
+	text += "Exported from " + std::string(appname) + " " + std::string(appversion) + " (" + std::string(architecture) + ")";
+
+	lecui::filesystem _file_system(*this);
+
+	lecui::save_file_params params;
+	params
+		.title(std::string(appname) + " - Export all info")
+		.include_all_files(false)
+		.file_types({ { "txt", "Text Document" } });
+
+	// get the full path to the file (prompt user)
+	const auto full_path = _file_system.save_file("pc_info - " + _pc_details.name + ".txt", params);
+
+	if (!full_path.empty()) {
+		// save the file
+		std::string error;
+		if (!leccore::file::write(full_path, text, error))
+			message(error);
+		else {
+			// open the file
+			if (!leccore::shell::open(full_path, error))
+				message(error);
+		}
+	}
 }
 
 void main_form::on_start() {
