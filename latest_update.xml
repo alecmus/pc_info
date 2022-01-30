@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Bug-fix: drive storage type and bus type now displaying on first run after a boot.</description>
-    <version>1.0.0 beta 10</version>
-    <date>06 Dec 2021</date>
+    <description>Various improvements including but not limited to the following: Added functionality to copy and export info from the app, bug fixes.</description>
+    <version>1.0.0 beta 11</version>
+    <date>30 Jan 2022</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.10/update.32.zip</download_url>
-      <size>2333509</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.11/update.32.zip</download_url>
+      <size>2379634</size>
       <hash>
-        <sha256>5CCF1B5452F9F499442EB57E2ADF4CFBA928DDD47F04FC8961D683590A8B805A</sha256>
+        <sha256>BDF395A99A4FC4B5404A34D52E44665BF03FFFDDA986AA3C0FA462DB94A20091</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.10/update.64.zip</download_url>
-      <size>2980510</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.11/update.64.zip</download_url>
+      <size>3030244</size>
       <hash>
-        <sha256>488AC90DE61A544552CF73CA1FE1AB9DB80192A041F764D03F32FE9522B33710</sha256>
+        <sha256>9CD83C08D0FD895034C93DD7D292F83BB5C2764D9E1C03D152F7E563ACE1704E</sha256>
       </hash>
     </x64>
   </update>
