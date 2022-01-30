@@ -290,6 +290,8 @@ void main_form::add_pc_details_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(pc_details_text(), error))
 			message(error);
+		else
+			message("PC details copied to the clipboard.");
 	};
 }
 
@@ -397,6 +399,8 @@ void main_form::add_power_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(power_details_text(), error))
 			message(error);
+		else
+			message("Power details copied to the clipboard.");
 	};
 }
 
@@ -695,6 +699,8 @@ void main_form::add_cpu_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(cpu_details_text(), error))
 			message(error);
+		else
+			message("CPU details copied to the clipboard.");
 	};
 }
 
@@ -845,6 +851,8 @@ void main_form::add_graphics_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(graphics_details_text(), error))
 			message(error);
+		else
+			message("Graphics details copied to the clipboard.");
 	};
 }
 
@@ -1129,6 +1137,8 @@ void main_form::add_ram_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(ram_details_text(), error))
 			message(error);
+		else
+			message("RAM details copied to the clipboard.");
 	};
 }
 
@@ -1318,6 +1328,8 @@ void main_form::add_drive_pane() {
 		std::string error;
 		if (!leccore::clipboard::set_text(drive_details_text(), error))
 			message(error);
+		else
+			message("Drive details copied to the clipboard.");
 	};
 }
 

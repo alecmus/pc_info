@@ -105,7 +105,7 @@ void main_form::copy_pc_info() {
 	if (!leccore::clipboard::set_text(text, error))
 		message(error);
 	else
-		message("This PC's info has been copied to the clipboard.");
+		message("All PC info copied to the clipboard.");
 }
 
 void main_form::export_pc_info() {
