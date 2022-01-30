@@ -167,6 +167,13 @@ class main_form : public lecui::form {
 	void close_update_status();
 	void on_close_update_status();
 
+	std::string pc_details_text();
+	std::string power_details_text();
+	std::string cpu_details_text();
+	std::string graphics_details_text();
+	std::string ram_details_text();
+	std::string drive_details_text();
+
 public:
 	main_form(const std::string& caption, bool restarted);
 	~main_form();

@@ -720,6 +720,242 @@ void main_form::on_close_update_status() {
 	_update_details_displayed = false;
 }
 
+std::string main_form::pc_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "PC DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n\n";
+	text += "Name:\t\t\t\t";
+	text += _pc_details.name + "\n";
+	text += "Manufacturer:\t\t\t";
+	text += _pc_details.manufacturer + "\n";
+	text += "Model:\t\t\t\t";
+	text += _pc_details.model + "\n";
+	text += "System type:\t\t\t";
+	text += _pc_details.system_type + "\n";
+	text += "BIOS Serial Number:\t\t";
+	text += _pc_details.bios_serial_number + "\n";
+	text += "Motherboard Serial Number:\t";
+	text += _pc_details.motherboard_serial_number + "\n";
+	text += "\n";
+	return text;
+}
+
+std::string main_form::power_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "POWER DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n\n";
+	text += "Status:\t\t\t\t";
+	text += std::string(_power.ac ? "On AC" : "On Battery") + ", " + _pc_info.to_string(_power.status) + "\n";
+	text += "Level:\t\t\t\t" + (_power.level != -1 ?
+		(std::to_string(_power.level) + "% ") : "Unknown ") + "overall power level\n";
+	text += "Time remaining:\t\t\t" + (_power.lifetime_remaining.empty() ? std::string() : (_power.lifetime_remaining + " remaining")) + "\n";
+
+	int battery_number = 0;
+	for (const auto& battery : _power.batteries) {
+		text += "\nBattery " + std::to_string(battery_number);
+		text += "\n-----------\n";
+
+		text += "Name:\t\t\t\t";
+		text += battery.name + "\n";
+		text += "Manufacturer:\t\t\t";
+		text += battery.manufacturer + "\n";
+		text += "Battery Health:\t\t\t";
+		text += leccore::round_off::to_string(battery.health, 0) + "%\n";
+		text += "Designed Capacity:\t\t";
+		text += (_setting_milliunits ?
+			std::to_string(battery.designed_capacity) + "mWh" :
+			leccore::round_off::to_string(battery.designed_capacity / 1000.f, 1) + "Wh") + "\n";
+		text += "Fully Charged Capacity:\t\t";
+		text += (_setting_milliunits ?
+			std::to_string(battery.fully_charged_capacity) + "mWh" :
+			leccore::round_off::to_string(battery.fully_charged_capacity / 1000.f, 1) + "Wh") + "\n";
+		text += "Current Capacity:\t\t";
+		text += (_setting_milliunits ?
+			std::to_string(battery.current_capacity) + "mWh" :
+			leccore::round_off::to_string(battery.current_capacity / 1000.f, 1) + "Wh") + "\n";
+		text += "Charge Level:\t\t\t";
+		text += (leccore::round_off::to_string(battery.level, 1) + "%") + "\n";
+		text += "Current Voltage:\t\t";
+		text += (battery.current_voltage == -1 ? "Unknown" :
+			_setting_milliunits ?
+			std::to_string(battery.current_voltage) + "mV" :
+			leccore::round_off::to_string(battery.current_voltage / 1000.f, 2) + "V") + "\n";
+		text += "Charge Rate:\t\t\t";
+		text += (_setting_milliunits ?
+			std::to_string(battery.current_charge_rate) + "mW" :
+			leccore::round_off::to_string(battery.current_charge_rate / 1000.f, 1) + "W") + "\n";
+		text += "Status:\t\t\t\t";
+		text += _pc_info.to_string(battery.status) + "\n";
+
+		battery_number++;
+	}
+
+	text += "\n";
+
+	return text;
+}
+
+std::string main_form::cpu_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "CPU DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n";
+
+	int cpu_number = 0;
+	for (const auto& cpu : _cpus) {
+		text += "\nCPU " + std::to_string(cpu_number);
+		text += "\n-----------\n";
+
+		text += "Name:\t\t\t\t";
+		text += cpu.name + "\n";
+		text += "Status:\t\t\t\t";
+		text += cpu.status + "\n";
+		text += "Base Speed:\t\t\t";
+		text += leccore::round_off::to_string(cpu.base_speed, 2) + "GHz" + "\n";
+		text += "Cores:\t\t\t\t";
+		text += (std::to_string(cpu.cores) +
+			std::string(cpu.cores == 1 ? " core" : " cores") + ", " +
+			std::to_string(cpu.logical_processors) +
+			std::string(cpu.cores == 1 ? " logical processor" : " logical processors")) + "\n";
+
+		cpu_number++;
+	}
+
+	text += "\n";
+
+	return text;
+}
+
+std::string main_form::graphics_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "GRAPHICS DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n";
+
+	int gpu_number = 0;
+	for (const auto& gpu : _gpus) {
+		text += "\nGPU " + std::to_string(gpu_number);
+		text += "\n-----------\n";
+
+		text += "Name:\t\t\t\t";
+		text += gpu.name + "\n";
+		text += "Status:\t\t\t\t";
+		text += gpu.status + "\n";
+		text += "Dedicated Memory:\t\t";
+		text += leccore::format_size(gpu.dedicated_vram) + "\n";
+		text += "Total Available:\t\t";
+		text += leccore::format_size(gpu.total_graphics_memory) + "\n";
+
+		gpu_number++;
+	}
+
+	int monitor_number = 0;
+	for (const auto& monitor : _monitors) {
+		text += "\nMONITOR " + std::to_string(monitor_number);
+		text += "\n-----------\n";
+
+		// get highest supported mode
+		leccore::pc_info::video_mode highest_mode = {};
+
+		for (auto& mode : monitor.supported_modes) {
+			if (highest_mode.horizontal_resolution < mode.horizontal_resolution)
+				highest_mode = mode;
+		}
+
+		text += "Name:\t\t\t\t";
+		text += (monitor.manufacturer + monitor.product_code_id) + "\n";
+		text += "Size:\t\t\t\t";
+		text += (leccore::round_off::to_string(highest_mode.physical_size, 1) +
+			" inches") + "\n";
+		text += "Max. Refresh:\t\t\t";
+		text += (leccore::round_off::to_string(highest_mode.refresh_rate, 1) + " Hz") + "\n";
+		text += "Max. Pixel Clock:\t\t";
+		text += (leccore::round_off::to_string((double(highest_mode.pixel_clock_rate) / (1000.0 * 1000.0)), 1) + " MHz") + "\n";
+		text += "Max. Screen Resolution:\t\t";
+		text += (std::to_string(highest_mode.horizontal_resolution) + "x" + std::to_string(highest_mode.vertical_resolution) + " (" + highest_mode.resolution_name + ")") + "\n";
+
+		monitor_number++;
+	}
+
+	text += "\n";
+
+	return text;
+}
+
+std::string main_form::ram_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "RAM DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n\n";
+	text += "Total Capacity:\t\t\t";
+	text += leccore::format_size(_ram.size) + "\n";
+	text += "Speed:\t\t\t\t";
+	text += std::to_string(_ram.speed) + "MHz" + "\n";
+
+	int ram_number = 0;
+	for (const auto& ram : _ram.ram_chips) {
+		text += "\nRAM " + std::to_string(ram_number);
+		text += "\n-----------\n";
+
+		text += "Part Number:\t\t\t";
+		text += ram.part_number + "\n";
+		text += "Manufacturer:\t\t\t";
+		text += ram.manufacturer + "\n";
+		text += "Status:\t\t\t\t";
+		text += ram.status + "\n";
+		text += "Type:\t\t\t\t";
+		text += ram.type + "\n";
+		text += "Form Factor:\t\t\t";
+		text += ram.form_factor + "\n";
+		text += "Capacity:\t\t\t";
+		text += leccore::format_size(ram.capacity) + "\n";
+		text += "Speed:\t\t\t\t";
+		text += std::to_string(ram.speed) + "MHz" + "\n";
+
+		ram_number++;
+	}
+
+	text += "\n";
+
+	return text;
+}
+
+std::string main_form::drive_details_text() {
+	std::string text;
+	text += "-------------------------------------------------------------------------------\n";
+	text += "DRIVE DETAILS\n";
+	text += "-------------------------------------------------------------------------------\n";
+
+	int drive_number = 0;
+	for (const auto& drive : _drives) {
+		text += "\nDrive " + std::to_string(drive_number);
+		text += "\n-----------\n";
+
+		text += "Model:\t\t\t\t";
+		text += drive.model + "\n";
+		text += "Status:\t\t\t\t";
+		text += drive.status + "\n";
+		text += "Storage Type:\t\t\t";
+		text += drive.storage_type + "\n";
+		text += "Bus Type:\t\t\t";
+		text += drive.bus_type + "\n";
+		text += "Serial Number:\t\t\t";
+		text += drive.serial_number + "\n";
+		text += "Capacity:\t\t\t";
+		text += leccore::format_size(drive.size) + "\n";
+		text += "Media Type:\t\t\t";
+		text += drive.media_type + "\n";
+
+		drive_number++;
+	}
+
+	text += "\n";
+
+	return text;
+}
+
 main_form::main_form(const std::string& caption, bool restarted) :
 	_cleanup_mode(restarted ? false : leccore::commandline_arguments::contains("/cleanup")),
 	_update_mode(restarted ? false : leccore::commandline_arguments::contains("/update")),
