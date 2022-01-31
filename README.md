@@ -33,4 +33,4 @@ The application has the following runtime requirements:
 1. Windows 10 (32 or 64 bit)
 
 ## More Info
-The app is powered by the [leccore](https://github.com/alecmus/leccore) library for the pc specifications and the [lecui](https://github.com/alecmus/lecui) library for the user interface.
+The app's user interface is powered by the [lecui](https://github.com/alecmus/lecui) library; PC specifications, updates and other functionality are powered by the [leccore](https://github.com/alecmus/leccore) library.
