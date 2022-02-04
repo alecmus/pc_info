@@ -24,13 +24,19 @@ View essential pc specs in a snap
 
 <img src="https://github.com/alecmus/files/blob/master/liblec/lecui/screenshots/pc_info/pc_info_03.png?raw=true" alt="screenshot" width="808"/>
 
-## About
+### :globe_with_meridians: Website
+Visit the official website of the app [here](https://alecmus.github.io/apps/pc_info).
+
+### :information_source: About
 A simple tool for viewing essential pc specs. The application displays the most essential specifications of a pc in a simple and straightforward layout.
 
-## Runtime Requirements
+### :zap: Runtime Requirements
 The application has the following runtime requirements:
 
-1. Windows 10 (32 or 64 bit)
+1. Windows 10, Windows 11 or later
+2. 1280x720 screen resolution (HD) or more
+3. 20MB disk space or more
+4. 64MB RAM or more
 
-## More Info
+### :information_source: More Info
 The app's user interface is powered by the [lecui](https://github.com/alecmus/lecui) library; PC specifications, updates and other functionality are powered by the [leccore](https://github.com/alecmus/leccore) library.
