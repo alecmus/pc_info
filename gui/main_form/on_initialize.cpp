@@ -330,6 +330,9 @@ bool main_form::on_initialize(std::string& error) {
 	_pc_info.ram(_ram, error);
 	_pc_info.drives(_drives, error);
 
+	// set colors that are theme dependent
+	_caption_color = lecui::defaults::color(_setting_darktheme ? lecui::themes::dark : lecui::themes::light, lecui::item::icon_description_text);
+
 	// size and stuff
 	_ctrls
 		.allow_resize(false)

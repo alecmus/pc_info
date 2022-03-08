@@ -66,10 +66,10 @@ class main_form : public lecui::form {
 	static const float _caption_font_size;
 	static const std::string _sample_text;
 	static const std::string _font;
-	static const lecui::color _caption_color;
 	static const lecui::color _ok_color;
 	static const lecui::color _not_ok_color;
 	static const unsigned long _refresh_interval;
+	lecui::color _caption_color;
 
 	bool _restart_now = false;
 

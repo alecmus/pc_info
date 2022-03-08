@@ -48,7 +48,6 @@ const float main_form::_detail_font_size = 10.f;
 const float main_form::_caption_font_size = 8.f;
 const std::string main_form::_sample_text = "<u><strong>Aq</strong></u>";
 const std::string main_form::_font = "Segoe UI";
-const lecui::color main_form::_caption_color{ lecui::color().red(100).green(100).blue(100) };
 const lecui::color main_form::_ok_color{ lecui::color().red(0).green(150).blue(0) };
 const lecui::color main_form::_not_ok_color{ lecui::color().red(200).green(0).blue(0) };
 const unsigned long main_form::_refresh_interval = 3000;
