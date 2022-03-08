@@ -25,7 +25,7 @@
 #pragma once
 
 #define appname			"PC Info"
-#define appdescription	"Get Essential PC Specs"
+#define appdescription	"PC Info"
 #define appcomments		"Powered by liblec"
 #define appcopyright	"(c) 2021 Alec Musasa"
 #define appcompany		"Alec Musasa"
@@ -36,4 +36,4 @@
 #define appminor		0
 #define apprevision		0
 
-#define appdate			"30 Jan 2022"
+#define appdate			"08 Mar 2022"
