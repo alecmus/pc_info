@@ -36,8 +36,8 @@
 #define MyAppPublisher "Alec Musasa"
 #define MyAppPublisherPath "com.github.alecmus"
 #define MyAppPublisherURL "https://alecmus.github.io"
-#define MyAppURL "https://github.com/alecmus/pc_info"
-#define MyAppUpdates "https://github.com/alecmus/pc_info/releases"
+#define MyAppURL "https://alecmus.github.io/apps/pc_info"
+#define MyAppUpdates "https://alecmus.github.io/apps/pc_info"
 #define MyAppCopyright "© 2021 Alec Musasa"
 
 [Messages]
