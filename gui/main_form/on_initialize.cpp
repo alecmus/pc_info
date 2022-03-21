@@ -331,7 +331,8 @@ bool main_form::on_initialize(std::string& error) {
 	_pc_info.drives(_drives, error);
 
 	// set colors that are theme dependent
-	_caption_color = lecui::defaults::color(_setting_darktheme ? lecui::themes::dark : lecui::themes::light, lecui::item::icon_description_text);
+	_caption_color = lecui::defaults::color(_setting_darktheme ?
+		lecui::themes::dark : lecui::themes::light, lecui::element::icon_description_text);
 
 	// size and stuff
 	_ctrls
@@ -349,9 +350,6 @@ bool main_form::on_initialize(std::string& error) {
 		form_width -= (270.f + _margin);
 
 	_dim.set_size(lecui::size().width(form_width).height(600.f));
-
-	// add form caption handler
-	form::on_caption([this]() { about(); }, "View info about this app");
 
 	// add form menu
 	_form_menu.add("• • •", "Settings and more", {

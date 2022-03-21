@@ -131,9 +131,11 @@ class main_form : public lecui::form {
 	float detail_height;
 	float caption_height;
 
-	bool on_initialize(std::string& error) override;
-	void on_start() override;
-	void on_close() override;
+	bool on_initialize(std::string& error);
+	bool on_layout(std::string& error);
+	void on_start();
+	void on_close();
+
 	void start_refresh_timer();
 	void stop_refresh_timer();
 	void about();
@@ -141,7 +143,6 @@ class main_form : public lecui::form {
 	void updates();
 	void copy_pc_info();
 	void export_pc_info();
-	bool on_layout(std::string& error) override;
 
 	void add_pc_details_pane();
 

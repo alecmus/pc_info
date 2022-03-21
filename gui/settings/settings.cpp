@@ -58,7 +58,7 @@ void main_form::settings() {
 		const std::string& _install_location_32;
 		const bool& _installed;
 
-		bool on_initialize(std::string& error) override {
+		bool on_initialize(std::string& error) {
 			// read application settings
 			std::string value;
 			if (!_settings.read_value("", "darktheme", value, error))
@@ -106,7 +106,7 @@ void main_form::settings() {
 			return true;
 		}
 
-		bool on_layout(std::string& error) override {
+		bool on_layout(std::string& error) {
 			// add home page
 			auto& home = _page_man.add("home");
 
@@ -202,7 +202,7 @@ void main_form::settings() {
 			return true;
 		}
 
-		void on_start() override {
+		void on_start() {
 			std::string error;
 			// disable autodownload_updates toggle button if autocheck_updates is off
 			if (_setting_autocheck_updates)
@@ -320,7 +320,22 @@ void main_form::settings() {
 			_setting_autostart(setting_autostart),
 			_install_location_64(install_location_64),
 			_install_location_32(install_location_32),
-			_installed(installed) {}
+			_installed(installed) {
+			// initialize event
+			events().initialize = [this](std::string& error) {
+				return on_initialize(error);
+			};
+
+			// layout event
+			events().layout = [this](std::string& error) {
+				return on_layout(error);
+			};
+
+			// start event
+			events().start = [this]() {
+				return on_start();
+			};
+		}
 
 		bool restart_now() {
 			return _restart_now;
