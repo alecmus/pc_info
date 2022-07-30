@@ -64,6 +64,7 @@ class main_form : public lecui::form {
 	static const float _highlight_font_size;
 	static const float _detail_font_size;
 	static const float _caption_font_size;
+	static const std::string _microsoft_basic_display_adapter_name;
 	static const std::string _sample_text;
 	static const std::string _font;
 	static const lecui::color _ok_color;

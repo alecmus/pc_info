@@ -876,6 +876,7 @@ void main_form::add_gpu_tab_pane() {
 		auto& gpu_pane = lecui::containers::tab::add(gpu_tab_pane,
 			"GPU " + std::to_string(gpu_number));
 
+		if (gpu.name != _microsoft_basic_display_adapter_name) {
 		// add gpu name
 		auto& gpu_name_caption = lecui::widgets::label::add(gpu_pane);
 		gpu_name_caption
@@ -942,6 +943,16 @@ void main_form::add_gpu_tab_pane() {
 			.font_size(_detail_font_size)
 			.rect(dedicated_ram.rect())
 			.rect().snap_to(dedicated_ram.rect(), snap_type::right, 0.f);
+		}
+		else {
+			// add notice
+			auto& notice = lecui::widgets::label::add(gpu_pane);
+			notice
+				.text("Graphics driver not installed")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect({ 0.f, gpu_pane.size().get_width(), 0.f, caption_height });
+		}
 
 		gpu_number++;
 	}

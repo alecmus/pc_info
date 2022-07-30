@@ -46,6 +46,7 @@ const float main_form::_title_font_size = 12.f;
 const float main_form::_highlight_font_size = 14.f;
 const float main_form::_detail_font_size = 10.f;
 const float main_form::_caption_font_size = 8.f;
+const std::string main_form::_microsoft_basic_display_adapter_name = "Microsoft Basic Display Adapter";
 const std::string main_form::_sample_text = "<u><strong>Aq</strong></u>";
 const std::string main_form::_font = "Segoe UI";
 const lecui::color main_form::_ok_color{ lecui::color().red(0).green(150).blue(0) };
@@ -899,6 +900,7 @@ std::string main_form::graphics_details_text() {
 		text += "\nGPU " + std::to_string(gpu_number);
 		text += "\n-----------\n";
 
+		if (gpu.name != _microsoft_basic_display_adapter_name) {
 		text += "Name:\t\t\t\t";
 		text += gpu.name + "\n";
 		text += "Status:\t\t\t\t";
@@ -907,6 +909,9 @@ std::string main_form::graphics_details_text() {
 		text += leccore::format_size(gpu.dedicated_vram) + "\n";
 		text += "Total Available:\t\t";
 		text += leccore::format_size(gpu.total_graphics_memory) + "\n";
+		}
+		else
+			text += "Graphics driver not installed\n";
 
 		gpu_number++;
 	}
