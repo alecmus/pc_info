@@ -122,12 +122,12 @@ void main_form::about() {
 
 			auto& github_link = lecui::widgets::label::add(home);
 			github_link
-				.text("Visit https://github.com/alecmus/pc_info")
+				.text("Visit <span style = 'color: rgb(85, 155, 215);'>https://alecmus.github.io/apps/pc_info</span>")
 				.rect().width(width).snap_to(more_info_caption.rect(), snap_type::bottom, 0.f);
 			github_link
 				.events().action = [this]() {
 				std::string error;
-				if (!leccore::shell::open("https://github.com/alecmus/pc_info", error))
+				if (!leccore::shell::open("https://alecmus.github.io/apps/pc_info", error))
 					message(error);
 			};
 
