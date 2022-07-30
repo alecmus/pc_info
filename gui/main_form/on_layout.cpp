@@ -877,72 +877,72 @@ void main_form::add_gpu_tab_pane() {
 			"GPU " + std::to_string(gpu_number));
 
 		if (gpu.name != _microsoft_basic_display_adapter_name) {
-		// add gpu name
-		auto& gpu_name_caption = lecui::widgets::label::add(gpu_pane);
-		gpu_name_caption
-			.text("Name")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect({ 0.f, gpu_pane.size().get_width(), 0.f, caption_height });
+			// add gpu name
+			auto& gpu_name_caption = lecui::widgets::label::add(gpu_pane);
+			gpu_name_caption
+				.text("Name")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect({ 0.f, gpu_pane.size().get_width(), 0.f, caption_height });
 
-		auto& gpu_name = lecui::widgets::label::add(gpu_pane);
-		gpu_name
-			.text(gpu.name)
-			.font_size(_detail_font_size)
-			.rect(gpu_name_caption.rect())
-			.rect().height(detail_height).snap_to(gpu_name_caption.rect(),
-				snap_type::bottom, 0.f);
+			auto& gpu_name = lecui::widgets::label::add(gpu_pane);
+			gpu_name
+				.text(gpu.name)
+				.font_size(_detail_font_size)
+				.rect(gpu_name_caption.rect())
+				.rect().height(detail_height).snap_to(gpu_name_caption.rect(),
+					snap_type::bottom, 0.f);
 
-		// add gpu status
-		auto& status_caption = lecui::widgets::label::add(gpu_pane);
-		status_caption
-			.text("Status")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(gpu_name_caption.rect())
-			.rect().width(gpu_pane.size().get_width() / 5.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
+			// add gpu status
+			auto& status_caption = lecui::widgets::label::add(gpu_pane);
+			status_caption
+				.text("Status")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect(gpu_name_caption.rect())
+				.rect().width(gpu_pane.size().get_width() / 5.f).snap_to(gpu_name.rect(), snap_type::bottom_left, _margin);
 
-		auto& status = lecui::widgets::label::add(gpu_pane, "status");
-		status
-			.text(gpu.status)
-			.font_size(_detail_font_size)
-			.rect(status_caption.rect())
-			.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
+			auto& status = lecui::widgets::label::add(gpu_pane, "status");
+			status
+				.text(gpu.status)
+				.font_size(_detail_font_size)
+				.rect(status_caption.rect())
+				.rect().height(detail_height).snap_to(status_caption.rect(), snap_type::bottom, 0.f);
 
-		if (gpu.status == "OK")
-			status.color_text(_ok_color);
+			if (gpu.status == "OK")
+				status.color_text(_ok_color);
 
-		// add dedicated video memory
-		auto& dedicated_ram_caption = lecui::widgets::label::add(gpu_pane);
-		dedicated_ram_caption
-			.text("Dedicated Memory")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(status_caption.rect())
-			.rect().width(2.f * status_caption.rect().width()).snap_to(status_caption.rect(), snap_type::right, 0.f);
+			// add dedicated video memory
+			auto& dedicated_ram_caption = lecui::widgets::label::add(gpu_pane);
+			dedicated_ram_caption
+				.text("Dedicated Memory")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect(status_caption.rect())
+				.rect().width(2.f * status_caption.rect().width()).snap_to(status_caption.rect(), snap_type::right, 0.f);
 
-		auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
-		dedicated_ram
-			.text(leccore::format_size(gpu.dedicated_vram))
-			.font_size(_detail_font_size)
-			.rect(dedicated_ram_caption.rect())
-			.rect().height(status.rect().height()).width(2.f * status_caption.rect().width()).snap_to(status.rect(), snap_type::right, 0.f);
+			auto& dedicated_ram = lecui::widgets::label::add(gpu_pane);
+			dedicated_ram
+				.text(leccore::format_size(gpu.dedicated_vram))
+				.font_size(_detail_font_size)
+				.rect(dedicated_ram_caption.rect())
+				.rect().height(status.rect().height()).width(2.f * status_caption.rect().width()).snap_to(status.rect(), snap_type::right, 0.f);
 
-		// add total available graphics memory
-		auto& total_graphics_memory_caption = lecui::widgets::label::add(gpu_pane);
-		total_graphics_memory_caption
-			.text("Total Available")
-			.color_text(_caption_color)
-			.font_size(_caption_font_size)
-			.rect(dedicated_ram_caption.rect())
-			.rect().snap_to(dedicated_ram_caption.rect(), snap_type::right, 0.f);
+			// add total available graphics memory
+			auto& total_graphics_memory_caption = lecui::widgets::label::add(gpu_pane);
+			total_graphics_memory_caption
+				.text("Total Available")
+				.color_text(_caption_color)
+				.font_size(_caption_font_size)
+				.rect(dedicated_ram_caption.rect())
+				.rect().snap_to(dedicated_ram_caption.rect(), snap_type::right, 0.f);
 
-		auto& total_graphics_memory = lecui::widgets::label::add(gpu_pane);
-		total_graphics_memory
-			.text(leccore::format_size(gpu.total_graphics_memory))
-			.font_size(_detail_font_size)
-			.rect(dedicated_ram.rect())
-			.rect().snap_to(dedicated_ram.rect(), snap_type::right, 0.f);
+			auto& total_graphics_memory = lecui::widgets::label::add(gpu_pane);
+			total_graphics_memory
+				.text(leccore::format_size(gpu.total_graphics_memory))
+				.font_size(_detail_font_size)
+				.rect(dedicated_ram.rect())
+				.rect().snap_to(dedicated_ram.rect(), snap_type::right, 0.f);
 		}
 		else {
 			// add notice
