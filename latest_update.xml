@@ -2,21 +2,21 @@
 <leccore>
   <update>
     <title>PC Info Update</title>
-    <description>Various improvements including but not limited to the following: Added functionality to copy and export info from the app, bug fixes.</description>
-    <version>1.0.0 beta 11</version>
-    <date>30 Jan 2022</date>
+    <description>Various improvements including but not limited to the following: Notice displayed when graphics driver is not installed, About modal form no longer a static message (URL links now work).</description>
+    <version>1.0.0 beta 12</version>
+    <date>30 Jul 2022</date>
     <x86>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.11/update.32.zip</download_url>
-      <size>2379635</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.12/update.32.zip</download_url>
+      <size>2390377</size>
       <hash>
-        <sha256>F09F2E19FF8B1A11AD1047BEA9FD009B6F34C566538A04165C5A78B593AB2E67</sha256>
+        <sha256>8D4EE2508290D2BFC6123D67EDF5FF20E78D8543E520BD4698DC15B90D5A8F27</sha256>
       </hash>
     </x86>
     <x64>
-      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.11/update.64.zip</download_url>
-      <size>3030241</size>
+      <download_url>https://github.com/alecmus/pc_info/releases/download/v1.0.0-beta.12/update.64.zip</download_url>
+      <size>3040901</size>
       <hash>
-        <sha256>065E3D437DBCB5EA0A69EC84AFED596193A329C0DA7AC0A4F124503AA233AF52</sha256>
+        <sha256>CE9EADD527D053D1BEC8D5D233359E1A71A3C2C8ACD1F82B38E4093732C331D5</sha256>
       </hash>
     </x64>
   </update>
