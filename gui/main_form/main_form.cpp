@@ -227,7 +227,7 @@ void main_form::on_refresh() {
 
 	try {
 		// refresh power details
-		if (_power_old.ac != _power.ac) {
+		if (_power_old.ac != _power.ac || _power_old.status != _power.status) {
 			auto& power_status = get_label("home/power_pane/power_status");
 			power_status.text() = _power.ac ? "On AC" : "On Battery";
 			power_status.text() += ", ";
